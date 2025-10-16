@@ -26,8 +26,19 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
         <div class="border-r border-base-300 min-h-screen">
           <div class="p-8">
-            <div class="mb-6">
-              <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Editor</h3>
+            <div class="mb-6 flex items-start justify-between gap-4">
+              <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide">Editor</h3>
+
+              <div class="flex-1 max-w-md">
+                <input
+                  type="text"
+                  name="article[tags_input]"
+                  id={@form[:tags].id}
+                  value={tags_to_string(@form[:tags].value)}
+                  placeholder="tags: elixir, phoenix, web"
+                  class="w-full px-3 py-1.5 text-sm bg-base-200/50 border border-base-300 rounded focus:outline-none focus:ring-1 focus:ring-primary focus:border-transparent placeholder:text-base-content/40"
+                />
+              </div>
             </div>
 
             <textarea
@@ -39,20 +50,6 @@
               style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.2;"
               phx-hook="AutoResize"
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:title].value) %></textarea>
-
-            <div class="mb-6">
-              <label for={@form[:tags].id} class="text-sm text-base-content/70 mb-2 block">
-                Tags (comma separated)
-              </label>
-              <input
-                type="text"
-                name="article[tags_input]"
-                id={@form[:tags].id}
-                value={tags_to_string(@form[:tags].value)}
-                placeholder="elixir, phoenix, web"
-                class="w-full px-4 py-2 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-              />
-            </div>
 
             <textarea
               name={@form[:content].name}
