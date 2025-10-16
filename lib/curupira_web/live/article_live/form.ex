@@ -67,20 +67,12 @@ defmodule CurupiraWeb.ArticleLive.Form do
     end
   end
 
-  defp generate_preview(title, content) do
-    full_markdown = build_full_markdown(title, content)
-
-    case Parser.to_html(full_markdown) do
+  defp generate_preview(_title, content) when is_binary(content) and content != "" do
+    case Parser.to_html(content) do
       {:ok, html} -> html
       {:error, _} -> "<p class='text-red-500'>Error parsing markdown</p>"
     end
   end
 
-  defp build_full_markdown(nil, nil), do: ""
-  defp build_full_markdown(nil, content) when is_binary(content), do: content
-  defp build_full_markdown(title, nil) when is_binary(title), do: "# #{title}"
-  defp build_full_markdown(title, content) when is_binary(title) and is_binary(content) do
-    "# #{title}\n\n#{content}"
-  end
-  defp build_full_markdown(_, _), do: ""
+  defp generate_preview(_title, _content), do: ""
 end

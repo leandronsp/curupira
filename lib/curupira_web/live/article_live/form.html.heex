@@ -23,9 +23,9 @@
 
   <.form for={@form} id="article-form" phx-change="validate" phx-submit="save">
     <div class="container mx-auto max-w-[1800px]">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-        <div class="border-r border-base-300 min-h-screen">
-          <div class="p-8">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-0 min-h-screen">
+        <div class="border-r border-base-300 flex flex-col">
+          <div class="p-8 flex-1 flex flex-col">
             <div class="mb-6">
               <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Editor</h3>
             </div>
@@ -34,9 +34,9 @@
               name={@form[:title].name}
               id={@form[:title].id}
               rows="1"
-              placeholder="New post title here..."
-              class="w-full text-5xl font-bold bg-transparent border-0 focus:outline-none focus:ring-0 placeholder:text-base-content/30 mb-8 p-0 resize-none overflow-hidden"
-              style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.2;"
+              placeholder="Title..."
+              class="w-full text-2xl font-semibold bg-transparent border-0 focus:outline-none focus:ring-0 placeholder:text-base-content/30 mb-6 p-0 resize-none overflow-hidden"
+              style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.4;"
               phx-hook="AutoResize"
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:title].value) %></textarea>
 
@@ -44,14 +44,14 @@
               name={@form[:content].name}
               id={@form[:content].id}
               placeholder="Write your post content here..."
-              class="w-full h-full min-h-[600px] bg-transparent border-0 focus:outline-none focus:ring-0 font-mono text-base leading-relaxed resize-none placeholder:text-base-content/30"
+              class="w-full flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 font-mono text-base leading-relaxed resize-none placeholder:text-base-content/30"
               style="font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;"
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:content].value) %></textarea>
           </div>
         </div>
 
-        <div class="bg-base-100 min-h-screen">
-          <div class="p-8">
+        <div class="bg-base-100 flex flex-col">
+          <div class="p-8 flex-1">
             <div class="mb-6">
               <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Preview</h3>
             </div>

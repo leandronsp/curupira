@@ -233,12 +233,14 @@
 }
 
 .prose blockquote {
-  border-left: 4px solid oklch(var(--bc) / 0.2);
-  padding-left: 1.5rem;
+  border-left: 5px solid oklch(var(--p));
+  background-color: oklch(var(--p) / 0.05);
+  padding: 1rem 1.5rem;
   margin-top: 1.5rem;
   margin-bottom: 1.5rem;
   font-style: italic;
-  color: oklch(var(--bc) / 0.8);
+  color: oklch(var(--bc) / 0.9);
+  border-radius: 0 0.5rem 0.5rem 0;
 }
 
 .prose img {
