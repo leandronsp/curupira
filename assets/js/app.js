@@ -55,6 +55,27 @@ Hooks.ConfirmDelete = {
   }
 }
 
+Hooks.TagInput = {
+  mounted() {
+    this.el.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault()
+        const value = this.el.value.trim()
+        if (value) {
+          this.pushEvent('add_tag', {value: value})
+        }
+      } else if (e.key === 'Backspace' && this.el.value === '') {
+        e.preventDefault()
+        this.pushEvent('remove_last_tag', {})
+      }
+    })
+
+    this.el.addEventListener('input', (e) => {
+      this.pushEvent('update_tag_input', {value: e.target.value})
+    })
+  }
+}
+
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   // Cmd+S (Mac) or Ctrl+S (Windows/Linux)

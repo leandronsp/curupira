@@ -17,7 +17,8 @@ defmodule CurupiraWeb.ArticleLive.Form do
      socket
      |> assign(:article, article)
      |> assign(:form, to_form(Blog.change_article(article)))
-     |> assign(:preview_html, generate_preview(article.title, article.content))}
+     |> assign(:preview_html, generate_preview(article.title, article.content))
+     |> assign(:tag_input, "")}
   end
 
   @impl true
@@ -41,6 +42,68 @@ defmodule CurupiraWeb.ArticleLive.Form do
   def handle_event("save", %{"article" => article_params}, socket) do
     article_params = process_tags(article_params)
     save_article(socket, socket.assigns.article.id, article_params)
+  end
+
+  @impl true
+  def handle_event("update_tag_input", %{"value" => value}, socket) do
+    {:noreply, assign(socket, :tag_input, value)}
+  end
+
+  @impl true
+  def handle_event("add_tag", %{"value" => tag}, socket) do
+    tag = String.trim(tag)
+
+    if tag != "" do
+      current_tags = get_current_tags(socket)
+      new_tags = Enum.uniq(current_tags ++ [tag])
+
+      changeset =
+        socket.assigns.article
+        |> Blog.change_article(%{"tags" => new_tags})
+        |> Map.put(:action, :validate)
+
+      {:noreply,
+       socket
+       |> assign(:form, to_form(changeset))
+       |> assign(:tag_input, "")}
+    else
+      {:noreply, socket}
+    end
+  end
+
+  @impl true
+  def handle_event("remove_tag", %{"tag" => tag}, socket) do
+    current_tags = get_current_tags(socket)
+    new_tags = Enum.reject(current_tags, &(&1 == tag))
+
+    changeset =
+      socket.assigns.article
+      |> Blog.change_article(%{"tags" => new_tags})
+      |> Map.put(:action, :validate)
+
+    {:noreply, assign(socket, :form, to_form(changeset))}
+  end
+
+  @impl true
+  def handle_event("remove_last_tag", _params, socket) do
+    if socket.assigns.tag_input == "" do
+      current_tags = get_current_tags(socket)
+
+      if length(current_tags) > 0 do
+        new_tags = Enum.drop(current_tags, -1)
+
+        changeset =
+          socket.assigns.article
+          |> Blog.change_article(%{"tags" => new_tags})
+          |> Map.put(:action, :validate)
+
+        {:noreply, assign(socket, :form, to_form(changeset))}
+      else
+        {:noreply, socket}
+      end
+    else
+      {:noreply, socket}
+    end
   end
 
   defp save_article(socket, nil, article_params) do
@@ -104,4 +167,12 @@ defmodule CurupiraWeb.ArticleLive.Form do
   defp tags_to_string([]), do: ""
   defp tags_to_string(tags) when is_list(tags), do: Enum.join(tags, ", ")
   defp tags_to_string(_), do: ""
+
+  defp get_current_tags(socket) do
+    case Ecto.Changeset.get_field(socket.assigns.form.source, :tags) do
+      nil -> []
+      tags when is_list(tags) -> tags
+      _ -> []
+    end
+  end
 end
