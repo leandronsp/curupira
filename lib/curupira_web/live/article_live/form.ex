@@ -18,7 +18,8 @@ defmodule CurupiraWeb.ArticleLive.Form do
      |> assign(:article, article)
      |> assign(:form, to_form(Blog.change_article(article)))
      |> assign(:preview_html, generate_preview(article.title, article.content))
-     |> assign(:tag_input, "")}
+     |> assign(:tag_input, "")
+     |> assign(:layout_mode, "split")}
   end
 
   @impl true
@@ -82,6 +83,11 @@ defmodule CurupiraWeb.ArticleLive.Form do
       |> Map.put(:action, :validate)
 
     {:noreply, assign(socket, :form, to_form(changeset))}
+  end
+
+  @impl true
+  def handle_event("switch_layout", %{"mode" => mode}, socket) do
+    {:noreply, assign(socket, :layout_mode, mode)}
   end
 
   @impl true

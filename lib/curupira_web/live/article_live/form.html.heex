@@ -1,14 +1,55 @@
 <div class="min-h-screen bg-base-100">
   <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
     <div class="container mx-auto px-6 py-4 flex items-center justify-between max-w-[1800px]">
-      <.link navigate={~p"/articles"}>
-        <button class="btn btn-ghost btn-sm gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-          </svg>
-          Back to articles
-        </button>
-      </.link>
+      <div class="flex items-center gap-4">
+        <.link navigate={~p"/articles"}>
+          <button class="btn btn-ghost btn-sm gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            Back to articles
+          </button>
+        </.link>
+
+        <div class="flex gap-1">
+          <button
+            type="button"
+            phx-click="switch_layout"
+            phx-value-mode="split"
+            class={"btn btn-sm btn-ghost" <> if @layout_mode == "split", do: " btn-active", else: ""}
+            title="Split view"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 4H5a2 2 0 00-2 2v14a2 2 0 002 2h4m0-18v18m0-18h10a2 2 0 012 2v14a2 2 0 01-2 2H9m0 0V4" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            phx-click="switch_layout"
+            phx-value-mode="editor"
+            class={"btn btn-sm btn-ghost" <> if @layout_mode == "editor", do: " btn-active", else: ""}
+            title="Editor only"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+          </button>
+
+          <button
+            type="button"
+            phx-click="switch_layout"
+            phx-value-mode="preview"
+            class={"btn btn-sm btn-ghost" <> if @layout_mode == "preview", do: " btn-active", else: ""}
+            title="Preview only"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+            </svg>
+          </button>
+        </div>
+      </div>
 
       <div class="flex gap-2">
         <button type="submit" form="article-form" class="btn btn-primary btn-sm gap-2" phx-disable-with="Saving...">
@@ -23,8 +64,8 @@
 
   <.form for={@form} id="article-form" phx-change="validate" phx-submit="save">
     <div class="container mx-auto max-w-[1800px]">
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-        <div class="border-r border-base-300 h-[calc(100vh-60px)] overflow-y-auto">
+      <div class={"grid gap-0 " <> if @layout_mode == "split", do: "grid-cols-1 lg:grid-cols-2", else: "grid-cols-1"}>
+        <div class={"h-[calc(100vh-60px)] overflow-y-auto " <> if @layout_mode == "split", do: "border-r border-base-300", else: ""} style={if @layout_mode == "preview", do: "display: none;", else: ""}>
           <div class="p-8">
             <div class="flex items-center justify-between gap-4">
               <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Editor</h3>
@@ -84,7 +125,7 @@
           </div>
         </div>
 
-        <div class="h-[calc(100vh-60px)] overflow-y-auto" style="background-color: oklch(98% 0.01 160);">
+        <div class="h-[calc(100vh-60px)] overflow-y-auto" style={"background-color: oklch(98% 0.01 160);" <> if @layout_mode == "editor", do: " display: none;", else: ""}>
           <div class="p-8">
             <div class="mb-6">
               <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Preview</h3>
