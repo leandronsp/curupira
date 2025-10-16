@@ -269,6 +269,38 @@ Hooks.PreviewAnchorScroll = {
   }
 }
 
+Hooks.ThemeToggle = {
+  mounted() {
+    // Load theme from localStorage or default to 'light'
+    const savedTheme = localStorage.getItem('theme') || 'light'
+    this.setTheme(savedTheme)
+
+    this.el.addEventListener('click', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme')
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
+      this.setTheme(newTheme)
+      localStorage.setItem('theme', newTheme)
+    })
+  },
+  setTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme)
+
+    // Update icon visibility
+    const sunIcon = this.el.querySelector('.sun-icon')
+    const moonIcon = this.el.querySelector('.moon-icon')
+
+    if (sunIcon && moonIcon) {
+      if (theme === 'dark') {
+        sunIcon.classList.remove('hidden')
+        moonIcon.classList.add('hidden')
+      } else {
+        sunIcon.classList.add('hidden')
+        moonIcon.classList.remove('hidden')
+      }
+    }
+  }
+}
+
 // Markdown editor with keyboard shortcuts and undo/redo
 // Available shortcuts (Cmd on Mac, Ctrl on Windows/Linux):
 //   - Cmd/Ctrl + S: Save article
