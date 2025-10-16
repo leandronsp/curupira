@@ -33,7 +33,7 @@
               placeholder="New post title here..."
               class="w-full text-5xl font-bold bg-transparent border-0 focus:outline-none focus:ring-0 placeholder:text-base-content/30 mb-8 p-0 resize-none overflow-hidden"
               style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.2;"
-              oninput="this.style.height = ''; this.style.height = this.scrollHeight + 'px'"
+              phx-hook="AutoResize"
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:title].value) %></textarea>
 
             <textarea
