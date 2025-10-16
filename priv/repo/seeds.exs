@@ -16,8 +16,6 @@ alias Curupira.Blog.Article
 Repo.insert!(%Article{
   title: "Getting Started with Phoenix LiveView",
   content: """
-  # Getting Started with Phoenix LiveView
-
   Phoenix LiveView is a powerful library that enables **rich, real-time user experiences** with server-rendered HTML.
 
   ## Why LiveView?
@@ -50,8 +48,6 @@ Repo.insert!(%Article{
 Repo.insert!(%Article{
   title: "Markdown Basics",
   content: """
-  # Markdown Basics
-
   Learn the essentials of **Markdown** syntax.
 
   ## Headers
