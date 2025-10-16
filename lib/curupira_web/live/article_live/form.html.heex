@@ -77,6 +77,77 @@
             <div class="flex items-center gap-4">
               <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Editor</h3>
 
+              <div class="dropdown mb-4">
+                <label tabindex="0" class="btn btn-ghost btn-xs gap-1 text-base-content/40 hover:text-base-content/70">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                  </svg>
+                  Keyboard Shortcuts
+                </label>
+                <div tabindex="0" class="dropdown-content z-[1] card card-compact w-80 p-4 shadow-lg bg-base-100 border border-base-300 mt-1">
+                  <div class="card-body">
+                    <h4 class="font-semibold text-sm mb-2">Available Shortcuts</h4>
+                    <div class="space-y-1 text-xs">
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Save</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">S</kbd>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Undo</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">Z</kbd>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Redo</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">⇧</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">Z</kbd>
+                        </div>
+                      </div>
+                      <div class="divider my-1"></div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Toggle Bold</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">B</kbd>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Toggle Italic</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">I</kbd>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Toggle Code</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">E</kbd>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Insert Link</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">K</kbd>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Toggle Strikethrough</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">⇧</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">X</kbd>
+                        </div>
+                      </div>
+                      <div class="flex justify-between items-center">
+                        <span class="text-base-content/60">Toggle Code Block</span>
+                        <div class="flex items-center gap-0.5">
+                          <kbd class="kbd kbd-xs">⌘/Ctrl</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">⇧</kbd><span class="mx-1">+</span><kbd class="kbd kbd-xs">K</kbd>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
               <div class={"mb-4 " <> if @layout_mode == "split", do: "flex-1 max-w-2xl", else: "flex-shrink-0"}>
                 <div class="flex flex-wrap items-center gap-2 px-3 py-1.5 bg-base-100 rounded-lg">
                   <%= for tag <- @form[:tags].value || [] do %>
@@ -118,7 +189,7 @@
               placeholder="Article title..."
               class="w-full text-5xl font-bold bg-transparent border-0 focus:outline-none focus:ring-0 placeholder:text-base-content/30 mb-8 p-0 resize-none overflow-hidden"
               style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.2;"
-              phx-hook="AutoResize"
+              phx-hook="TitleEditor"
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:title].value) %></textarea>
 
             <textarea
@@ -127,6 +198,7 @@
               placeholder="Write your markdown content here..."
               class="w-full flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-lg resize-none placeholder:text-base-content/30"
               style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.75; min-height: 500px;"
+              phx-hook="MarkdownEditor"
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:content].value) %></textarea>
           </div>
         </div>
