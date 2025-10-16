@@ -10,6 +10,9 @@ defmodule Curupira.Markdown.Parser do
       ],
       parse: [
         smart: true
+      ],
+      render: [
+        hardbreaks: true
       ]
     ]
 
