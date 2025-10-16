@@ -1,9 +1,27 @@
 <div class="min-h-screen bg-base-200">
   <div class="container mx-auto px-6 py-8 max-w-5xl">
-    <div class="flex justify-end items-center mb-8">
+    <div class="flex justify-between items-center gap-4 mb-8">
+      <div class="flex-1 max-w-lg">
+        <form phx-change="search" phx-submit="search">
+          <div class="relative">
+            <input
+              type="text"
+              name="q"
+              value={@search_query}
+              placeholder="Search articles by title..."
+              class="input input-bordered w-full h-12 pr-12 text-base"
+              phx-debounce="300"
+            />
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute right-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+          </div>
+        </form>
+      </div>
+
       <.link patch={~p"/articles/new"}>
-        <button class="btn btn-primary btn-sm gap-2">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button class="btn btn-primary gap-2 h-12 px-6 text-base">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
           </svg>
           New Article
@@ -15,17 +33,17 @@
       <div
         :for={{id, article} <- @streams.articles}
         id={id}
-        class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer h-[160px]"
+        class={"card shadow-md hover:shadow-lg transition-shadow cursor-pointer h-[160px] " <> if article.status == "published", do: "bg-base-100", else: "bg-base-200 border-2 border-warning/30"}
         phx-click={JS.navigate(~p"/articles/#{article}/edit")}
       >
         <div class="card-body p-6 h-full">
-          <div class="flex items-start justify-between gap-6 h-full">
+          <div class="flex items-start justify-between gap-4 h-full">
             <div class="flex-1 min-w-0 flex flex-col h-full">
               <h2 class="text-xl font-bold text-base-content mb-3 line-clamp-2">
                 <%= article.title %>
               </h2>
 
-              <div class="flex flex-wrap items-center gap-3 text-sm text-base-content/60 mt-auto max-h-[60px] overflow-hidden">
+              <div class="flex flex-wrap items-center gap-3 text-sm text-base-content/60 mt-auto">
                 <div class="flex items-center gap-1.5">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -34,10 +52,21 @@
                 </div>
 
                 <div :if={article.status} class="flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                  </svg>
-                  <span class="capitalize"><%= article.status %></span>
+                  <%= if article.status == "published" do %>
+                    <span class="badge badge-success badge-sm gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Published
+                    </span>
+                  <% else %>
+                    <span class="badge badge-warning badge-sm gap-1">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      Unpublished
+                    </span>
+                  <% end %>
                 </div>
 
                 <div :if={article.published_at} class="flex items-center gap-1.5">
@@ -48,41 +77,43 @@
                   <span>Published <%= Calendar.strftime(article.published_at, "%d %b %Y") %></span>
                 </div>
 
-                <div :if={article.tags && length(article.tags) > 0} class="flex items-center gap-1.5 max-w-[300px]">
+                <div :if={article.tags && length(article.tags) > 0} class="flex items-center gap-1.5">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
-                  <div class="flex gap-1 overflow-hidden">
+                  <div class="flex gap-1 flex-wrap">
                     <span :for={tag <- Enum.take(article.tags, 3)} class="badge badge-sm badge-outline whitespace-nowrap"><%= tag %></span>
                     <%= if length(article.tags) > 3 do %>
                       <span class="badge badge-sm badge-outline">+<%= length(article.tags) - 3 %></span>
                     <% end %>
                   </div>
                 </div>
-
-                <div :if={article.dev_to_url} class="flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                  </svg>
-                  <a href={article.dev_to_url} target="_blank" class="link link-primary hover:underline" onclick="event.stopPropagation()">
-                    dev.to
-                  </a>
-                </div>
               </div>
             </div>
 
-            <button
-              class="btn btn-sm btn-error btn-outline gap-1 flex-shrink-0"
-              phx-click="delete"
-              phx-value-id={article.id}
-              phx-hook="ConfirmDelete"
-              id={"delete-#{article.id}"}
-            >
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-              </svg>
-              Delete
-            </button>
+            <div class="flex flex-col items-end justify-between h-full flex-shrink-0">
+              <button
+                class="btn btn-sm btn-error btn-outline gap-1"
+                phx-click="delete"
+                phx-value-id={article.id}
+                phx-hook="ConfirmDelete"
+                id={"delete-#{article.id}"}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                </svg>
+                Delete
+              </button>
+
+              <div :if={article.dev_to_url} class="flex items-center gap-1.5 text-sm text-base-content/60">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                <a href={article.dev_to_url} target="_blank" class="link link-primary hover:underline" onclick="event.stopPropagation()">
+                  dev.to
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -94,8 +125,11 @@
           <%= if page_num == :gap do %>
             <span class="px-3 py-2">...</span>
           <% else %>
+            <%
+              params = if @search_query != "", do: %{"page" => page_num, "q" => @search_query}, else: %{"page" => page_num}
+            %>
             <.link
-              patch={~p"/articles?page=#{page_num}"}
+              patch={~p"/articles?#{params}"}
               class={"btn btn-sm " <> if page_num == @pagination.page, do: "btn-active", else: ""}
             >
               <%= page_num %>

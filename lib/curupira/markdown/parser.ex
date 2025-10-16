@@ -6,7 +6,8 @@ defmodule Curupira.Markdown.Parser do
         table: true,
         autolink: true,
         tasklist: true,
-        footnotes: true
+        footnotes: true,
+        header_ids: ""
       ],
       parse: [
         smart: true

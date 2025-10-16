@@ -11,11 +11,17 @@ defmodule CurupiraWeb.ArticleLive.Index do
   @impl true
   def handle_params(params, _url, socket) do
     page = String.to_integer(params["page"] || "1")
-    pagination = Blog.list_articles_paginated(page: page, per_page: 10)
+    search_query = params["q"] || ""
+
+    opts = [page: page, per_page: 10]
+    opts = if search_query != "", do: Keyword.put(opts, :search, search_query), else: opts
+
+    pagination = Blog.list_articles_paginated(opts)
 
     {:noreply,
      socket
      |> apply_action(socket.assigns.live_action, params)
+     |> assign(:search_query, search_query)
      |> assign(:pagination, pagination)
      |> stream(:articles, pagination.articles, reset: true)}
   end
@@ -32,6 +38,15 @@ defmodule CurupiraWeb.ArticleLive.Index do
     {:ok, _} = Blog.delete_article(article)
 
     {:noreply, stream_delete(socket, :articles, article)}
+  end
+
+  @impl true
+  def handle_event("search", %{"q" => query}, socket) do
+    search_query = String.trim(query)
+
+    params = if search_query == "", do: %{}, else: %{"q" => search_query}
+
+    {:noreply, push_patch(socket, to: ~p"/articles?#{params}")}
   end
 
   defp pagination_range(current_page, total_pages) do

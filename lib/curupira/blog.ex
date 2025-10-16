@@ -28,26 +28,41 @@ defmodule Curupira.Blog do
 
     * `:page` - Page number (default: 1)
     * `:per_page` - Items per page (default: 10)
+    * `:search` - Search term to filter by title (optional)
 
   ## Examples
 
       iex> list_articles_paginated(page: 1, per_page: 10)
       %{articles: [%Article{}, ...], total_count: 100, page: 1, per_page: 10, total_pages: 10}
 
+      iex> list_articles_paginated(page: 1, per_page: 10, search: "elixir")
+      %{articles: [%Article{}, ...], total_count: 5, page: 1, per_page: 10, total_pages: 1}
+
   """
   def list_articles_paginated(opts \\ []) do
     page = Keyword.get(opts, :page, 1)
     per_page = Keyword.get(opts, :per_page, 10)
+    search = Keyword.get(opts, :search)
 
     offset = (page - 1) * per_page
 
-    query = from a in Article,
-            order_by: [desc: a.published_at, desc: a.inserted_at],
-            limit: ^per_page,
-            offset: ^offset
+    base_query = from a in Article
+
+    query =
+      base_query
+      |> maybe_filter_by_search(search)
+      |> order_by([a], [
+        asc: fragment("CASE WHEN ? = 'published' THEN 1 ELSE 0 END", a.status),
+        desc: a.published_at,
+        desc: a.inserted_at
+      ])
+      |> limit(^per_page)
+      |> offset(^offset)
+
+    count_query = maybe_filter_by_search(base_query, search)
 
     articles = Repo.all(query)
-    total_count = Repo.aggregate(Article, :count)
+    total_count = Repo.aggregate(count_query, :count)
     total_pages = ceil(total_count / per_page)
 
     %{
@@ -57,6 +72,13 @@ defmodule Curupira.Blog do
       per_page: per_page,
       total_pages: total_pages
     }
+  end
+
+  defp maybe_filter_by_search(query, nil), do: query
+  defp maybe_filter_by_search(query, ""), do: query
+  defp maybe_filter_by_search(query, search) do
+    search_pattern = "%#{search}%"
+    from a in query, where: ilike(a.title, ^search_pattern)
   end
 
   @doc """

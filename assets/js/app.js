@@ -229,6 +229,46 @@ Hooks.PreserveScroll = {
   }
 }
 
+Hooks.PreviewAnchorScroll = {
+  mounted() {
+    this.setupAnchorNavigation()
+  },
+  updated() {
+    this.setupAnchorNavigation()
+  },
+  setupAnchorNavigation() {
+    // Find all anchor links in the preview
+    const anchorLinks = this.el.querySelectorAll('a[href^="#"]')
+
+    anchorLinks.forEach(link => {
+      link.addEventListener('click', (e) => {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const href = link.getAttribute('href').substring(1)
+        // Decode URL-encoded characters in the href
+        const targetId = decodeURIComponent(href)
+
+        // Try to find the target element by ID
+        let targetElement = this.el.querySelector(`#${CSS.escape(targetId)}`)
+
+        // If not found, try with the raw href (for cases where IDs are already encoded)
+        if (!targetElement) {
+          targetElement = this.el.querySelector(`#${CSS.escape(href)}`)
+        }
+
+        if (targetElement) {
+          // Smooth scroll to the target element within the preview container
+          targetElement.scrollIntoView({
+            behavior: 'smooth',
+            block: 'start'
+          })
+        }
+      })
+    })
+  }
+}
+
 // Markdown editor with keyboard shortcuts and undo/redo
 // Available shortcuts (Cmd on Mac, Ctrl on Windows/Linux):
 //   - Cmd/Ctrl + S: Save article
