@@ -41,6 +41,20 @@ Hooks.AutoResize = {
   }
 }
 
+Hooks.ConfirmDelete = {
+  mounted() {
+    this.el.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      if (confirm('Are you sure you want to delete this article?')) {
+        const id = this.el.getAttribute('phx-value-id')
+        this.pushEvent('delete', {id: id})
+      }
+    })
+  }
+}
+
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   // Cmd+S (Mac) or Ctrl+S (Windows/Linux)
