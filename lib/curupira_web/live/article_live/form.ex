@@ -39,7 +39,8 @@ defmodule CurupiraWeb.ArticleLive.Form do
 
   @impl true
   def handle_event("save", %{"article" => article_params}, socket) do
-    save_article(socket, socket.assigns.article.id, article_params)
+    article_params_with_title = extract_title_from_content(article_params)
+    save_article(socket, socket.assigns.article.id, article_params_with_title)
   end
 
   defp save_article(socket, nil, article_params) do
@@ -75,4 +76,23 @@ defmodule CurupiraWeb.ArticleLive.Form do
   end
 
   defp generate_preview(_title, _content), do: ""
+
+  defp extract_title_from_content(article_params) do
+    content = article_params["content"] || ""
+    title = extract_h1_from_markdown(content)
+    Map.put(article_params, "title", title)
+  end
+
+  defp extract_h1_from_markdown(content) when is_binary(content) do
+    content
+    |> String.split("\n")
+    |> Enum.find_value("Untitled", fn line ->
+      case Regex.run(~r/^#\s+(.+)$/, String.trim(line)) do
+        [_, title] -> title
+        _ -> nil
+      end
+    end)
+  end
+
+  defp extract_h1_from_markdown(_), do: "Untitled"
 end
