@@ -22,6 +22,8 @@ defmodule CurupiraWeb.ArticleLive.Form do
 
   @impl true
   def handle_event("validate", %{"article" => article_params}, socket) do
+    article_params = process_tags(article_params)
+
     changeset =
       socket.assigns.article
       |> Blog.change_article(article_params)
@@ -37,6 +39,7 @@ defmodule CurupiraWeb.ArticleLive.Form do
 
   @impl true
   def handle_event("save", %{"article" => article_params}, socket) do
+    article_params = process_tags(article_params)
     save_article(socket, socket.assigns.article.id, article_params)
   end
 
@@ -83,4 +86,22 @@ defmodule CurupiraWeb.ArticleLive.Form do
     "# #{title}\n\n#{content}"
   end
   defp build_full_markdown(_, _), do: ""
+
+  defp process_tags(%{"tags_input" => tags_input} = params) when is_binary(tags_input) do
+    tags =
+      tags_input
+      |> String.split(",")
+      |> Enum.map(&String.trim/1)
+      |> Enum.reject(&(&1 == ""))
+
+    params
+    |> Map.delete("tags_input")
+    |> Map.put("tags", tags)
+  end
+  defp process_tags(params), do: params
+
+  defp tags_to_string(nil), do: ""
+  defp tags_to_string([]), do: ""
+  defp tags_to_string(tags) when is_list(tags), do: Enum.join(tags, ", ")
+  defp tags_to_string(_), do: ""
 end

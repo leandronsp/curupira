@@ -40,6 +40,20 @@
               phx-hook="AutoResize"
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:title].value) %></textarea>
 
+            <div class="mb-6">
+              <label for={@form[:tags].id} class="text-sm text-base-content/70 mb-2 block">
+                Tags (comma separated)
+              </label>
+              <input
+                type="text"
+                name="article[tags_input]"
+                id={@form[:tags].id}
+                value={tags_to_string(@form[:tags].value)}
+                placeholder="elixir, phoenix, web"
+                class="w-full px-4 py-2 bg-base-200/50 border border-base-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+              />
+            </div>
+
             <textarea
               name={@form[:content].name}
               id={@form[:content].id}
