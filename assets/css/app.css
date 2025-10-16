@@ -343,82 +343,82 @@
 }
 
 /* Dark mode styles for prose */
-.dark .prose {
+[data-theme="dark"] .prose {
   color: oklch(88% 0.025 252);
 }
 
-.dark .prose h1,
-.dark .prose h2,
-.dark .prose h3,
-.dark .prose h4,
-.dark .prose h5,
-.dark .prose h6 {
+[data-theme="dark"] .prose h1,
+[data-theme="dark"] .prose h2,
+[data-theme="dark"] .prose h3,
+[data-theme="dark"] .prose h4,
+[data-theme="dark"] .prose h5,
+[data-theme="dark"] .prose h6 {
   color: oklch(92% 0.025 252);
 }
 
-.dark .prose strong {
+[data-theme="dark"] .prose strong {
   color: oklch(90% 0.025 252);
 }
 
-.dark .prose em {
+[data-theme="dark"] .prose em {
   color: oklch(86% 0.025 252);
 }
 
-.dark .prose a {
+[data-theme="dark"] .prose a {
   color: oklch(78% 0.14 240);
   border-bottom-color: oklch(78% 0.14 240 / 0.3);
 }
 
-.dark .prose a:hover {
+[data-theme="dark"] .prose a:hover {
   border-bottom-color: oklch(78% 0.14 240);
 }
 
-.dark .prose code {
+[data-theme="dark"] .prose code {
   background-color: oklch(22% 0.011 252);
   color: oklch(82% 0.12 270);
 }
 
-.dark .prose pre {
+[data-theme="dark"] .prose pre {
   background-color: oklch(22% 0.011 252) !important;
   border-color: oklch(35% 0.03 252 / 0.3);
 }
 
-.dark .prose pre code {
+[data-theme="dark"] .prose pre code {
   color: oklch(85% 0.02 252);
 }
 
-.dark .prose blockquote {
+[data-theme="dark"] .prose blockquote {
   border-left-color: oklch(88% 0.025 252 / 0.3);
   color: oklch(84% 0.025 252);
 }
 
-.dark .prose hr {
+[data-theme="dark"] .prose hr {
   border-top-color: oklch(35% 0.03 252 / 0.3);
 }
 
-.dark .prose del {
+[data-theme="dark"] .prose del {
   color: oklch(84% 0.025 252);
 }
 
-.dark .prose thead {
+[data-theme="dark"] .prose thead {
   border-bottom-color: oklch(35% 0.03 252 / 0.4);
 }
 
-.dark .prose th {
+[data-theme="dark"] .prose th {
   background-color: oklch(26% 0.013 252);
   color: oklch(90% 0.025 252);
 }
 
-.dark .prose td {
+[data-theme="dark"] .prose td {
   border-bottom-color: oklch(35% 0.03 252 / 0.2);
   color: oklch(86% 0.025 252);
 }
 
-.dark .prose tbody tr:hover {
+[data-theme="dark"] .prose tbody tr:hover {
   background-color: oklch(26% 0.013 252 / 0.5);
 }
 
-.dark .prose .footnotes {
+[data-theme="dark"] .prose .footnotes {
   border-top-color: oklch(35% 0.03 252 / 0.3);
   color: oklch(84% 0.025 252);
 }
