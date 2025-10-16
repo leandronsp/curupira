@@ -15,17 +15,17 @@
       <div
         :for={{id, article} <- @streams.articles}
         id={id}
-        class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
+        class="card bg-base-100 shadow-md hover:shadow-lg transition-shadow cursor-pointer h-[160px]"
         phx-click={JS.navigate(~p"/articles/#{article}/edit")}
       >
-        <div class="card-body p-6">
-          <div class="flex items-start justify-between gap-6">
-            <div class="flex-1 min-w-0">
-              <h2 class="text-xl font-bold text-base-content mb-3">
+        <div class="card-body p-6 h-full">
+          <div class="flex items-start justify-between gap-6 h-full">
+            <div class="flex-1 min-w-0 flex flex-col h-full">
+              <h2 class="text-xl font-bold text-base-content mb-3 line-clamp-2">
                 <%= article.title %>
               </h2>
 
-              <div class="flex flex-wrap items-center gap-4 text-sm text-base-content/60">
+              <div class="flex flex-wrap items-center gap-3 text-sm text-base-content/60 mt-auto max-h-[60px] overflow-hidden">
                 <div class="flex items-center gap-1.5">
                   <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -48,12 +48,15 @@
                   <span>Published <%= Calendar.strftime(article.published_at, "%d %b %Y") %></span>
                 </div>
 
-                <div :if={article.tags && length(article.tags) > 0} class="flex items-center gap-1.5">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <div :if={article.tags && length(article.tags) > 0} class="flex items-center gap-1.5 max-w-[300px]">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                   </svg>
-                  <div class="flex flex-wrap gap-1">
-                    <span :for={tag <- article.tags} class="badge badge-sm badge-outline"><%= tag %></span>
+                  <div class="flex gap-1 overflow-hidden">
+                    <span :for={tag <- Enum.take(article.tags, 3)} class="badge badge-sm badge-outline whitespace-nowrap"><%= tag %></span>
+                    <%= if length(article.tags) > 3 do %>
+                      <span class="badge badge-sm badge-outline">+<%= length(article.tags) - 3 %></span>
+                    <% end %>
                   </div>
                 </div>
 
@@ -84,5 +87,26 @@
         </div>
       </div>
     </div>
+
+    <%= if @pagination.total_pages > 1 do %>
+      <div class="flex justify-center items-center gap-1 mt-8">
+        <%= for page_num <- pagination_range(@pagination.page, @pagination.total_pages) do %>
+          <%= if page_num == :gap do %>
+            <span class="px-3 py-2">...</span>
+          <% else %>
+            <.link
+              patch={~p"/articles?page=#{page_num}"}
+              class={"btn btn-sm " <> if page_num == @pagination.page, do: "btn-active", else: ""}
+            >
+              <%= page_num %>
+            </.link>
+          <% end %>
+        <% end %>
+      </div>
+
+      <div class="text-center text-sm text-base-content/60 mt-4">
+        Showing <%= (@pagination.page - 1) * @pagination.per_page + 1 %> to <%= min(@pagination.page * @pagination.per_page, @pagination.total_count) %> of <%= @pagination.total_count %> articles
+      </div>
+    <% end %>
   </div>
 </div>

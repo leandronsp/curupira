@@ -22,6 +22,44 @@ defmodule Curupira.Blog do
   end
 
   @doc """
+  Returns paginated articles ordered by published_at DESC.
+
+  ## Options
+
+    * `:page` - Page number (default: 1)
+    * `:per_page` - Items per page (default: 10)
+
+  ## Examples
+
+      iex> list_articles_paginated(page: 1, per_page: 10)
+      %{articles: [%Article{}, ...], total_count: 100, page: 1, per_page: 10, total_pages: 10}
+
+  """
+  def list_articles_paginated(opts \\ []) do
+    page = Keyword.get(opts, :page, 1)
+    per_page = Keyword.get(opts, :per_page, 10)
+
+    offset = (page - 1) * per_page
+
+    query = from a in Article,
+            order_by: [desc: a.published_at, desc: a.inserted_at],
+            limit: ^per_page,
+            offset: ^offset
+
+    articles = Repo.all(query)
+    total_count = Repo.aggregate(Article, :count)
+    total_pages = ceil(total_count / per_page)
+
+    %{
+      articles: articles,
+      total_count: total_count,
+      page: page,
+      per_page: per_page,
+      total_pages: total_pages
+    }
+  end
+
+  @doc """
   Gets a single article.
 
   Raises `Ecto.NoResultsError` if the Article does not exist.

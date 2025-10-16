@@ -327,3 +327,17 @@
 .prose sup a {
   border-bottom: none;
 }
+
+.prose sub {
+  font-size: 0.75em;
+  vertical-align: sub;
+  display: block;
+  line-height: 1.4;
+  white-space: pre-line;
+}
+
+.prose sub a {
+  border-bottom: none;
+  display: block;
+  margin-bottom: 0.25rem;
+}

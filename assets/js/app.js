@@ -77,6 +77,21 @@ Hooks.TagInput = {
   }
 }
 
+Hooks.PreserveScroll = {
+  mounted() {
+    this.scrollTop = 0
+    this.el.addEventListener('scroll', () => {
+      this.scrollTop = this.el.scrollTop
+    })
+  },
+  beforeUpdate() {
+    this.scrollTop = this.el.scrollTop
+  },
+  updated() {
+    this.el.scrollTop = this.scrollTop
+  }
+}
+
 // Keyboard shortcuts
 document.addEventListener('keydown', (e) => {
   // Cmd+S (Mac) or Ctrl+S (Windows/Linux)

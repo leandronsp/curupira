@@ -43,6 +43,110 @@ defmodule Curupira.Blog.DevToImporter do
   end
 
   @doc """
+  Imports ALL articles from dev.to for the given username.
+  Fetches all pages until no more articles are returned.
+
+  ## Options
+
+    * `:username` - The dev.to username to import from (defaults to DEVTO_USERNAME env var)
+    * `:per_page` - Number of articles per page (default: 1000, max: 1000)
+    * `:progress_callback` - Function called with progress updates (fn page, total -> :ok end)
+
+  ## Examples
+
+      iex> DevToImporter.import_all_articles(username: "leandronsp")
+      {:ok, [%Article{}, ...]}
+
+      iex> DevToImporter.import_all_articles()
+      {:ok, [%Article{}, ...]}  # Uses DEVTO_USERNAME env var
+
+  """
+  def import_all_articles(opts \\ []) do
+    username = opts[:username] || get_username_from_env()
+    per_page = opts[:per_page] || 1000
+    progress_callback = opts[:progress_callback]
+
+    Logger.info("Importing ALL articles from dev.to for user: #{username}")
+
+    fetch_all_pages(username, per_page, 1, [], progress_callback)
+  end
+
+  defp fetch_all_pages(username, per_page, page, accumulated, progress_callback) do
+    case fetch_articles(username, per_page, page) do
+      {:ok, []} ->
+        # No more articles, import everything we collected
+        Logger.info("Fetched all pages. Total articles: #{length(accumulated)}")
+
+        if progress_callback do
+          progress_callback.({:fetching_complete, length(accumulated)})
+        end
+
+        import_into_database_with_progress(accumulated, progress_callback)
+
+      {:ok, articles} ->
+        Logger.info("Page #{page}: fetched #{length(articles)} articles")
+
+        if progress_callback do
+          progress_callback.({:fetching, page, length(articles)})
+        end
+
+        # Continue to next page
+        fetch_all_pages(username, per_page, page + 1, accumulated ++ articles, progress_callback)
+
+      {:error, reason} ->
+        Logger.error("Failed to fetch page #{page}: #{inspect(reason)}")
+        {:error, reason}
+    end
+  end
+
+  defp import_into_database_with_progress(articles, nil) do
+    import_into_database(articles)
+  end
+
+  defp import_into_database_with_progress(articles, progress_callback) do
+    # Filter out boost articles
+    filtered_articles = Enum.reject(articles, &is_boost_article?/1)
+
+    Logger.info("Filtered #{length(articles) - length(filtered_articles)} boost articles")
+
+    total = length(filtered_articles)
+
+    if progress_callback do
+      progress_callback.({:importing, 0, total})
+    end
+
+    results =
+      filtered_articles
+      |> Enum.with_index(1)
+      |> Enum.map(fn {article_data, index} ->
+        result = case import_single_article(article_data) do
+          {:ok, article} ->
+            Logger.debug("Imported article: #{article.title}")
+            {:ok, article}
+
+          {:error, changeset} ->
+            Logger.error("Failed to import article: #{inspect(changeset.errors)}")
+            {:error, changeset}
+        end
+
+        if progress_callback do
+          progress_callback.({:importing, index, total})
+        end
+
+        result
+      end)
+
+    successful = Enum.filter(results, fn {status, _} -> status == :ok end)
+    failed = Enum.filter(results, fn {status, _} -> status == :error end)
+
+    if length(failed) > 0 do
+      Logger.warning("#{length(failed)} articles failed to import")
+    end
+
+    {:ok, Enum.map(successful, fn {:ok, article} -> article end)}
+  end
+
+  @doc """
   Fetches articles from dev.to API.
   """
   def fetch_articles(username, per_page \\ 30, page \\ 1) do
@@ -87,10 +191,16 @@ defmodule Curupira.Blog.DevToImporter do
   @doc """
   Imports a list of dev.to articles into the database.
   Creates new articles or updates existing ones based on dev_to_id.
+  Filters out boost articles (title "[Boost]" or contains embed tags).
   """
   def import_into_database(articles) when is_list(articles) do
+    # Filter out boost articles
+    filtered_articles = Enum.reject(articles, &is_boost_article?/1)
+
+    Logger.info("Filtered #{length(articles) - length(filtered_articles)} boost articles")
+
     results =
-      Enum.map(articles, fn article_data ->
+      Enum.map(filtered_articles, fn article_data ->
         case import_single_article(article_data) do
           {:ok, article} ->
             Logger.debug("Imported article: #{article.title}")
@@ -207,5 +317,12 @@ defmodule Curupira.Blog.DevToImporter do
       username ->
         username
     end
+  end
+
+  defp is_boost_article?(article) do
+    title = article["title"] || ""
+    body = article["body_markdown"] || ""
+
+    title == "[Boost]" || String.contains?(body, "{% embed")
   end
 end

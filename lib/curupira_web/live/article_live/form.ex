@@ -19,7 +19,8 @@ defmodule CurupiraWeb.ArticleLive.Form do
      |> assign(:form, to_form(Blog.change_article(article)))
      |> assign(:preview_html, generate_preview(article.title, article.content))
      |> assign(:tag_input, "")
-     |> assign(:layout_mode, "split")}
+     |> assign(:layout_mode, "split")
+     |> assign(:save_state, "idle")}
   end
 
   @impl true
@@ -91,6 +92,11 @@ defmodule CurupiraWeb.ArticleLive.Form do
   end
 
   @impl true
+  def handle_info(:reset_save_state, socket) do
+    {:noreply, assign(socket, :save_state, "idle")}
+  end
+
+  @impl true
   def handle_event("remove_last_tag", _params, socket) do
     if socket.assigns.tag_input == "" do
       current_tags = get_current_tags(socket)
@@ -115,9 +121,12 @@ defmodule CurupiraWeb.ArticleLive.Form do
   defp save_article(socket, nil, article_params) do
     case Blog.create_article(article_params) do
       {:ok, article} ->
+        Process.send_after(self(), :reset_save_state, 2000)
+
         {:noreply,
          socket
          |> put_flash(:info, "Article created successfully")
+         |> assign(:save_state, "saved")
          |> push_navigate(to: ~p"/articles/#{article}/edit")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
@@ -128,9 +137,12 @@ defmodule CurupiraWeb.ArticleLive.Form do
   defp save_article(socket, _id, article_params) do
     case Blog.update_article(socket.assigns.article, article_params) do
       {:ok, _article} ->
+        Process.send_after(self(), :reset_save_state, 2000)
+
         {:noreply,
          socket
-         |> put_flash(:info, "Article updated successfully")}
+         |> put_flash(:info, "Article updated successfully")
+         |> assign(:save_state, "saved")}
 
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign(socket, form: to_form(changeset))}

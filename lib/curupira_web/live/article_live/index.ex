@@ -5,12 +5,19 @@ defmodule CurupiraWeb.ArticleLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, stream(socket, :articles, Blog.list_articles())}
+    {:ok, socket}
   end
 
   @impl true
   def handle_params(params, _url, socket) do
-    {:noreply, apply_action(socket, socket.assigns.live_action, params)}
+    page = String.to_integer(params["page"] || "1")
+    pagination = Blog.list_articles_paginated(page: page, per_page: 10)
+
+    {:noreply,
+     socket
+     |> apply_action(socket.assigns.live_action, params)
+     |> assign(:pagination, pagination)
+     |> stream(:articles, pagination.articles, reset: true)}
   end
 
   defp apply_action(socket, :index, _params) do
@@ -25,5 +32,25 @@ defmodule CurupiraWeb.ArticleLive.Index do
     {:ok, _} = Blog.delete_article(article)
 
     {:noreply, stream_delete(socket, :articles, article)}
+  end
+
+  defp pagination_range(current_page, total_pages) do
+    cond do
+      # If 7 or fewer pages, show all
+      total_pages <= 7 ->
+        Enum.to_list(1..total_pages)
+
+      # If current page is near the start
+      current_page <= 4 ->
+        [1, 2, 3, 4, 5, :gap, total_pages]
+
+      # If current page is near the end
+      current_page >= total_pages - 3 ->
+        [1, :gap] ++ Enum.to_list((total_pages - 4)..total_pages)
+
+      # Current page is in the middle
+      true ->
+        [1, :gap, current_page - 1, current_page, current_page + 1, :gap, total_pages]
+    end
   end
 end
