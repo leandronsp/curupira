@@ -4,7 +4,7 @@ import Config
 config :curupira, Curupira.Repo,
   username: "postgres",
   password: "postgres",
-  hostname: "localhost",
+  hostname: "db",
   database: "curupira_dev",
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
@@ -83,3 +83,8 @@ config :phoenix_live_view,
   debug_attributes: true,
   # Enable helpful, but potentially expensive runtime checks
   enable_expensive_runtime_checks: true
+
+config :cloudex,
+  api_key: System.get_env("CLOUDINARY_API_KEY") || "placeholder",
+  secret: System.get_env("CLOUDINARY_API_SECRET") || "placeholder",
+  cloud_name: System.get_env("CLOUDINARY_CLOUD_NAME") || "placeholder"
