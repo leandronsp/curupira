@@ -24,7 +24,7 @@
   <.form for={@form} id="article-form" phx-change="validate" phx-submit="save">
     <div class="container mx-auto max-w-[1800px]">
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-0">
-        <div class="border-r border-base-300 min-h-screen">
+        <div class="border-r border-base-300 h-[calc(100vh-60px)] overflow-y-auto">
           <div class="p-8">
             <div class="flex items-center justify-between gap-4">
               <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Editor</h3>
@@ -84,7 +84,7 @@
           </div>
         </div>
 
-        <div class="min-h-screen" style="background-color: oklch(98% 0.01 160);">
+        <div class="h-[calc(100vh-60px)] overflow-y-auto" style="background-color: oklch(98% 0.01 160);">
           <div class="p-8">
             <div class="mb-6">
               <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Preview</h3>
