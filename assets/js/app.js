@@ -41,6 +41,24 @@ Hooks.AutoResize = {
   }
 }
 
+// Keyboard shortcuts
+document.addEventListener('keydown', (e) => {
+  // Cmd+S (Mac) or Ctrl+S (Windows/Linux)
+  if ((e.metaKey || e.ctrlKey) && e.key === 's') {
+    e.preventDefault()
+
+    // Find and submit the article form
+    const form = document.getElementById('article-form')
+    if (form) {
+      // Trigger form submission via LiveView
+      const submitButton = form.querySelector('button[type="submit"]')
+      if (submitButton) {
+        submitButton.click()
+      }
+    }
+  }
+})
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
