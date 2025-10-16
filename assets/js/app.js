@@ -63,6 +63,7 @@ Hooks.TagInput = {
         const value = this.el.value.trim()
         if (value) {
           this.pushEvent('add_tag', {value: value})
+          this.el.value = ''
         }
       } else if (e.key === 'Backspace' && this.el.value === '') {
         e.preventDefault()
