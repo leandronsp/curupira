@@ -26,26 +26,26 @@
   default: false;
   prefersdark: true;
   color-scheme: "dark";
-  --color-base-100: oklch(23% 0.016 252.42);
-  --color-base-200: oklch(19% 0.014 253.1);
-  --color-base-300: oklch(15% 0.012 254.09);
-  --color-base-content: oklch(95% 0.029 256.847);
-  --color-primary: oklch(65% 0.25 275);
-  --color-primary-content: oklch(98% 0.018 275);
-  --color-secondary: oklch(68% 0.22 330);
-  --color-secondary-content: oklch(98% 0.018 330);
-  --color-accent: oklch(72% 0.25 195);
-  --color-accent-content: oklch(15% 0.016 195);
-  --color-neutral: oklch(30% 0.044 257.287);
-  --color-neutral-content: oklch(98% 0.003 247.858);
-  --color-info: oklch(68% 0.18 230);
-  --color-info-content: oklch(97% 0.013 230);
-  --color-success: oklch(65% 0.15 155);
-  --color-success-content: oklch(98% 0.014 155);
-  --color-warning: oklch(72% 0.18 85);
-  --color-warning-content: oklch(15% 0.022 85);
-  --color-error: oklch(62% 0.25 25);
-  --color-error-content: oklch(98% 0.015 25);
+  --color-base-100: oklch(30% 0.015 252);
+  --color-base-200: oklch(26% 0.013 252);
+  --color-base-300: oklch(22% 0.011 252);
+  --color-base-content: oklch(88% 0.025 252);
+  --color-primary: oklch(72% 0.15 275);
+  --color-primary-content: oklch(20% 0.05 275);
+  --color-secondary: oklch(75% 0.13 330);
+  --color-secondary-content: oklch(20% 0.05 330);
+  --color-accent: oklch(78% 0.14 195);
+  --color-accent-content: oklch(20% 0.05 195);
+  --color-neutral: oklch(35% 0.03 252);
+  --color-neutral-content: oklch(90% 0.02 252);
+  --color-info: oklch(74% 0.12 230);
+  --color-info-content: oklch(20% 0.04 230);
+  --color-success: oklch(72% 0.11 155);
+  --color-success-content: oklch(20% 0.04 155);
+  --color-warning: oklch(78% 0.13 85);
+  --color-warning-content: oklch(20% 0.05 85);
+  --color-error: oklch(70% 0.16 25);
+  --color-error-content: oklch(20% 0.04 25);
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
   --radius-box: 1rem;
@@ -340,4 +340,85 @@
   border-bottom: none;
   display: block;
   margin-bottom: 0.25rem;
+}
+
+/* Dark mode styles for prose */
+.dark .prose {
+  color: oklch(88% 0.025 252);
+}
+
+.dark .prose h1,
+.dark .prose h2,
+.dark .prose h3,
+.dark .prose h4,
+.dark .prose h5,
+.dark .prose h6 {
+  color: oklch(92% 0.025 252);
+}
+
+.dark .prose strong {
+  color: oklch(90% 0.025 252);
+}
+
+.dark .prose em {
+  color: oklch(86% 0.025 252);
+}
+
+.dark .prose a {
+  color: oklch(78% 0.14 240);
+  border-bottom-color: oklch(78% 0.14 240 / 0.3);
+}
+
+.dark .prose a:hover {
+  border-bottom-color: oklch(78% 0.14 240);
+}
+
+.dark .prose code {
+  background-color: oklch(22% 0.011 252);
+  color: oklch(82% 0.12 270);
+}
+
+.dark .prose pre {
+  background-color: oklch(22% 0.011 252) !important;
+  border-color: oklch(35% 0.03 252 / 0.3);
+}
+
+.dark .prose pre code {
+  color: oklch(85% 0.02 252);
+}
+
+.dark .prose blockquote {
+  border-left-color: oklch(88% 0.025 252 / 0.3);
+  color: oklch(84% 0.025 252);
+}
+
+.dark .prose hr {
+  border-top-color: oklch(35% 0.03 252 / 0.3);
+}
+
+.dark .prose del {
+  color: oklch(84% 0.025 252);
+}
+
+.dark .prose thead {
+  border-bottom-color: oklch(35% 0.03 252 / 0.4);
+}
+
+.dark .prose th {
+  background-color: oklch(26% 0.013 252);
+  color: oklch(90% 0.025 252);
+}
+
+.dark .prose td {
+  border-bottom-color: oklch(35% 0.03 252 / 0.2);
+  color: oklch(86% 0.025 252);
+}
+
+.dark .prose tbody tr:hover {
+  background-color: oklch(26% 0.013 252 / 0.5);
+}
+
+.dark .prose .footnotes {
+  border-top-color: oklch(35% 0.03 252 / 0.3);
+  color: oklch(84% 0.025 252);
 }
