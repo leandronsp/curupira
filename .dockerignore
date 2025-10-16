@@ -1,0 +1,60 @@
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+
+# Documentation
+*.md
+docs/
+
+# Environment files
+.env
+.env.*
+!.env.prod.example
+
+# Dependencies
+deps/
+_build/
+.elixir_ls/
+.mix/
+node_modules/
+
+# Compiled files
+*.beam
+*.ez
+priv/static/assets/
+priv/static/cache_manifest.json
+
+# Test files
+test/
+cover/
+.dialyzer/
+
+# Development tools
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Logs
+*.log
+log/
+logs/
+
+# Docker
+docker-compose*.yml
+Dockerfile*
+.dockerignore
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Temporary files
+tmp/
+temp/
