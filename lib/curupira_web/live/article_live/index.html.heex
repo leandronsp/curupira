@@ -1,31 +1,67 @@
-<.header>
-  Articles
-  <:actions>
+<div class="container mx-auto px-4 py-8 max-w-7xl">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-4xl font-bold">Articles</h1>
     <.link patch={~p"/articles/new"}>
-      <.button>New Article</.button>
+      <button class="btn btn-primary">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        New Article
+      </button>
     </.link>
-  </:actions>
-</.header>
+  </div>
 
-<.table
-  id="articles"
-  rows={@streams.articles}
-  row_click={fn {_id, article} -> JS.navigate(~p"/articles/#{article}/edit") end}
->
-  <:col :let={{_id, article}} label="Title"><%= article.title %></:col>
-  <:col :let={{_id, article}} label="Status"><%= article.status %></:col>
-  <:col :let={{_id, article}} label="Published at">
-    <%= if article.published_at, do: Calendar.strftime(article.published_at, "%Y-%m-%d %H:%M") %>
-  </:col>
-  <:action :let={{_id, article}}>
-    <.link navigate={~p"/articles/#{article}/edit"}>Edit</.link>
-  </:action>
-  <:action :let={{id, article}}>
-    <.link
-      phx-click={JS.push("delete", value: %{id: article.id}) |> hide("##{id}")}
-      data-confirm="Are you sure?"
-    >
-      Delete
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="articles" phx-update="stream">
+    <div :for={{id, article} <- @streams.articles} id={id} class="card bg-base-200 shadow-xl hover:shadow-2xl transition-shadow duration-300">
+      <div class="card-body">
+        <h2 class="card-title text-2xl">
+          <%= article.title %>
+          <div :if={article.status} class="badge badge-secondary badge-sm"><%= article.status %></div>
+        </h2>
+
+        <div class="text-base-content/70 text-sm mb-4">
+          <%= if article.published_at do %>
+            <div class="flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <%= Calendar.strftime(article.published_at, "%B %d, %Y") %>
+            </div>
+          <% end %>
+        </div>
+
+        <div :if={article.tags && length(article.tags) > 0} class="flex flex-wrap gap-2 mb-4">
+          <div :for={tag <- article.tags} class="badge badge-outline badge-sm"><%= tag %></div>
+        </div>
+
+        <div class="card-actions justify-end mt-4">
+          <.link navigate={~p"/articles/#{article}/edit"} class="btn btn-sm btn-primary">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+            </svg>
+            Edit
+          </.link>
+          <button
+            class="btn btn-sm btn-error"
+            phx-click={JS.push("delete", value: %{id: article.id}) |> hide("##{id}")}
+            data-confirm="Are you sure you want to delete this article?"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+            Delete
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div :if={Enum.empty?(@streams.articles)} class="text-center py-20">
+    <div class="text-6xl mb-4">📝</div>
+    <h2 class="text-2xl font-bold mb-2">No articles yet</h2>
+    <p class="text-base-content/70 mb-6">Create your first article to get started</p>
+    <.link patch={~p"/articles/new"}>
+      <button class="btn btn-primary btn-lg">Create Article</button>
     </.link>
-  </:action>
-</.table>
+  </div>
+</div>

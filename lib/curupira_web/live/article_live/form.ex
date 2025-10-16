@@ -1,6 +1,8 @@
 defmodule CurupiraWeb.ArticleLive.Form do
   use CurupiraWeb, :live_view
 
+  import CurupiraWeb.CoreComponents
+
   alias Curupira.Blog
   alias Curupira.Blog.Article
   alias Curupira.Markdown.Parser
