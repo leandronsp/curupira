@@ -38,6 +38,24 @@ defmodule Curupira.Blog do
   def get_article!(id), do: Repo.get!(Article, id)
 
   @doc """
+  Gets a single article by dev.to ID.
+
+  Returns `nil` if the Article does not exist.
+
+  ## Examples
+
+      iex> get_article_by_dev_to_id(123)
+      %Article{}
+
+      iex> get_article_by_dev_to_id(456)
+      nil
+
+  """
+  def get_article_by_dev_to_id(dev_to_id) do
+    Repo.get_by(Article, dev_to_id: dev_to_id)
+  end
+
+  @doc """
   Creates a article.
 
   ## Examples
