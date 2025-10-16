@@ -43,9 +43,8 @@
             <textarea
               name={@form[:content].name}
               id={@form[:content].id}
-              rows="30"
               placeholder="Write your post content here..."
-              class="w-full bg-transparent border-0 focus:outline-none focus:ring-0 font-mono text-base leading-relaxed resize-none placeholder:text-base-content/30"
+              class="w-full h-full min-h-[600px] bg-transparent border-0 focus:outline-none focus:ring-0 font-mono text-base leading-relaxed resize-none placeholder:text-base-content/30"
               style="font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;"
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:content].value) %></textarea>
           </div>
@@ -59,9 +58,6 @@
 
             <article class="prose prose-lg max-w-none">
               <%= if @preview_html != "" do %>
-                <h1 class="text-5xl font-bold mb-4" style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;">
-                  <%= @form[:title].value || "New post title here..." %>
-                </h1>
                 <%= Phoenix.HTML.raw(@preview_html) %>
               <% else %>
                 <div class="text-center text-base-content/30 mt-20">

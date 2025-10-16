@@ -1,6 +1,19 @@
 defmodule Curupira.Markdown.Parser do
   def to_html(markdown) when is_binary(markdown) do
-    case MDEx.to_html(markdown) do
+    opts = [
+      extension: [
+        strikethrough: true,
+        table: true,
+        autolink: true,
+        tasklist: true,
+        footnotes: true
+      ],
+      parse: [
+        smart: true
+      ]
+    ]
+
+    case MDEx.to_html(markdown, opts) do
       {:ok, html} -> {:ok, html}
       {:error, reason} -> {:error, reason}
     end

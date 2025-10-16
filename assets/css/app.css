@@ -198,6 +198,15 @@
   margin-top: 1.25rem;
   margin-bottom: 1.25rem;
   padding-left: 1.5rem;
+  list-style-position: outside;
+}
+
+.prose ul {
+  list-style-type: disc;
+}
+
+.prose ol {
+  list-style-type: decimal;
 }
 
 .prose li {
@@ -205,6 +214,22 @@
   margin-bottom: 0.5rem;
   font-size: 1.125rem;
   line-height: 1.75;
+}
+
+.prose ul ul,
+.prose ul ol,
+.prose ol ul,
+.prose ol ol {
+  margin-top: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+.prose ul ul {
+  list-style-type: circle;
+}
+
+.prose ul ul ul {
+  list-style-type: square;
 }
 
 .prose blockquote {
@@ -227,4 +252,67 @@
   border-top: 1px solid oklch(var(--bc) / 0.1);
   margin-top: 2.5rem;
   margin-bottom: 2.5rem;
+}
+
+/* Strikethrough */
+.prose del {
+  text-decoration: line-through;
+  color: oklch(var(--bc) / 0.6);
+}
+
+/* Tables */
+.prose table {
+  width: 100%;
+  margin-top: 1.5rem;
+  margin-bottom: 1.5rem;
+  border-collapse: collapse;
+  font-size: 1rem;
+}
+
+.prose thead {
+  border-bottom: 2px solid oklch(var(--bc) / 0.2);
+}
+
+.prose th {
+  padding: 0.75rem 1rem;
+  text-align: left;
+  font-weight: 700;
+  background-color: oklch(var(--bc) / 0.03);
+}
+
+.prose td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid oklch(var(--bc) / 0.1);
+}
+
+.prose tbody tr:hover {
+  background-color: oklch(var(--bc) / 0.02);
+}
+
+/* Tasklists */
+.prose input[type="checkbox"] {
+  margin-right: 0.5rem;
+  cursor: pointer;
+}
+
+.prose li:has(input[type="checkbox"]) {
+  list-style-type: none;
+  margin-left: -1.5rem;
+}
+
+/* Footnotes */
+.prose .footnotes {
+  margin-top: 3rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid oklch(var(--bc) / 0.1);
+  font-size: 0.9rem;
+}
+
+.prose sup {
+  font-size: 0.75em;
+  vertical-align: super;
+}
+
+.prose sup a {
+  border-bottom: none;
 }

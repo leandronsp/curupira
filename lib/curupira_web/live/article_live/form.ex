@@ -19,7 +19,7 @@ defmodule CurupiraWeb.ArticleLive.Form do
      socket
      |> assign(:article, article)
      |> assign(:form, to_form(Blog.change_article(article)))
-     |> assign(:preview_html, generate_preview(article.content))}
+     |> assign(:preview_html, generate_preview(article.title, article.content))}
   end
 
   @impl true
@@ -29,7 +29,7 @@ defmodule CurupiraWeb.ArticleLive.Form do
       |> Blog.change_article(article_params)
       |> Map.put(:action, :validate)
 
-    preview_html = generate_preview(article_params["content"])
+    preview_html = generate_preview(article_params["title"], article_params["content"])
 
     {:noreply,
      socket
@@ -67,12 +67,20 @@ defmodule CurupiraWeb.ArticleLive.Form do
     end
   end
 
-  defp generate_preview(nil), do: ""
-  defp generate_preview(""), do: ""
-  defp generate_preview(markdown) do
-    case Parser.to_html(markdown) do
+  defp generate_preview(title, content) do
+    full_markdown = build_full_markdown(title, content)
+
+    case Parser.to_html(full_markdown) do
       {:ok, html} -> html
       {:error, _} -> "<p class='text-red-500'>Error parsing markdown</p>"
     end
   end
+
+  defp build_full_markdown(nil, nil), do: ""
+  defp build_full_markdown(nil, content) when is_binary(content), do: content
+  defp build_full_markdown(title, nil) when is_binary(title), do: "# #{title}"
+  defp build_full_markdown(title, content) when is_binary(title) and is_binary(content) do
+    "# #{title}\n\n#{content}"
+  end
+  defp build_full_markdown(_, _), do: ""
 end
