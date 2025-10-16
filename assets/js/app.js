@@ -59,6 +59,19 @@ document.addEventListener('keydown', (e) => {
   }
 })
 
+// Handle data-confirm for LiveView elements
+document.addEventListener('click', (e) => {
+  const target = e.target.closest('[data-confirm]')
+  if (target) {
+    e.stopPropagation() // Prevent card click
+    const message = target.getAttribute('data-confirm')
+    if (!confirm(message)) {
+      e.preventDefault()
+      e.stopImmediatePropagation()
+    }
+  }
+}, true)
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
