@@ -138,10 +138,18 @@
 }
 
 .prose p {
-  margin-top: 1.25rem;
-  margin-bottom: 1.25rem;
+  margin-top: 0;
+  margin-bottom: 1.5em;
   font-size: 1.125rem;
   line-height: 1.75;
+}
+
+.prose p:first-child {
+  margin-top: 0;
+}
+
+.prose p:last-child {
+  margin-bottom: 0;
 }
 
 .prose a {
