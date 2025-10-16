@@ -17,7 +17,10 @@ defmodule CurupiraWeb.Router do
   scope "/", CurupiraWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", ArticleLive.Index, :index
+    live "/articles", ArticleLive.Index, :index
+    live "/articles/new", ArticleLive.Form, :new
+    live "/articles/:id/edit", ArticleLive.Form, :edit
   end
 
   # Other scopes may use custom stacks.

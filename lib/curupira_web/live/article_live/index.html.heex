@@ -1,0 +1,31 @@
+<.header>
+  Articles
+  <:actions>
+    <.link patch={~p"/articles/new"}>
+      <.button>New Article</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="articles"
+  rows={@streams.articles}
+  row_click={fn {_id, article} -> JS.navigate(~p"/articles/#{article}/edit") end}
+>
+  <:col :let={{_id, article}} label="Title"><%= article.title %></:col>
+  <:col :let={{_id, article}} label="Status"><%= article.status %></:col>
+  <:col :let={{_id, article}} label="Published at">
+    <%= if article.published_at, do: Calendar.strftime(article.published_at, "%Y-%m-%d %H:%M") %>
+  </:col>
+  <:action :let={{_id, article}}>
+    <.link navigate={~p"/articles/#{article}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, article}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: article.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
