@@ -3,7 +3,7 @@
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
       <%!-- Sidebar - Profile Section --%>
       <div class="lg:col-span-4">
-        <div class="sticky top-8 space-y-6">
+        <div class="space-y-6">
           <%!-- Blog Title --%>
           <input
             type="text"
@@ -31,16 +31,14 @@
 
       <%!-- Main Content - Articles List --%>
       <div class="lg:col-span-8" phx-hook="PaginationScroll" id="articles-container">
-        <%= if @pagination.total_pages > 1 do %>
-          <div class="flex items-center gap-2 mb-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-            </svg>
-            <span class="text-sm text-base-content/50 font-mono">
-              <%= @pagination.page %> / <%= @pagination.total_pages %>
-            </span>
-          </div>
-        <% end %>
+        <div class={"flex items-center gap-2 mb-2 " <> if @pagination.total_pages <= 1, do: "invisible", else: ""}>
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+          </svg>
+          <span class="text-sm text-base-content/50 font-mono">
+            <%= @pagination.page %> / <%= @pagination.total_pages %>
+          </span>
+        </div>
 
         <div class="flex justify-between items-center gap-4 mb-6">
           <div class="flex-1 max-w-lg">
@@ -51,8 +49,10 @@
                   name="q"
                   value={@search_query}
                   placeholder="Search articles by title..."
-                  class="input input-bordered w-full h-12 pr-12 text-base"
+                  class="w-full h-12 pr-12 text-base bg-base-100 border-2 border-base-300 rounded-lg px-4 transition-all duration-200 ease-in-out focus:border-primary focus:outline-none hover:border-base-content/30 hover:shadow-sm"
                   phx-debounce="300"
+                  id="search-input"
+                  autocomplete="off"
                 />
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute right-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -177,6 +177,16 @@
             </div>
           </div>
         </div>
+
+        <%= if @pagination.total_count == 0 do %>
+          <div class="flex flex-col items-center justify-center py-16 text-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/20 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <h3 class="text-lg font-semibold text-base-content/60 mb-2">No results found</h3>
+            <p class="text-base-content/40">Try a different search or create a new article</p>
+          </div>
+        <% end %>
 
         <%= if @pagination.total_pages > 1 do %>
           <div class="flex justify-center items-center gap-1 mt-8">

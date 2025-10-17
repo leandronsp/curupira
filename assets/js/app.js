@@ -337,25 +337,43 @@ Hooks.BioEditor = {
 
 Hooks.PaginationScroll = {
   mounted() {
-    // Store initial state
-    this.previousPage = null
+    // Store initial state from URL
+    const urlParams = new URLSearchParams(window.location.search)
+    this.previousPage = urlParams.get('page') || '1'
+    this.previousQuery = urlParams.get('q') || ''
   },
   updated() {
-    // When pagination changes (articles list updated), scroll to top of this container
-    // Use smooth scroll for better UX, and align to the very top
-    this.el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
+    // Get current state from URL
+    const urlParams = new URLSearchParams(window.location.search)
+    const currentPage = urlParams.get('page') || '1'
+    const currentQuery = urlParams.get('q') || ''
 
-    // Also scroll window to absolute top to ensure bookmark is visible
-    setTimeout(() => {
-      const rect = this.el.getBoundingClientRect()
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
-      const targetScroll = rect.top + scrollTop - 32 // 32px padding from top
+    // Only scroll if:
+    // - Page changed AND
+    // - Search query stayed the same (not a new search)
+    const pageChanged = currentPage !== this.previousPage
+    const queryChanged = currentQuery !== this.previousQuery
 
-      window.scrollTo({
-        top: targetScroll,
-        behavior: 'smooth'
-      })
-    }, 100)
+    if (pageChanged && !queryChanged) {
+      // Scroll to top of this container
+      this.el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
+
+      // Also scroll window to absolute top to ensure bookmark is visible
+      setTimeout(() => {
+        const rect = this.el.getBoundingClientRect()
+        const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+        const targetScroll = rect.top + scrollTop - 32 // 32px padding from top
+
+        window.scrollTo({
+          top: targetScroll,
+          behavior: 'smooth'
+        })
+      }, 100)
+    }
+
+    // Update stored values
+    this.previousPage = currentPage
+    this.previousQuery = currentQuery
   }
 }
 
