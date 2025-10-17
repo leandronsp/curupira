@@ -178,6 +178,298 @@ Hooks.TitleEditor = {
   }
 }
 
+// Markdown content editor with full keyboard shortcuts and undo/redo
+Hooks.MarkdownEditor = {
+  mounted() {
+    // Initialize undo/redo history
+    this.history = [this.el.value]
+    this.historyIndex = 0
+    this.maxHistory = 50
+
+    // Keyboard shortcuts
+    this.setupKeyboardShortcuts()
+
+    // Listen for image upload completion from server
+    this.handleEvent("image-uploaded", ({url}) => {
+      this.insertImageAtCursor(url)
+    })
+
+    // Setup paste support for images
+    this.setupPasteUpload()
+  },
+  setupPasteUpload() {
+    this.el.addEventListener('paste', (e) => {
+      const items = e.clipboardData?.items
+      if (!items) return
+
+      for (let item of items) {
+        if (item.type.startsWith('image/')) {
+          e.preventDefault()
+          const file = item.getAsFile()
+
+          // Find the LiveView file input (has data-phx-upload-ref attribute)
+          const fileInput = document.querySelector('input[data-phx-upload-ref]')
+          if (fileInput) {
+            // Create a new FileList-like object
+            const dataTransfer = new DataTransfer()
+            dataTransfer.items.add(file)
+
+            // Assign files to input
+            fileInput.files = dataTransfer.files
+
+            // Dispatch input event that LiveView listens to
+            const event = new Event('input', { bubbles: true })
+            fileInput.dispatchEvent(event)
+          }
+          break
+        }
+      }
+    })
+  },
+  insertImageAtCursor(url) {
+    const textarea = this.el
+    const start = textarea.selectionStart
+    const end = textarea.selectionEnd
+    const text = textarea.value
+    const selectedText = text.substring(start, end)
+
+    // Use selected text as alt text, or default to "image"
+    const altText = selectedText || "image"
+    const imageMarkdown = `![${altText}](${url})`
+
+    const newText = text.substring(0, start) + imageMarkdown + text.substring(end)
+    textarea.value = newText
+    this.saveToHistory()
+    textarea.dispatchEvent(new Event('input', { bubbles: true }))
+
+    // Position cursor after the inserted image
+    const newCursorPos = start + imageMarkdown.length
+    textarea.setSelectionRange(newCursorPos, newCursorPos)
+    textarea.focus()
+  },
+  setupKeyboardShortcuts() {
+    this.el.addEventListener('keydown', (e) => {
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
+      const modifier = isMac ? e.metaKey : e.ctrlKey
+
+      if (!modifier) return
+
+      // Undo: Cmd/Ctrl + Z (without Shift)
+      if (e.key === 'z' && !e.shiftKey) {
+        e.preventDefault()
+        this.undo()
+        return
+      }
+
+      // Redo: Cmd/Ctrl + Shift + Z
+      if (e.key === 'z' && e.shiftKey) {
+        e.preventDefault()
+        this.redo()
+        return
+      }
+
+      // Save: Cmd/Ctrl + S
+      if (e.key === 's') {
+        e.preventDefault()
+        const submitButton = document.querySelector('button[type="submit"][form="article-form"]')
+        if (submitButton) {
+          submitButton.click()
+        }
+        return
+      }
+
+      // Bold: Cmd/Ctrl + B
+      if (e.key === 'b') {
+        e.preventDefault()
+        this.toggleFormatting('**', '**')
+        return
+      }
+
+      // Italic: Cmd/Ctrl + I
+      if (e.key === 'i') {
+        e.preventDefault()
+        this.toggleFormatting('*', '*')
+        return
+      }
+
+      // Code: Cmd/Ctrl + E
+      if (e.key === 'e') {
+        e.preventDefault()
+        this.toggleFormatting('`', '`')
+        return
+      }
+
+      // Link: Cmd/Ctrl + K
+      if (e.key === 'k') {
+        e.preventDefault()
+        this.insertLink()
+        return
+      }
+
+      // Strikethrough: Cmd/Ctrl + Shift + X
+      if (e.key === 'X' && e.shiftKey) {
+        e.preventDefault()
+        this.toggleFormatting('~~', '~~')
+        return
+      }
+
+      // Code Block: Cmd/Ctrl + Shift + K
+      if (e.key === 'K' && e.shiftKey) {
+        e.preventDefault()
+        this.toggleCodeBlock()
+        return
+      }
+    })
+  },
+  saveToHistory() {
+    this.history = this.history.slice(0, this.historyIndex + 1)
+    this.history.push(this.el.value)
+    if (this.history.length > this.maxHistory) {
+      this.history.shift()
+    } else {
+      this.historyIndex++
+    }
+  },
+  undo() {
+    if (this.historyIndex > 0) {
+      this.historyIndex--
+      const value = this.history[this.historyIndex]
+      this.el.value = value
+      this.el.dispatchEvent(new Event('input', { bubbles: true }))
+    }
+  },
+  redo() {
+    if (this.historyIndex < this.history.length - 1) {
+      this.historyIndex++
+      const value = this.history[this.historyIndex]
+      this.el.value = value
+      this.el.dispatchEvent(new Event('input', { bubbles: true }))
+    }
+  },
+  toggleFormatting(before, after) {
+    const start = this.el.selectionStart
+    const end = this.el.selectionEnd
+    const text = this.el.value
+    const selectedText = text.substring(start, end)
+
+    if (start !== end) {
+      const beforeStart = start - before.length
+      const afterEnd = end + after.length
+      const textBefore = text.substring(beforeStart, start)
+      const textAfter = text.substring(end, afterEnd)
+
+      if (textBefore === before && textAfter === after) {
+        // Remove formatting
+        const newText = text.substring(0, beforeStart) + selectedText + text.substring(afterEnd)
+        this.el.value = newText
+        this.saveToHistory()
+        this.el.dispatchEvent(new Event('input', { bubbles: true }))
+        this.el.setSelectionRange(beforeStart, beforeStart + selectedText.length)
+      } else {
+        // Add formatting
+        const newText = text.substring(0, start) + before + selectedText + after + text.substring(end)
+        this.el.value = newText
+        this.saveToHistory()
+        this.el.dispatchEvent(new Event('input', { bubbles: true }))
+        const newCursorPos = start + before.length + selectedText.length + after.length
+        this.el.setSelectionRange(newCursorPos, newCursorPos)
+      }
+    } else {
+      const newText = text.substring(0, start) + before + after + text.substring(end)
+      this.el.value = newText
+      this.saveToHistory()
+      this.el.dispatchEvent(new Event('input', { bubbles: true }))
+      const newCursorPos = start + before.length
+      this.el.setSelectionRange(newCursorPos, newCursorPos)
+    }
+
+    this.el.focus()
+  },
+  insertLink() {
+    const start = this.el.selectionStart
+    const end = this.el.selectionEnd
+    const text = this.el.value
+    const selectedText = text.substring(start, end)
+
+    const linkText = selectedText || 'link text'
+    const linkFormat = `[${linkText}](url)`
+
+    const newText = text.substring(0, start) + linkFormat + text.substring(end)
+    this.el.value = newText
+    this.saveToHistory()
+    this.el.dispatchEvent(new Event('input', { bubbles: true }))
+
+    // Select the URL part
+    const urlStart = start + linkText.length + 3
+    const urlEnd = urlStart + 3
+    this.el.setSelectionRange(urlStart, urlEnd)
+    this.el.focus()
+  },
+  toggleCodeBlock() {
+    const start = this.el.selectionStart
+    const end = this.el.selectionEnd
+    const text = this.el.value
+    const selectedText = text.substring(start, end)
+
+    // Find the start of the current line
+    let lineStart = start
+    while (lineStart > 0 && text[lineStart - 1] !== '\n') {
+      lineStart--
+    }
+
+    // Find the end of the current line
+    let lineEnd = end
+    while (lineEnd < text.length && text[lineEnd] !== '\n') {
+      lineEnd++
+    }
+
+    const before = '```\n'
+    const after = '\n```'
+
+    // Check if already in code block
+    const checkStart = Math.max(0, lineStart - 4)
+    const checkEnd = Math.min(text.length, lineEnd + 4)
+    const surrounding = text.substring(checkStart, checkEnd)
+
+    if (surrounding.includes('```')) {
+      // Try to remove code block
+      const beforeBlock = text.substring(checkStart, lineStart)
+      const afterBlock = text.substring(lineEnd, checkEnd)
+
+      if (beforeBlock.trim() === '```' || beforeBlock.endsWith('\n```\n')) {
+        // Remove the code block markers
+        let newLineStart = lineStart
+        while (newLineStart > 0 && text.substring(newLineStart - 4, newLineStart) !== '```\n') {
+          newLineStart--
+        }
+        newLineStart -= 4
+
+        let newLineEnd = lineEnd
+        while (newLineEnd < text.length && text.substring(newLineEnd, newLineEnd + 4) !== '\n```') {
+          newLineEnd++
+        }
+        newLineEnd += 4
+
+        const newText = text.substring(0, newLineStart) + text.substring(newLineStart + 4, newLineEnd - 4) + text.substring(newLineEnd)
+        this.el.value = newText
+        this.saveToHistory()
+        this.el.dispatchEvent(new Event('input', { bubbles: true }))
+        this.el.setSelectionRange(start - 4, end - 4)
+        this.el.focus()
+        return
+      }
+    }
+
+    // Add code block
+    const newText = text.substring(0, lineStart) + before + text.substring(lineStart, lineEnd) + after + text.substring(lineEnd)
+    this.el.value = newText
+    this.saveToHistory()
+    this.el.dispatchEvent(new Event('input', { bubbles: true }))
+    this.el.setSelectionRange(lineStart + before.length, lineEnd + before.length)
+    this.el.focus()
+  }
+}
+
 Hooks.ConfirmDelete = {
   mounted() {
     this.el.addEventListener('click', (e) => {

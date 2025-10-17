@@ -49,6 +49,14 @@
             </svg>
           </button>
 
+          <div class="divider divider-horizontal mx-0"></div>
+
+          <label for={@uploads.images.ref} class="btn btn-sm btn-ghost" title="Upload image (click, drag-drop, or paste)">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+          </label>
+
           <button
             type="button"
             phx-hook="ThemeToggle"
@@ -85,6 +93,8 @@
   </div>
 
   <.form for={@form} id="article-form" phx-change="validate" phx-debounce="300" phx-submit="save">
+    <.live_file_input upload={@uploads.images} class="hidden" />
+
     <div class="container mx-auto max-w-[1800px]">
       <div class={"grid gap-0 " <> if @layout_mode == "split", do: "grid-cols-1 lg:grid-cols-2", else: "grid-cols-1"}>
         <div class={"h-[calc(100vh-60px)] overflow-y-auto " <> if @layout_mode == "split", do: "border-r border-base-300", else: ""} style={if @layout_mode == "preview", do: "display: none;", else: ""} phx-hook="PreserveScroll" id="editor-container">
@@ -214,6 +224,7 @@
               class="w-full flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-lg resize-none placeholder:text-base-content/30"
               style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.75; min-height: 500px;"
               phx-hook="MarkdownEditor"
+              phx-drop-target={@uploads.images.ref}
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:content].value) %></textarea>
           </div>
         </div>

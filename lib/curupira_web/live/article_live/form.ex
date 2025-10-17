@@ -20,7 +20,14 @@ defmodule CurupiraWeb.ArticleLive.Form do
      |> assign(:preview_html, generate_preview(article.title, article.content))
      |> assign(:tag_input, "")
      |> assign(:layout_mode, "split")
-     |> assign(:save_state, "idle")}
+     |> assign(:save_state, "idle")
+     |> allow_upload(:images,
+       accept: ~w(.jpg .jpeg .png .gif .webp),
+       max_entries: 1,
+       max_file_size: 5_000_000,
+       auto_upload: true,
+       progress: &handle_progress/3
+     )}
   end
 
   @impl true
@@ -38,6 +45,38 @@ defmodule CurupiraWeb.ArticleLive.Form do
      socket
      |> assign(:form, to_form(changeset))
      |> assign(:preview_html, preview_html)}
+  end
+
+  defp handle_progress(:images, entry, socket) when entry.done? do
+    uploaded_file =
+      consume_uploaded_entry(socket, entry, fn %{path: path} ->
+        # Create uploads directory if it doesn't exist
+        upload_dir = Path.join([:code.priv_dir(:curupira), "static", "uploads"])
+        File.mkdir_p!(upload_dir)
+
+        # Generate unique filename preserving extension
+        ext = Path.extname(entry.client_name)
+        filename = "#{System.unique_integer([:positive])}#{ext}"
+        dest = Path.join(upload_dir, filename)
+
+        # Copy file to permanent location
+        case File.cp(path, dest) do
+          :ok ->
+            {:ok, "/uploads/#{filename}"}
+
+          {:error, reason} ->
+            require Logger
+            Logger.error("Failed to save uploaded image: #{inspect(reason)}")
+            {:postpone, :error}
+        end
+      end)
+
+    {:noreply, push_event(socket, "image-uploaded", %{url: uploaded_file})}
+  end
+
+  defp handle_progress(:images, _entry, socket) do
+    # Upload still in progress, do nothing
+    {:noreply, socket}
   end
 
   @impl true
@@ -87,16 +126,6 @@ defmodule CurupiraWeb.ArticleLive.Form do
   end
 
   @impl true
-  def handle_event("switch_layout", %{"mode" => mode}, socket) do
-    {:noreply, assign(socket, :layout_mode, mode)}
-  end
-
-  @impl true
-  def handle_info(:reset_save_state, socket) do
-    {:noreply, assign(socket, :save_state, "idle")}
-  end
-
-  @impl true
   def handle_event("remove_last_tag", _params, socket) do
     if socket.assigns.tag_input == "" do
       current_tags = get_current_tags(socket)
@@ -116,6 +145,16 @@ defmodule CurupiraWeb.ArticleLive.Form do
     else
       {:noreply, socket}
     end
+  end
+
+  @impl true
+  def handle_event("switch_layout", %{"mode" => mode}, socket) do
+    {:noreply, assign(socket, :layout_mode, mode)}
+  end
+
+  @impl true
+  def handle_info(:reset_save_state, socket) do
+    {:noreply, assign(socket, :save_state, "idle")}
   end
 
   defp save_article(socket, nil, article_params) do
