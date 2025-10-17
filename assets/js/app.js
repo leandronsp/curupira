@@ -335,6 +335,30 @@ Hooks.BioEditor = {
   }
 }
 
+Hooks.PaginationScroll = {
+  mounted() {
+    // Store initial state
+    this.previousPage = null
+  },
+  updated() {
+    // When pagination changes (articles list updated), scroll to top of this container
+    // Use smooth scroll for better UX, and align to the very top
+    this.el.scrollIntoView({ behavior: 'smooth', block: 'start', inline: 'nearest' })
+
+    // Also scroll window to absolute top to ensure bookmark is visible
+    setTimeout(() => {
+      const rect = this.el.getBoundingClientRect()
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop
+      const targetScroll = rect.top + scrollTop - 32 // 32px padding from top
+
+      window.scrollTo({
+        top: targetScroll,
+        behavior: 'smooth'
+      })
+    }, 100)
+  }
+}
+
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,

@@ -30,7 +30,18 @@
       </div>
 
       <%!-- Main Content - Articles List --%>
-      <div class="lg:col-span-8">
+      <div class="lg:col-span-8" phx-hook="PaginationScroll" id="articles-container">
+        <%= if @pagination.total_pages > 1 do %>
+          <div class="flex items-center gap-2 mb-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+            </svg>
+            <span class="text-sm text-base-content/50 font-mono">
+              <%= @pagination.page %> / <%= @pagination.total_pages %>
+            </span>
+          </div>
+        <% end %>
+
         <div class="flex justify-between items-center gap-4 mb-6">
           <div class="flex-1 max-w-lg">
             <form phx-change="search" phx-submit="search">
