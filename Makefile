@@ -1,4 +1,4 @@
-.PHONY: help dev-up dev-down dev-logs dev-reset dev-seeds prod-build prod-up prod-down prod-logs prod-reset prod-seeds prod-create-admin test-all clean deploy-build deploy-push deploy
+.PHONY: help dev-up dev-down dev-logs dev-reset dev-seeds prod-build prod-up prod-down prod-logs prod-reset prod-seeds prod-create-admin test-all clean static-build static-serve static-test deploy-build deploy-push deploy
 
 # Default target
 help:
@@ -26,6 +26,11 @@ help:
 	@echo "  make test-all        - Start both dev and prod for testing"
 	@echo "  make test-dev        - Test dev endpoint (localhost:4000)"
 	@echo "  make test-prod       - Test prod endpoint (localhost:4001)"
+	@echo ""
+	@echo "Static Site:"
+	@echo "  make static-build    - Build static site in Docker"
+	@echo "  make static-serve    - Serve static site locally (port 8000)"
+	@echo "  make static-test     - Build and serve static site"
 	@echo ""
 	@echo "Deployment:"
 	@echo "  make deploy-build    - Build AMD64 image for production servers"
@@ -192,6 +197,40 @@ test-dev:
 test-prod:
 	@echo "Testing production..."
 	@curl -s -o /dev/null -w "Prod (4001): HTTP %{http_code}\n" http://localhost:4001/
+
+# ======================
+# Static Site Commands
+# ======================
+
+static-build:
+	@echo "Building static site in Docker..."
+	@echo "1. Ensuring development environment is running..."
+	@docker-compose up -d --wait
+	@echo "2. Building assets..."
+	@docker-compose exec -T web mix assets.build
+	@echo "3. Generating static pages..."
+	@docker-compose exec -T web mix build_static
+	@echo "4. Copying to shared volume for nginx..."
+	@docker-compose exec -T web sh -c "rm -rf /static_html/* && cp -r static_output/* /static_html/"
+	@echo "5. Restarting nginx container..."
+	@docker-compose restart static
+	@echo "✓ Static site ready at http://localhost:8000"
+
+static-serve:
+	@echo "Serving static site on http://localhost:8000"
+	@echo "Press Ctrl+C to stop"
+	@cd static_output && python3 -m http.server 8000
+
+static-test: static-build
+	@echo ""
+	@echo "=========================================="
+	@echo "Static site built and ready to test!"
+	@echo "=========================================="
+	@echo ""
+	@echo "Starting server on http://localhost:8000"
+	@echo "Press Ctrl+C to stop"
+	@echo ""
+	@cd static_output && python3 -m http.server 8000
 
 # ======================
 # Cleanup Commands

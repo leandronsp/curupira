@@ -39,3 +39,6 @@ curupira-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Static site output
+/static_output/
+

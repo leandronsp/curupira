@@ -236,6 +236,13 @@
             </div>
 
             <article class="prose prose-lg max-w-none" id="preview-content">
+              <style>
+                #preview-content img {
+                  max-width: 100%;
+                  height: auto;
+                  border-radius: 0.5rem;
+                }
+              </style>
               <%= if @preview_html != "" do %>
                 <%= Phoenix.HTML.raw(@preview_html) %>
               <% else %>

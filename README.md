@@ -71,6 +71,27 @@ mix ecto.reset
 mix ecto.migrate
 ```
 
+## Static Site Deployment (GitHub Pages)
+
+Generate static HTML/CSS/JS files for free hosting:
+
+```bash
+# Build static site
+./build_static.sh
+
+# Test locally
+cd static_output && python3 -m http.server 8000
+```
+
+Deploy to GitHub Pages, Netlify, Vercel, or any static hosting. See [STATIC_DEPLOY.md](STATIC_DEPLOY.md) for detailed instructions.
+
+**Features in static version:**
+- Article listing with search
+- Individual article pages
+- Dark/light theme toggle
+- Responsive design
+- No admin features (read-only)
+
 ## Production
 
 ### Local Testing
