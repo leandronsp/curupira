@@ -5,7 +5,12 @@ defmodule CurupiraWeb.ArticleLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, socket}
+    profile = Blog.get_or_create_profile()
+
+    {:ok,
+     socket
+     |> assign(:profile, profile)
+     |> assign(:profile_form, Blog.change_profile(profile))}
   end
 
   @impl true
@@ -47,6 +52,23 @@ defmodule CurupiraWeb.ArticleLive.Index do
     params = if search_query == "", do: %{}, else: %{"q" => search_query}
 
     {:noreply, push_patch(socket, to: ~p"/articles?#{params}")}
+  end
+
+  @impl true
+  def handle_event("update_profile", %{"field" => field, "value" => value}, socket) do
+    profile = socket.assigns.profile
+
+    # Convert field string to atom
+    field_atom = String.to_existing_atom(field)
+    attrs = %{field_atom => value}
+
+    case Blog.update_profile(profile, attrs) do
+      {:ok, updated_profile} ->
+        {:noreply, assign(socket, :profile, updated_profile)}
+
+      {:error, _changeset} ->
+        {:noreply, socket}
+    end
   end
 
   defp pagination_range(current_page, total_pages) do

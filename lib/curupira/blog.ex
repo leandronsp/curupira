@@ -7,6 +7,7 @@ defmodule Curupira.Blog do
   alias Curupira.Repo
 
   alias Curupira.Blog.Article
+  alias Curupira.Blog.Profile
 
   @doc """
   Returns the list of articles.
@@ -178,5 +179,76 @@ defmodule Curupira.Blog do
   """
   def change_article(%Article{} = article, attrs \\ %{}) do
     Article.changeset(article, attrs)
+  end
+
+  # Blog Profile functions
+
+  @doc """
+  Gets or creates the blog profile (singleton).
+
+  ## Examples
+
+      iex> get_or_create_profile()
+      %Profile{}
+
+  """
+  def get_or_create_profile do
+    case Repo.one(Profile) do
+      nil ->
+        {:ok, profile} = create_profile(%{name: "My Blog"})
+        profile
+
+      profile ->
+        profile
+    end
+  end
+
+  @doc """
+  Creates a profile.
+
+  ## Examples
+
+      iex> create_profile(%{name: "My Blog"})
+      {:ok, %Profile{}}
+
+      iex> create_profile(%{})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def create_profile(attrs) do
+    %Profile{}
+    |> Profile.changeset(attrs)
+    |> Repo.insert()
+  end
+
+  @doc """
+  Updates the blog profile.
+
+  ## Examples
+
+      iex> update_profile(profile, %{name: "New Name"})
+      {:ok, %Profile{}}
+
+      iex> update_profile(profile, %{name: nil})
+      {:error, %Ecto.Changeset{}}
+
+  """
+  def update_profile(%Profile{} = profile, attrs) do
+    profile
+    |> Profile.changeset(attrs)
+    |> Repo.update()
+  end
+
+  @doc """
+  Returns an `%Ecto.Changeset{}` for tracking profile changes.
+
+  ## Examples
+
+      iex> change_profile(profile)
+      %Ecto.Changeset{data: %Profile{}}
+
+  """
+  def change_profile(%Profile{} = profile, attrs \\ %{}) do
+    Profile.changeset(profile, attrs)
   end
 end

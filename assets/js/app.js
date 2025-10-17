@@ -301,209 +301,37 @@ Hooks.ThemeToggle = {
   }
 }
 
-// Markdown editor with keyboard shortcuts and undo/redo
-// Available shortcuts (Cmd on Mac, Ctrl on Windows/Linux):
-//   - Cmd/Ctrl + S: Save article
-//   - Cmd/Ctrl + B: Toggle bold (**text**)
-//   - Cmd/Ctrl + I: Toggle italic (*text*)
-//   - Cmd/Ctrl + E: Toggle inline code (`code`)
-//   - Cmd/Ctrl + K: Insert link ([text](url))
-//   - Cmd/Ctrl + Shift + X: Toggle strikethrough (~~text~~)
-//   - Cmd/Ctrl + Shift + K: Toggle code block (```code```)
-//   - Cmd/Ctrl + Z: Undo
-//   - Cmd/Ctrl + Shift + Z: Redo
-Hooks.MarkdownEditor = {
+Hooks.InlineEdit = {
   mounted() {
-    // Initialize undo/redo history
-    this.history = [this.el.value]
-    this.historyIndex = 0
-    this.maxHistory = 50
+    this.el.addEventListener('blur', () => {
+      const field = this.el.getAttribute('phx-value-field')
+      const value = this.el.value
 
-    this.el.addEventListener('keydown', (e) => {
-      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0
-      const modifier = isMac ? e.metaKey : e.ctrlKey
+      // Push event to server
+      this.pushEvent('update_profile', { field: field, value: value })
+    })
+  }
+}
 
-      // Only handle shortcuts when modifier key is pressed
-      if (!modifier) return
+Hooks.BioEditor = {
+  mounted() {
+    // Auto-resize functionality
+    this.resize()
+    this.el.addEventListener('input', () => this.resize())
 
-      // Undo: Cmd/Ctrl + Z (without Shift)
-      if (e.key === 'z' && !e.shiftKey) {
-        e.preventDefault()
-        this.undo()
-        return
-      }
-
-      // Redo: Cmd/Ctrl + Shift + Z
-      if (e.key === 'z' && e.shiftKey) {
-        e.preventDefault()
-        this.redo()
-        return
-      }
-
-      // Save: Cmd/Ctrl + S
-      if (e.key === 's') {
-        e.preventDefault()
-        const submitButton = document.querySelector('button[type="submit"][form="article-form"]')
-        if (submitButton) {
-          submitButton.click()
-        }
-        return
-      }
-
-      // Bold: Cmd/Ctrl + B
-      if (e.key === 'b') {
-        e.preventDefault()
-        this.toggleFormatting('**', '**')
-        return
-      }
-
-      // Italic: Cmd/Ctrl + I
-      if (e.key === 'i') {
-        e.preventDefault()
-        this.toggleFormatting('*', '*')
-        return
-      }
-
-      // Inline Code: Cmd/Ctrl + E
-      if (e.key === 'e') {
-        e.preventDefault()
-        this.toggleFormatting('`', '`')
-        return
-      }
-
-      // Strikethrough: Cmd/Ctrl + Shift + X
-      if (e.key === 'X' && e.shiftKey) {
-        e.preventDefault()
-        this.toggleFormatting('~~', '~~')
-        return
-      }
-
-      // Code Block: Cmd/Ctrl + Shift + K
-      if (e.key === 'K' && e.shiftKey) {
-        e.preventDefault()
-        this.toggleFormatting('\n```\n', '\n```\n')
-        return
-      }
-
-      // Link: Cmd/Ctrl + K
-      if (e.key === 'k') {
-        e.preventDefault()
-        this.insertLink()
-        return
-      }
+    // Save on blur
+    this.el.addEventListener('blur', () => {
+      const field = this.el.getAttribute('phx-value-field')
+      const value = this.el.value
+      this.pushEvent('update_profile', { field: field, value: value })
     })
   },
-
-  saveToHistory() {
-    // Remove any future history if we're not at the end
-    this.history = this.history.slice(0, this.historyIndex + 1)
-
-    // Add current state
-    this.history.push(this.el.value)
-
-    // Keep history size limited
-    if (this.history.length > this.maxHistory) {
-      this.history.shift()
-    } else {
-      this.historyIndex++
-    }
+  updated() {
+    this.resize()
   },
-
-  undo() {
-    if (this.historyIndex > 0) {
-      this.historyIndex--
-      const value = this.history[this.historyIndex]
-      this.el.value = value
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-    }
-  },
-
-  redo() {
-    if (this.historyIndex < this.history.length - 1) {
-      this.historyIndex++
-      const value = this.history[this.historyIndex]
-      this.el.value = value
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-    }
-  },
-
-  toggleFormatting(before, after) {
-    const start = this.el.selectionStart
-    const end = this.el.selectionEnd
-    const text = this.el.value
-    const selectedText = text.substring(start, end)
-
-    // If there's a selection
-    if (start !== end) {
-      // Check if the selection is already wrapped with the formatting
-      const beforeStart = start - before.length
-      const afterEnd = end + after.length
-      const textBefore = text.substring(beforeStart, start)
-      const textAfter = text.substring(end, afterEnd)
-
-      if (textBefore === before && textAfter === after) {
-        // Remove formatting
-        const newText = text.substring(0, beforeStart) + selectedText + text.substring(afterEnd)
-        this.el.value = newText
-        this.saveToHistory()
-        this.el.dispatchEvent(new Event('input', { bubbles: true }))
-
-        // Set cursor position to the unwrapped text
-        this.el.setSelectionRange(beforeStart, beforeStart + selectedText.length)
-      } else {
-        // Add formatting
-        const newText = text.substring(0, start) + before + selectedText + after + text.substring(end)
-        this.el.value = newText
-        this.saveToHistory()
-        this.el.dispatchEvent(new Event('input', { bubbles: true }))
-
-        // Set cursor position after the wrapped text
-        const newCursorPos = start + before.length + selectedText.length + after.length
-        this.el.setSelectionRange(newCursorPos, newCursorPos)
-      }
-    } else {
-      // No selection, insert markers and place cursor between them
-      const newText = text.substring(0, start) + before + after + text.substring(end)
-      this.el.value = newText
-      this.saveToHistory()
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-
-      // Place cursor between the markers
-      const newCursorPos = start + before.length
-      this.el.setSelectionRange(newCursorPos, newCursorPos)
-    }
-
-    this.el.focus()
-  },
-
-  insertLink() {
-    const start = this.el.selectionStart
-    const end = this.el.selectionEnd
-    const text = this.el.value
-    const selectedText = text.substring(start, end)
-
-    if (selectedText) {
-      // If text is selected, use it as link text
-      const newText = text.substring(0, start) + '[' + selectedText + '](url)' + text.substring(end)
-      this.el.value = newText
-      this.saveToHistory()
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-
-      // Select "url" so user can type the URL
-      const urlStart = start + selectedText.length + 3
-      this.el.setSelectionRange(urlStart, urlStart + 3)
-    } else {
-      // No selection, insert template
-      const newText = text.substring(0, start) + '[text](url)' + text.substring(end)
-      this.el.value = newText
-      this.saveToHistory()
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-
-      // Select "text" so user can type link text
-      this.el.setSelectionRange(start + 1, start + 5)
-    }
-
-    this.el.focus()
+  resize() {
+    this.el.style.height = 'auto'
+    this.el.style.height = this.el.scrollHeight + 'px'
   }
 }
 
