@@ -18,6 +18,7 @@ defmodule Curupira.Blog.Article do
     field :dev_to_url, :string
     field :published_at, :utc_datetime
     field :tags, {:array, :string}
+    field :language, :string, default: "en"
 
     timestamps(type: :utc_datetime)
   end
@@ -40,9 +41,26 @@ defmodule Curupira.Blog.Article do
       :dev_to_id,
       :dev_to_url,
       :published_at,
-      :tags
+      :tags,
+      :language
     ])
     |> validate_required([:title, :content])
     |> unique_constraint(:slug)
   end
+
+  @doc """
+  Returns the flag emoji for the article's language.
+  """
+  def language_flag(%__MODULE__{language: "pt-BR"}), do: "🇧🇷"
+  def language_flag(%__MODULE__{language: "pt"}), do: "🇧🇷"
+  def language_flag(%__MODULE__{language: "en"}), do: "🇺🇸"
+  def language_flag(_), do: "🌐"
+
+  @doc """
+  Returns the language code for display (PT, EN, etc).
+  """
+  def language_code(%__MODULE__{language: "pt-BR"}), do: "PT"
+  def language_code(%__MODULE__{language: "pt"}), do: "PT"
+  def language_code(%__MODULE__{language: "en"}), do: "EN"
+  def language_code(_), do: "??"
 end

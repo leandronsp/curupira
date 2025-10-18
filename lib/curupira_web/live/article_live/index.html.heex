@@ -90,7 +90,7 @@
           <div
             :for={{id, article} <- @streams.articles}
             id={id}
-            class={"card border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer h-[160px] bg-transparent " <> if article.status != "published", do: "border-l-4 border-l-warning", else: ""}
+            class={"card border border-base-content/20 hover:border-base-content/30 transition-colors cursor-pointer h-[200px] bg-transparent " <> if article.status != "published", do: "border-l-4 border-l-warning", else: ""}
             phx-click={JS.navigate(~p"/articles/#{article}/edit")}
           >
             <div class="card-body p-6 h-full">
@@ -107,6 +107,10 @@
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                         <span><%= Calendar.strftime(article.inserted_at, "%d %b %Y") %></span>
+                      </div>
+
+                      <div class="flex items-center gap-1.5">
+                        <span class="text-xl"><%= Curupira.Blog.Article.language_flag(article) %></span>
                       </div>
 
                       <div :if={article.status} class="flex items-center gap-1.5">

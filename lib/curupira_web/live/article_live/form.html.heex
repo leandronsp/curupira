@@ -51,6 +51,27 @@
 
           <div class="divider divider-horizontal mx-0"></div>
 
+          <div class="dropdown dropdown-end">
+            <label tabindex="0" class="btn btn-sm btn-ghost gap-1" title="Select language">
+              <span class="text-xl"><%= Curupira.Blog.Article.language_flag(@article) %></span>
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+              </svg>
+            </label>
+            <ul tabindex="0" class="dropdown-content z-[1] menu p-2 shadow-lg bg-base-100 border border-base-300 rounded-box w-20 mt-1">
+              <li>
+                <button type="button" phx-click="change_language" phx-value-language="en" class={"flex justify-center " <> if @article.language == "en", do: "active", else: ""}>
+                  <span class="text-xl">🇺🇸</span>
+                </button>
+              </li>
+              <li>
+                <button type="button" phx-click="change_language" phx-value-language="pt-BR" class={"flex justify-center " <> if @article.language == "pt-BR", do: "active", else: ""}>
+                  <span class="text-xl">🇧🇷</span>
+                </button>
+              </li>
+            </ul>
+          </div>
+
           <label for={@uploads.images.ref} class="btn btn-sm btn-ghost" title="Upload image (click, drag-drop, or paste)">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
