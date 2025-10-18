@@ -422,3 +422,13 @@
   border-top-color: oklch(35% 0.03 252 / 0.3);
   color: oklch(84% 0.025 252);
 }
+
+/* Remove article border */
+article {
+  border: none !important;
+}
+
+/* Article header background - slightly different from article background in light theme */
+.article-header {
+  background-color: oklch(94% 0.01 80) !important;
+}

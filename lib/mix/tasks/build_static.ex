@@ -266,7 +266,6 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
       </div>
 
-      <script src="/assets/js/app.js"></script>
       <script src="/static-theme.js"></script>
       <script src="/static-search.js"></script>
       <script src="/static-pagination.js"></script>
@@ -338,21 +337,31 @@ defmodule Mix.Tasks.BuildStatic do
         /* Article card styling */
         article {
           background-color: transparent;
-          border: 1px solid #e5e7eb;
+          border: none;
           border-radius: 0.5rem;
           padding: 2rem;
         }
         [data-theme="dark"] article {
+          background-color: transparent;
+        }
+        /* Article container background in dark mode */
+        .article-container {
+          background-color: transparent;
+        }
+        [data-theme="dark"] .article-container {
           background-color: #2f3542;
-          border-color: #3d4454;
+        }
+        /* Body background in dark mode - same as container */
+        [data-theme="dark"] body {
+          background-color: #2f3542;
         }
       </style>
     </head>
     <body class="min-h-screen bg-base-200">
-      <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
-        <div class="container mx-auto px-6 py-4 flex items-center justify-between max-w-7xl">
-          <a href="/" class="btn btn-ghost btn-sm gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <div class="border-b border-base-300 bg-base-300 sticky top-0 z-10">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between max-w-4xl">
+          <a href="/" class="btn btn-ghost gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back to articles
@@ -361,20 +370,20 @@ defmodule Mix.Tasks.BuildStatic do
           <button
             type="button"
             id="theme-toggle"
-            class="btn btn-ghost btn-sm"
+            class="btn btn-ghost"
             title="Toggle theme"
           >
-            <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-4 w-4 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
             </svg>
-            <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
             </svg>
           </button>
         </div>
       </div>
 
-      <div class="container mx-auto px-6 py-8 max-w-4xl">
+      <div class="container mx-auto py-8 max-w-4xl article-container">
         <article>
           <h1 class="text-5xl font-bold mb-6">#{article.title}</h1>
 
@@ -411,7 +420,6 @@ defmodule Mix.Tasks.BuildStatic do
         </article>
       </div>
 
-      <script src="/assets/js/app.js"></script>
       <script src="/static-theme.js"></script>
     </body>
     </html>
