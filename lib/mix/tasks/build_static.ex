@@ -31,6 +31,10 @@ defmodule Mix.Tasks.BuildStatic do
     File.mkdir_p!(Path.join(@output_dir, "articles"))
     File.mkdir_p!(Path.join(@output_dir, "assets"))
     File.mkdir_p!(Path.join(@output_dir, "uploads"))
+    File.mkdir_p!(Path.join(@output_dir, "images"))
+
+    # Copy favicon
+    File.cp!("priv/static/images/favicon.svg", Path.join([@output_dir, "images", "favicon.svg"]))
 
     # Build optimized CSS for static site
     build_optimized_css()
@@ -69,11 +73,11 @@ defmodule Mix.Tasks.BuildStatic do
     # Create temporary config for minified build
     css_output = Path.join([@output_dir, "assets", "css", "app.css"])
 
-    # Use shell to run tailwind with our static config
+    # Use shell to run tailwind with static CSS (no DaisyUI components)
     cmd = """
     _build/tailwind-* \
       -c tailwind.static.config.js \
-      -i assets/css/app.css \
+      -i assets/css/app.static.css \
       -o #{css_output} \
       --minify
     """
@@ -237,6 +241,7 @@ defmodule Mix.Tasks.BuildStatic do
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>#{profile.name || "Blog"}</title>
+      <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 
       <!-- SEO Meta Tags -->
       <meta name="description" content="#{site_description}">
@@ -249,12 +254,6 @@ defmodule Mix.Tasks.BuildStatic do
       <meta property="og:title" content="#{profile.name || "Blog"}">
       <meta property="og:description" content="#{site_description}">
       <meta property="og:site_name" content="#{profile.name || "Blog"}">
-
-      <!-- Twitter -->
-      <meta name="twitter:card" content="summary">
-      <meta name="twitter:url" content="#{@site_url}/">
-      <meta name="twitter:title" content="#{profile.name || "Blog"}">
-      <meta name="twitter:description" content="#{site_description}">
 
       <!-- JSON-LD Schema -->
       <script type="application/ld+json">
@@ -286,11 +285,11 @@ defmodule Mix.Tasks.BuildStatic do
           --base-300: #1e222a;
           --base-content: #e8eaed;
         }
-        [data-theme="dark"] .card {
+        [data-theme="dark"] .article-card {
           background-color: #2f3542;
           border-color: #3d4454;
         }
-        [data-theme="dark"] .card:hover {
+        [data-theme="dark"] .article-card:hover {
           border-color: #4a5568;
         }
         [data-theme="dark"] .prose {
@@ -344,6 +343,30 @@ defmodule Mix.Tasks.BuildStatic do
               else
                 ""
               end}
+
+              <div class="space-y-3">
+                <h2 class="text-sm font-semibold text-base-content/60 uppercase tracking-wider">Trabalhos de Escrita</h2>
+                <div class="flex flex-col gap-2">
+                  <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-base-content/80 hover:text-primary transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    <span>Web 101</span>
+                  </a>
+                  <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-base-content/80 hover:text-primary transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    <span>Concorrência 101</span>
+                  </a>
+                  <a href="https://aws101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-2 text-base-content/80 hover:text-primary transition-colors group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40 group-hover:text-primary transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                    <span>AWS 101</span>
+                  </a>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -377,7 +400,7 @@ defmodule Mix.Tasks.BuildStatic do
               <button
                 type="button"
                 id="theme-toggle"
-                class="btn btn-ghost btn-circle h-12 w-12"
+                class="inline-flex items-center justify-center rounded-full h-12 w-12 hover:bg-base-content/10 transition-colors"
                 title="Toggle theme"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -393,12 +416,12 @@ defmodule Mix.Tasks.BuildStatic do
               #{render_article_list(articles)}
             </div>
 
-            <div id="no-results" class="hidden text-center text-base-content/60 py-16">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/20 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div id="no-results" class="hidden text-center text-base-content/70 py-16">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/30 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <h3 class="text-lg font-semibold text-base-content/60 mb-2">No results found</h3>
-              <p class="text-base-content/40">Try a different search</p>
+              <h3 class="text-lg font-semibold text-base-content/70 mb-2">No results found</h3>
+              <p class="text-base-content/50">Try a different search</p>
             </div>
 
             <div id="pagination-container" class="mt-8"></div>
@@ -409,6 +432,30 @@ defmodule Mix.Tasks.BuildStatic do
       <script src="/static-theme.js"></script>
       <script src="/static-search.js"></script>
       <script src="/static-pagination.js"></script>
+
+      <!-- Lazy load Google Analytics after page is interactive -->
+      <script>
+        (function() {
+          function loadGTM() {
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0Y5RNLZMKN');
+
+            var script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+            document.head.appendChild(script);
+          }
+
+          // Load after page is idle, or after 2 seconds as fallback
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadGTM, { timeout: 2000 });
+          } else {
+            setTimeout(loadGTM, 2000);
+          }
+        })();
+      </script>
     </body>
     </html>
     """
@@ -444,6 +491,7 @@ defmodule Mix.Tasks.BuildStatic do
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>#{article.title} - #{profile.name || "Blog"}</title>
+      <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
 
       <!-- SEO Meta Tags -->
       <meta name="description" content="#{description}">
@@ -464,12 +512,6 @@ defmodule Mix.Tasks.BuildStatic do
       else
         ""
       end}
-
-      <!-- Twitter -->
-      <meta name="twitter:card" content="summary_large_image">
-      <meta name="twitter:url" content="#{article_url}">
-      <meta name="twitter:title" content="#{article.title}">
-      <meta name="twitter:description" content="#{description}">
 
       <!-- JSON-LD Schema -->
       <script type="application/ld+json">
@@ -506,11 +548,11 @@ defmodule Mix.Tasks.BuildStatic do
           --base-300: #1e222a;
           --base-content: #e8eaed;
         }
-        [data-theme="dark"] .card {
+        [data-theme="dark"] .article-card {
           background-color: #2f3542;
           border-color: #3d4454;
         }
-        [data-theme="dark"] .card:hover {
+        [data-theme="dark"] .article-card:hover {
           border-color: #4a5568;
         }
         [data-theme="dark"] .prose {
@@ -551,23 +593,20 @@ defmodule Mix.Tasks.BuildStatic do
         [data-theme="dark"] article {
           background-color: transparent;
         }
-        /* Article container background in dark mode */
+        /* Article container has its own background */
         .article-container {
-          background-color: transparent;
+          background-color: oklch(98% 0.005 80); /* base-100 light */
+          border-radius: 0.5rem;
         }
         [data-theme="dark"] .article-container {
-          background-color: #2f3542;
-        }
-        /* Body background in dark mode - same as container */
-        [data-theme="dark"] body {
-          background-color: #2f3542;
+          background-color: oklch(30% 0.015 252); /* base-100 dark */
         }
       </style>
     </head>
     <body class="min-h-screen bg-base-200">
-      <div class="border-b border-base-300 bg-base-300 sticky top-0 z-10">
-        <div class="container mx-auto px-6 py-4 flex items-center justify-between max-w-4xl">
-          <a href="/" class="btn btn-ghost gap-2">
+      <div class="border-b border-base-300 bg-base-200 sticky top-0 z-10">
+        <div class="container mx-auto px-4 py-4 flex items-center justify-between max-w-8xl">
+          <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -577,7 +616,7 @@ defmodule Mix.Tasks.BuildStatic do
           <button
             type="button"
             id="theme-toggle"
-            class="btn btn-ghost"
+            class="inline-flex items-center justify-center px-4 py-2 rounded-lg hover:bg-base-content/10 transition-colors"
             title="Toggle theme"
           >
             <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -590,11 +629,11 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
       </div>
 
-      <div class="container mx-auto py-8 max-w-4xl article-container">
-        <article>
+      <div class="article-container py-8">
+        <article class="container mx-auto px-4 max-w-8xl">
           <h1 class="text-5xl font-bold mb-6">#{article.title}</h1>
 
-          <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/60">
+          <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/75">
             <div class="flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -611,7 +650,7 @@ defmodule Mix.Tasks.BuildStatic do
                 </svg>
                 <div class="flex gap-2 flex-wrap">
                   #{Enum.map_join(article.tags, "", fn tag ->
-                    ~s(<span class="badge badge-outline">#{tag}</span>)
+                    ~s(<span class="inline-flex items-center px-3 py-1 text-sm border border-base-content/25 rounded-full">#{tag}</span>)
                   end)}
                 </div>
               </div>
@@ -628,6 +667,30 @@ defmodule Mix.Tasks.BuildStatic do
       </div>
 
       <script src="/static-theme.js"></script>
+
+      <!-- Lazy load Google Analytics after page is interactive -->
+      <script>
+        (function() {
+          function loadGTM() {
+            window.dataLayer = window.dataLayer || [];
+            function gtag(){dataLayer.push(arguments);}
+            gtag('js', new Date());
+            gtag('config', 'G-0Y5RNLZMKN');
+
+            var script = document.createElement('script');
+            script.async = true;
+            script.src = 'https://www.googletagmanager.com/gtag/js?id=G-0Y5RNLZMKN';
+            document.head.appendChild(script);
+          }
+
+          // Load after page is idle, or after 2 seconds as fallback
+          if ('requestIdleCallback' in window) {
+            requestIdleCallback(loadGTM, { timeout: 2000 });
+          } else {
+            setTimeout(loadGTM, 2000);
+          }
+        })();
+      </script>
     </body>
     </html>
     """
@@ -644,11 +707,11 @@ defmodule Mix.Tasks.BuildStatic do
       end
 
       """
-      <div class="article-card card border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer h-[160px] bg-transparent"
+      <div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer h-[160px] bg-base-100"
            data-title="#{String.downcase(article.title)}"
            data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
            onclick="window.location.href='/articles/#{article.slug}.html'">
-        <div class="card-body p-6 h-full">
+        <div class="p-6 h-full">
           <div class="flex items-start justify-between gap-4 h-full">
             <div class="flex-1 min-w-0 flex flex-col h-full">
               <h2 class="text-xl font-bold text-base-content mb-3 line-clamp-2">
@@ -656,7 +719,7 @@ defmodule Mix.Tasks.BuildStatic do
               </h2>
 
               <div class="mt-auto space-y-2">
-                <div class="flex flex-wrap items-center gap-3 text-sm text-base-content/60">
+                <div class="flex flex-wrap items-center gap-3 text-sm text-base-content/75">
                   <div class="flex items-center gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -667,16 +730,16 @@ defmodule Mix.Tasks.BuildStatic do
 
                 #{if article.tags && length(article.tags) > 0 do
                   """
-                  <div class="flex items-center gap-1.5 text-sm text-base-content/60">
+                  <div class="flex items-center gap-1.5 text-sm text-base-content/75">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
                     <div class="flex gap-1 flex-wrap">
                       #{Enum.take(article.tags, 3) |> Enum.map_join("", fn tag ->
-                        ~s(<span class="badge badge-sm badge-outline whitespace-nowrap">#{tag}</span>)
+                        ~s(<span class="inline-flex items-center px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap">#{tag}</span>)
                       end)}
                       #{if length(article.tags) > 3 do
-                        ~s(<span class="badge badge-sm badge-outline">+#{length(article.tags) - 3}</span>)
+                        ~s(<span class="inline-flex items-center px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+#{length(article.tags) - 3}</span>)
                       else
                         ""
                       end}

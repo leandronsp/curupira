@@ -83,23 +83,23 @@
 
     container.innerHTML = `
       <div class="flex flex-col items-center gap-4">
-        <div class="text-sm text-base-content/60">
+        <div class="text-sm text-base-content/70">
           Showing ${start}-${end} of ${visibleArticles.length} articles
         </div>
 
         <div class="join">
-          <button class="join-item btn btn-sm" id="prev-page" onclick="window.pagination.prevPage()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button class="join-item btn btn-sm" id="prev-page" onclick="window.pagination.prevPage()" aria-label="Previous page">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
             </svg>
           </button>
 
-          <button class="join-item btn btn-sm no-animation">
+          <button class="join-item btn btn-sm no-animation" aria-label="Page ${currentPage} of ${totalPages}">
             Page ${currentPage} of ${totalPages}
           </button>
 
-          <button class="join-item btn btn-sm" id="next-page" onclick="window.pagination.nextPage()">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <button class="join-item btn btn-sm" id="next-page" onclick="window.pagination.nextPage()" aria-label="Next page">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
             </svg>
           </button>
