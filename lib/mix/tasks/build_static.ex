@@ -458,6 +458,35 @@ defmodule Mix.Tasks.BuildStatic do
             <div id="pagination-container" class="mt-8"></div>
           </div>
         </div>
+
+        <!-- Footer -->
+        <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+          <div class="text-center text-sm text-base-content/60">
+            <p>
+              Powered by
+              <a
+                href="https://github.com/leandronsp/curupira"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-semibold text-primary hover:underline"
+              >
+                Curupira
+              </a>
+              | Open source blog platform built with Phoenix LiveView
+            </p>
+            <p class="mt-2 text-xs text-base-content/50">
+              Licensed under
+              <a
+                href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="hover:underline"
+              >
+                AGPL-3.0
+              </a>
+            </p>
+          </div>
+        </footer>
       </div>
 
       <script src="/static-theme.js" defer></script>
@@ -696,6 +725,35 @@ defmodule Mix.Tasks.BuildStatic do
             #{html_content}
           </div>
         </article>
+
+        <!-- Footer -->
+        <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
+          <div class="text-center text-sm text-base-content/60">
+            <p>
+              Powered by
+              <a
+                href="https://github.com/leandronsp/curupira"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="font-semibold text-primary hover:underline"
+              >
+                Curupira
+              </a>
+              | Open source blog platform built with Phoenix LiveView
+            </p>
+            <p class="mt-2 text-xs text-base-content/50">
+              Licensed under
+              <a
+                href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="hover:underline"
+              >
+                AGPL-3.0
+              </a>
+            </p>
+          </div>
+        </footer>
       </div>
 
       <script src="/static-theme.js" defer></script>
