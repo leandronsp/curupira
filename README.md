@@ -2,6 +2,10 @@
 
 A modern personal blog platform built with **Phoenix LiveView** and **Elixir**. Import articles from dev.to and deploy as a dynamic web app or static site.
 
+<video src="https://github.com/user-attachments/assets/eb0b7254-836b-41fb-a712-889cdc9bd183"
+autoplay loop muted playsinline controls></video>
+
+
 ## TL;DR
 This project is a WIP. More to come soon.
 
