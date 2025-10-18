@@ -66,18 +66,19 @@ defmodule Mix.Tasks.BuildStatic do
   defp build_optimized_css do
     Logger.info("🎨 Building optimized CSS...")
 
-    # Build purged and minified CSS using static config
-    {output, status} = System.cmd(
-      "npx",
-      [
-        "tailwindcss",
-        "-c", "tailwind.static.config.js",
-        "-i", "assets/css/app.css",
-        "-o", Path.join([@output_dir, "assets", "css", "app.css"]),
-        "--minify"
-      ],
-      stderr_to_stdout: true
-    )
+    # Create temporary config for minified build
+    css_output = Path.join([@output_dir, "assets", "css", "app.css"])
+
+    # Use shell to run tailwind with our static config
+    cmd = """
+    _build/tailwind-* \
+      -c tailwind.static.config.js \
+      -i assets/css/app.css \
+      -o #{css_output} \
+      --minify
+    """
+
+    {output, status} = System.cmd("sh", ["-c", cmd], stderr_to_stdout: true)
 
     if status != 0 do
       Logger.error("Failed to build CSS: #{output}")
@@ -85,8 +86,7 @@ defmodule Mix.Tasks.BuildStatic do
     end
 
     # Get file size for logging
-    css_path = Path.join([@output_dir, "assets", "css", "app.css"])
-    {:ok, stat} = File.stat(css_path)
+    {:ok, stat} = File.stat(css_output)
     size_kb = Float.round(stat.size / 1024, 1)
     Logger.info("  ✓ CSS optimized: #{size_kb}KB")
   end
@@ -114,19 +114,16 @@ defmodule Mix.Tasks.BuildStatic do
 
     priv_static = "priv/static"
 
-    # Minify and copy static JavaScript files using esbuild (already installed)
+    # Minify and copy static JavaScript files
     ["static-theme.js", "static-search.js", "static-pagination.js"]
     |> Enum.each(fn file ->
       src = Path.join(priv_static, file)
       dest = Path.join(@output_dir, file)
 
       if File.exists?(src) do
-        # Minify JS using esbuild (already available in project)
-        {output, status} = System.cmd(
-          "npx",
-          ["esbuild", src, "--minify", "--outfile=#{dest}"],
-          stderr_to_stdout: true
-        )
+        # Minify JS using esbuild binary (use wildcard pattern for cross-platform)
+        cmd = "_build/esbuild-* #{src} --minify --outfile=#{dest}"
+        {output, status} = System.cmd("sh", ["-c", cmd], stderr_to_stdout: true)
 
         if status != 0 do
           Logger.warning("Failed to minify #{file}, copying original: #{output}")
