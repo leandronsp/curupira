@@ -269,6 +269,7 @@ defmodule Mix.Tasks.BuildStatic do
       }
       </script>
 
+      <link rel="preload" href="/assets/css/app.css" as="style">
       <script>
         // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
         (function() {
@@ -339,7 +340,7 @@ defmodule Mix.Tasks.BuildStatic do
             <div class="space-y-6">
               <h1 class="text-4xl font-bold">#{profile.name || "Blog"}</h1>
               #{if profile.bio do
-                ~s(<p class="text-lg text-base-content/70 whitespace-pre-wrap">#{profile.bio}</p>)
+                ~s(<p class="text-lg text-base-content/85 whitespace-pre-wrap">#{profile.bio}</p>)
               else
                 ""
               end}
@@ -419,7 +420,7 @@ defmodule Mix.Tasks.BuildStatic do
               </div>
 
               <div class="flex items-center gap-2 sm:gap-3">
-                <span class="text-xs sm:text-sm text-base-content/60 font-medium whitespace-nowrap">Filter:</span>
+                <span class="text-xs sm:text-sm text-base-content/80 font-medium whitespace-nowrap">Filter:</span>
                 <div class="flex rounded-lg border-2 border-base-300 overflow-hidden">
                   <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-primary text-white" data-lang="all" onclick="setLanguageFilter('all')">All</button>
                   <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="pt" onclick="setLanguageFilter('pt')">🇧🇷 PT</button>
@@ -446,11 +447,11 @@ defmodule Mix.Tasks.BuildStatic do
               #{render_article_list(articles)}
             </div>
 
-            <div id="no-results" class="hidden text-center text-base-content/70 py-16">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/30 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div id="no-results" class="hidden text-center text-base-content/85 py-16">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/50 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
               </svg>
-              <h3 class="text-lg font-semibold text-base-content/70 mb-2">No results found</h3>
+              <h3 class="text-lg font-semibold text-base-content/85 mb-2">No results found</h3>
               <p class="text-base-content/50">Try a different search</p>
             </div>
 
@@ -459,9 +460,9 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
       </div>
 
-      <script src="/static-theme.js"></script>
-      <script src="/static-search.js"></script>
-      <script src="/static-pagination.js"></script>
+      <script src="/static-theme.js" defer></script>
+      <script src="/static-search.js" defer></script>
+      <script src="/static-pagination.js" defer></script>
 
       <!-- Lazy load Google Analytics after page is interactive -->
       <script>
@@ -562,6 +563,7 @@ defmodule Mix.Tasks.BuildStatic do
       }
       </script>
 
+      <link rel="preload" href="/assets/css/app.css" as="style">
       <script>
         // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
         (function() {
@@ -663,7 +665,7 @@ defmodule Mix.Tasks.BuildStatic do
         <article class="container mx-auto px-4 max-w-8xl">
           <h1 class="text-5xl font-bold mb-6">#{article.title}</h1>
 
-          <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/75">
+          <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
             <div class="flex items-center gap-1.5">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -696,7 +698,7 @@ defmodule Mix.Tasks.BuildStatic do
         </article>
       </div>
 
-      <script src="/static-theme.js"></script>
+      <script src="/static-theme.js" defer></script>
 
       <!-- Lazy load Google Analytics after page is interactive -->
       <script>
@@ -750,7 +752,7 @@ defmodule Mix.Tasks.BuildStatic do
               </h2>
 
               <div class="mt-auto space-y-1.5 sm:space-y-2">
-                <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/75">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/85">
                   <div class="flex items-center gap-1 sm:gap-1.5">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -766,7 +768,7 @@ defmodule Mix.Tasks.BuildStatic do
                 #{if article.tags && length(article.tags) > 0 do
                   max_tags = 2
                   """
-                  <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/75">
+                  <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/85">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
