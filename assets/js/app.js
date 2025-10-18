@@ -55,6 +55,33 @@ Hooks.TitleEditor = {
 
     // Keyboard shortcuts
     this.setupKeyboardShortcuts()
+
+    // Setup auto-save
+    this.setupAutoSave()
+  },
+  setupAutoSave() {
+    // Auto-save after 2 seconds of inactivity
+    const AUTO_SAVE_DELAY = 2000
+    let autoSaveTimeout = null
+
+    const triggerAutoSave = () => {
+      // Find the form and trigger submit
+      const form = document.getElementById('article-form')
+      if (form) {
+        // Dispatch submit event
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
+        form.dispatchEvent(submitEvent)
+      }
+    }
+
+    // Listen to input events
+    this.el.addEventListener('input', () => {
+      // Clear existing timeout
+      clearTimeout(autoSaveTimeout)
+
+      // Set new timeout for auto-save
+      autoSaveTimeout = setTimeout(triggerAutoSave, AUTO_SAVE_DELAY)
+    })
   },
   updated() {
     this.resize()
@@ -196,6 +223,33 @@ Hooks.MarkdownEditor = {
 
     // Setup paste support for images
     this.setupPasteUpload()
+
+    // Setup auto-save
+    this.setupAutoSave()
+  },
+  setupAutoSave() {
+    // Auto-save after 2 seconds of inactivity
+    const AUTO_SAVE_DELAY = 2000
+    let autoSaveTimeout = null
+
+    const triggerAutoSave = () => {
+      // Find the form and trigger submit
+      const form = document.getElementById('article-form')
+      if (form) {
+        // Dispatch submit event
+        const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
+        form.dispatchEvent(submitEvent)
+      }
+    }
+
+    // Listen to input events
+    this.el.addEventListener('input', () => {
+      // Clear existing timeout
+      clearTimeout(autoSaveTimeout)
+
+      // Set new timeout for auto-save
+      autoSaveTimeout = setTimeout(triggerAutoSave, AUTO_SAVE_DELAY)
+    })
   },
   setupPasteUpload() {
     this.el.addEventListener('paste', (e) => {
@@ -524,9 +578,30 @@ Hooks.PreserveScroll = {
 Hooks.PreviewAnchorScroll = {
   mounted() {
     this.setupAnchorNavigation()
+    this.userScrolling = false
+    this.scrollTimeout = null
+
+    // Track user manual scrolling
+    this.el.addEventListener('scroll', () => {
+      this.userScrolling = true
+      clearTimeout(this.scrollTimeout)
+      // Reset after 2 seconds of no scrolling
+      this.scrollTimeout = setTimeout(() => {
+        this.userScrolling = false
+      }, 2000)
+    })
   },
   updated() {
     this.setupAnchorNavigation()
+
+    // Auto-scroll to bottom when preview updates (user is typing)
+    // Only if user hasn't manually scrolled recently
+    if (!this.userScrolling) {
+      // Small delay to ensure DOM is fully rendered
+      setTimeout(() => {
+        this.el.scrollTop = this.el.scrollHeight
+      }, 50)
+    }
   },
   setupAnchorNavigation() {
     // Find all anchor links in the preview
