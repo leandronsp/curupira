@@ -110,7 +110,7 @@
     // Update button states
     document.querySelectorAll('.lang-filter-btn').forEach(btn => {
       if (btn.getAttribute('data-lang') === lang) {
-        btn.className = 'lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-primary text-white';
+        btn.className = 'lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-blue-600 text-white';
         if (btn.getAttribute('data-lang') !== 'all') {
           btn.classList.add('border-l-2', 'border-base-300');
         }

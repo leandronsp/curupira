@@ -422,7 +422,7 @@ defmodule Mix.Tasks.BuildStatic do
               <div class="flex items-center gap-2 sm:gap-3">
                 <span class="text-xs sm:text-sm text-base-content/80 font-medium whitespace-nowrap">Filter:</span>
                 <div class="flex rounded-lg border-2 border-base-300 overflow-hidden">
-                  <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-primary text-white" data-lang="all" onclick="setLanguageFilter('all')">All</button>
+                  <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-blue-600 text-white" data-lang="all" onclick="setLanguageFilter('all')">All</button>
                   <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="pt" onclick="setLanguageFilter('pt')">🇧🇷 PT</button>
                   <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="en" onclick="setLanguageFilter('en')">🇺🇸 EN</button>
                 </div>
