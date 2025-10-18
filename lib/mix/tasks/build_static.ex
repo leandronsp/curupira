@@ -402,41 +402,41 @@ defmodule Mix.Tasks.BuildStatic do
               </span>
             </div>
 
-            <div class="flex items-center gap-4 mb-6">
-              <div class="flex-1 max-w-lg">
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+              <div class="w-full md:flex-1 md:max-w-lg">
                 <div class="relative">
                   <input
                     type="text"
                     id="search-input"
-                    placeholder="Search articles by title, tags..."
-                    class="w-full h-12 pr-12 text-base bg-base-100 border-2 border-base-300 rounded-lg px-4 transition-all duration-200 ease-in-out focus:border-primary focus:outline-none hover:border-base-content/30 hover:shadow-sm"
+                    placeholder="Search articles..."
+                    class="w-full h-10 sm:h-12 pr-10 sm:pr-12 text-sm sm:text-base bg-base-100 border-2 border-base-300 rounded-lg px-3 sm:px-4 transition-all duration-200 ease-in-out focus:border-primary focus:outline-none hover:border-base-content/30 hover:shadow-sm"
                     autocomplete="off"
                   />
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 absolute right-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 sm:h-6 sm:w-6 absolute right-3 sm:right-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
               </div>
 
-              <div class="flex items-center gap-2">
-                <span class="text-sm text-base-content/60 font-medium whitespace-nowrap">Filter:</span>
+              <div class="flex items-center gap-2 sm:gap-3">
+                <span class="text-xs sm:text-sm text-base-content/60 font-medium whitespace-nowrap">Filter:</span>
                 <div class="flex rounded-lg border-2 border-base-300 overflow-hidden">
-                  <button class="lang-filter-btn px-3 py-1.5 text-sm font-medium transition-colors bg-primary text-white" data-lang="all" onclick="setLanguageFilter('all')">All</button>
-                  <button class="lang-filter-btn px-3 py-1.5 text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="pt" onclick="setLanguageFilter('pt')">🇧🇷 PT</button>
-                  <button class="lang-filter-btn px-3 py-1.5 text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="en" onclick="setLanguageFilter('en')">🇺🇸 EN</button>
+                  <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-primary text-white" data-lang="all" onclick="setLanguageFilter('all')">All</button>
+                  <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="pt" onclick="setLanguageFilter('pt')">🇧🇷 PT</button>
+                  <button class="lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="en" onclick="setLanguageFilter('en')">🇺🇸 EN</button>
                 </div>
               </div>
 
               <button
                 type="button"
                 id="theme-toggle"
-                class="inline-flex items-center justify-center rounded-full h-12 w-12 hover:bg-base-content/10 transition-colors flex-shrink-0"
+                class="inline-flex items-center justify-center rounded-full h-10 w-10 sm:h-12 sm:w-12 hover:bg-base-content/10 transition-colors flex-shrink-0"
                 title="Toggle theme"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-5 w-5 sm:h-6 sm:w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z" />
                 </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5 sm:h-6 sm:w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
                 </svg>
               </button>
@@ -737,44 +737,45 @@ defmodule Mix.Tasks.BuildStatic do
       end
 
       """
-      <div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer h-[160px] bg-base-100"
+      <div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
            data-slug="#{article.slug}"
            data-title="#{String.downcase(article.title)}"
            data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
            onclick="window.location.href='/articles/#{article.slug}.html'">
-        <div class="p-6 h-full">
-          <div class="flex items-start justify-between gap-4 h-full">
+        <div class="p-4 sm:p-6 h-full">
+          <div class="flex items-start gap-3 sm:gap-4 h-full">
             <div class="flex-1 min-w-0 flex flex-col h-full">
-              <h2 class="text-xl font-bold text-base-content mb-3 line-clamp-2">
+              <h2 class="text-base sm:text-xl font-bold text-base-content mb-2 sm:mb-3 line-clamp-2">
                 #{article.title}
               </h2>
 
-              <div class="mt-auto space-y-2">
-                <div class="flex flex-wrap items-center gap-3 text-sm text-base-content/75">
-                  <div class="flex items-center gap-1.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <div class="mt-auto space-y-1.5 sm:space-y-2">
+                <div class="flex flex-wrap items-center gap-2 sm:gap-3 text-xs sm:text-sm text-base-content/75">
+                  <div class="flex items-center gap-1 sm:gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                     </svg>
-                    <span>#{published_date}</span>
+                    <span class="truncate">#{published_date}</span>
                   </div>
                   <div class="flex items-center gap-1">
                     <span>•</span>
-                    <span class="text-lg">#{Curupira.Blog.Article.language_flag(article)}</span>
+                    <span class="text-base sm:text-lg">#{Curupira.Blog.Article.language_flag(article)}</span>
                   </div>
                 </div>
 
                 #{if article.tags && length(article.tags) > 0 do
+                  max_tags = 2
                   """
-                  <div class="flex items-center gap-1.5 text-sm text-base-content/75">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <div class="flex items-center gap-1 sm:gap-1.5 text-xs sm:text-sm text-base-content/75">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3 sm:h-4 sm:w-4 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
                     </svg>
                     <div class="flex gap-1 flex-wrap">
-                      #{Enum.take(article.tags, 3) |> Enum.map_join("", fn tag ->
-                        ~s(<span class="inline-flex items-center px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap">#{tag}</span>)
+                      #{Enum.take(article.tags, max_tags) |> Enum.map_join("", fn tag ->
+                        ~s(<span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full whitespace-nowrap truncate max-w-[80px] sm:max-w-none">#{tag}</span>)
                       end)}
-                      #{if length(article.tags) > 3 do
-                        ~s(<span class="inline-flex items-center px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+#{length(article.tags) - 3}</span>)
+                      #{if length(article.tags) > max_tags do
+                        ~s(<span class="inline-flex items-center px-1.5 sm:px-2 py-0.5 text-xs border border-base-content/25 rounded-full">+#{length(article.tags) - max_tags}</span>)
                       else
                         ""
                       end}
