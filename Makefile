@@ -203,18 +203,36 @@ test-prod:
 # ======================
 
 static-build:
-	@echo "Building static site in Docker..."
+	@echo "=========================================="
+	@echo "  Building Optimized Static Site"
+	@echo "=========================================="
+	@echo ""
 	@echo "1. Ensuring development environment is running..."
 	@docker-compose up -d --wait
-	@echo "2. Building assets..."
-	@docker-compose exec -T web mix assets.build
-	@echo "3. Generating static pages..."
+	@echo ""
+	@echo "2. Generating static site (CSS purge + SEO + pages)..."
 	@docker-compose exec -T web mix build_static
-	@echo "4. Copying to shared volume for nginx..."
+	@echo ""
+	@echo "3. Copying to nginx volume..."
 	@docker-compose exec -T web sh -c "rm -rf /static_html/* && cp -r static_output/* /static_html/"
-	@echo "5. Restarting nginx container..."
+	@echo ""
+	@echo "4. Restarting nginx..."
 	@docker-compose restart static
-	@echo "✓ Static site ready at http://localhost:8000"
+	@echo ""
+	@echo "=========================================="
+	@echo "  ✓ Static Site Ready!"
+	@echo "=========================================="
+	@echo ""
+	@echo "Preview:  http://localhost:8000"
+	@echo "Output:   ./static_output/"
+	@echo ""
+	@echo "Files generated:"
+	@echo "  • Optimized CSS (purged + minified)"
+	@echo "  • SEO meta tags (OG, Twitter, Schema)"
+	@echo "  • sitemap.xml"
+	@echo "  • robots.txt"
+	@echo "  • search-index.json"
+	@echo ""
 
 static-serve:
 	@echo "Serving static site on http://localhost:8000"

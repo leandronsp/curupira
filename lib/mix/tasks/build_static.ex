@@ -17,6 +17,7 @@ defmodule Mix.Tasks.BuildStatic do
 
   @output_dir "static_output"
   @articles_per_page 10
+  @site_url "https://leandronsp.com"  # TODO: Make this configurable
 
   @shortdoc "Build static site for deployment"
   def run(_args) do
@@ -30,6 +31,9 @@ defmodule Mix.Tasks.BuildStatic do
     File.mkdir_p!(Path.join(@output_dir, "articles"))
     File.mkdir_p!(Path.join(@output_dir, "assets"))
     File.mkdir_p!(Path.join(@output_dir, "uploads"))
+
+    # Build optimized CSS for static site
+    build_optimized_css()
 
     # Get all published articles
     articles = Curupira.Blog.list_articles()
@@ -46,8 +50,10 @@ defmodule Mix.Tasks.BuildStatic do
     copy_assets()
     copy_uploads()
 
-    # Generate search index
+    # Generate SEO files
     generate_search_index(articles)
+    generate_sitemap(articles)
+    generate_robots_txt()
 
     # Create .nojekyll for GitHub Pages
     File.write!(Path.join(@output_dir, ".nojekyll"), "")
@@ -55,6 +61,34 @@ defmodule Mix.Tasks.BuildStatic do
     Logger.info("✅ Static site generated in ./#{@output_dir}")
     Logger.info("📦 Deploy this directory to GitHub Pages")
     Logger.info("📖 See STATIC_DEPLOY.md for deployment instructions")
+  end
+
+  defp build_optimized_css do
+    Logger.info("🎨 Building optimized CSS...")
+
+    # Build purged and minified CSS using static config
+    {output, status} = System.cmd(
+      "npx",
+      [
+        "tailwindcss",
+        "-c", "tailwind.static.config.js",
+        "-i", "assets/css/app.css",
+        "-o", Path.join([@output_dir, "assets", "css", "app.css"]),
+        "--minify"
+      ],
+      stderr_to_stdout: true
+    )
+
+    if status != 0 do
+      Logger.error("Failed to build CSS: #{output}")
+      raise "CSS build failed"
+    end
+
+    # Get file size for logging
+    css_path = Path.join([@output_dir, "assets", "css", "app.css"])
+    {:ok, stat} = File.stat(css_path)
+    size_kb = Float.round(stat.size / 1024, 1)
+    Logger.info("  ✓ CSS optimized: #{size_kb}KB")
   end
 
   defp generate_homepage(articles, profile) do
@@ -76,24 +110,32 @@ defmodule Mix.Tasks.BuildStatic do
   end
 
   defp copy_assets do
-    Logger.info("📦 Copying assets...")
+    Logger.info("📦 Copying and minifying JavaScript...")
 
-    # Copy compiled CSS and JS
     priv_static = "priv/static"
 
-    if File.exists?(Path.join(priv_static, "assets")) do
-      File.cp_r!(
-        Path.join(priv_static, "assets"),
-        Path.join(@output_dir, "assets")
-      )
-    end
-
-    # Copy static JavaScript files
+    # Minify and copy static JavaScript files
     ["static-theme.js", "static-search.js", "static-pagination.js"]
     |> Enum.each(fn file ->
       src = Path.join(priv_static, file)
+      dest = Path.join(@output_dir, file)
+
       if File.exists?(src) do
-        File.cp!(src, Path.join(@output_dir, file))
+        # Minify JS using terser
+        {output, status} = System.cmd(
+          "npx",
+          ["terser", src, "-c", "-m", "-o", dest],
+          stderr_to_stdout: true
+        )
+
+        if status != 0 do
+          Logger.warning("Failed to minify #{file}, copying original: #{output}")
+          File.cp!(src, dest)
+        else
+          {:ok, stat} = File.stat(dest)
+          size_kb = Float.round(stat.size / 1024, 1)
+          Logger.info("  ✓ #{file} minified: #{size_kb}KB")
+        end
       end
     end)
   end
@@ -127,16 +169,110 @@ defmodule Mix.Tasks.BuildStatic do
     File.write!(Path.join(@output_dir, "search-index.json"), json)
   end
 
+  defp generate_sitemap(articles) do
+    Logger.info("🗺️  Generating sitemap.xml...")
+
+    urls = [
+      sitemap_url("/", "1.0", "daily"),
+      # Add article URLs
+      Enum.map(articles, fn article ->
+        date = if article.published_at do
+          Calendar.strftime(article.published_at, "%Y-%m-%d")
+        else
+          Calendar.strftime(article.inserted_at, "%Y-%m-%d")
+        end
+        sitemap_url("/articles/#{article.slug}.html", "0.8", "monthly", date)
+      end)
+    ]
+    |> List.flatten()
+    |> Enum.join("\n  ")
+
+    sitemap = """
+    <?xml version="1.0" encoding="UTF-8"?>
+    <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+      #{urls}
+    </urlset>
+    """
+
+    File.write!(Path.join(@output_dir, "sitemap.xml"), sitemap)
+  end
+
+  defp sitemap_url(path, priority, changefreq, lastmod \\ nil) do
+    lastmod_tag = if lastmod do
+      "<lastmod>#{lastmod}</lastmod>"
+    else
+      ""
+    end
+
+    """
+    <url>
+      <loc>#{@site_url}#{path}</loc>
+      <priority>#{priority}</priority>
+      <changefreq>#{changefreq}</changefreq>
+      #{lastmod_tag}
+    </url>
+    """
+  end
+
+  defp generate_robots_txt do
+    Logger.info("🤖 Generating robots.txt...")
+
+    robots = """
+    User-agent: *
+    Allow: /
+
+    Sitemap: #{@site_url}/sitemap.xml
+    """
+
+    File.write!(Path.join(@output_dir, "robots.txt"), robots)
+  end
+
   defp render_homepage(articles, profile) do
     total_pages = ceil(length(articles) / @articles_per_page)
 
+    # SEO metadata for homepage
+    site_description = profile.bio || "Personal blog about software development, programming, and technology"
+
     """
     <!DOCTYPE html>
-    <html lang="en" data-theme="light">
+    <html lang="pt-BR" data-theme="light">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>#{profile.name || "Blog"}</title>
+
+      <!-- SEO Meta Tags -->
+      <meta name="description" content="#{site_description}">
+      <meta name="author" content="#{profile.name || ""}">
+      <link rel="canonical" href="#{@site_url}/">
+
+      <!-- Open Graph / Facebook -->
+      <meta property="og:type" content="website">
+      <meta property="og:url" content="#{@site_url}/">
+      <meta property="og:title" content="#{profile.name || "Blog"}">
+      <meta property="og:description" content="#{site_description}">
+      <meta property="og:site_name" content="#{profile.name || "Blog"}">
+
+      <!-- Twitter -->
+      <meta name="twitter:card" content="summary">
+      <meta name="twitter:url" content="#{@site_url}/">
+      <meta name="twitter:title" content="#{profile.name || "Blog"}">
+      <meta name="twitter:description" content="#{site_description}">
+
+      <!-- JSON-LD Schema -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "Blog",
+        "name": "#{profile.name || "Blog"}",
+        "description": "#{String.replace(site_description, "\"", "\\\"")}"#{if profile.name do
+          ~s(,\n        "author": {\n          "@type": "Person",\n          "name": "#{profile.name}"\n        })
+        else
+          ""
+        end}
+      }
+      </script>
+
       <script>
         // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
         (function() {
@@ -290,13 +426,73 @@ defmodule Mix.Tasks.BuildStatic do
       Calendar.strftime(article.inserted_at, "%d %b %Y")
     end
 
+    # SEO metadata
+    description = article.content
+      |> String.replace(~r/<[^>]*>/, "")  # Remove HTML tags
+      |> String.slice(0..160)
+      |> String.trim()
+
+    article_url = "#{@site_url}/articles/#{article.slug}.html"
+
+    iso_date = if article.published_at do
+      DateTime.to_iso8601(article.published_at)
+    else
+      DateTime.to_iso8601(article.inserted_at)
+    end
+
     """
     <!DOCTYPE html>
-    <html lang="en" data-theme="light">
+    <html lang="pt-BR" data-theme="light">
     <head>
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>#{article.title} - #{profile.name || "Blog"}</title>
+
+      <!-- SEO Meta Tags -->
+      <meta name="description" content="#{description}">
+      <meta name="author" content="#{profile.name || ""}">
+      <link rel="canonical" href="#{article_url}">
+
+      <!-- Open Graph / Facebook -->
+      <meta property="og:type" content="article">
+      <meta property="og:url" content="#{article_url}">
+      <meta property="og:title" content="#{article.title}">
+      <meta property="og:description" content="#{description}">
+      <meta property="og:site_name" content="#{profile.name || "Blog"}">
+      #{if article.published_at, do: ~s(<meta property="article:published_time" content="#{iso_date}">), else: ""}
+      #{if article.tags && length(article.tags) > 0 do
+        Enum.map_join(article.tags, "\n      ", fn tag ->
+          ~s(<meta property="article:tag" content="#{tag}">)
+        end)
+      else
+        ""
+      end}
+
+      <!-- Twitter -->
+      <meta name="twitter:card" content="summary_large_image">
+      <meta name="twitter:url" content="#{article_url}">
+      <meta name="twitter:title" content="#{article.title}">
+      <meta name="twitter:description" content="#{description}">
+
+      <!-- JSON-LD Schema -->
+      <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "BlogPosting",
+        "headline": "#{String.replace(article.title, "\"", "\\\"")}",
+        "datePublished": "#{iso_date}",
+        "author": {
+          "@type": "Person",
+          "name": "#{profile.name || ""}"
+        },
+        "description": "#{String.replace(description, "\"", "\\\"")}"#{if article.tags && length(article.tags) > 0 do
+          ~s(,\n        "keywords": "#{Enum.join(article.tags, ", ")}")
+        else
+          ""
+        end}
+      }
+      </script>
+
       <script>
         // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
         (function() {
