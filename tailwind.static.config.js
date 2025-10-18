@@ -13,6 +13,9 @@ module.exports = {
         'base-300': 'var(--color-base-300)',
         'base-content': 'var(--color-base-content)',
         'primary': 'var(--color-primary)',
+        'blue': {
+          600: '#2563eb',
+        },
       },
     },
   },
