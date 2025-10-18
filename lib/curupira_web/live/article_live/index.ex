@@ -71,6 +71,30 @@ defmodule CurupiraWeb.ArticleLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("toggle_publish", %{"id" => id}, socket) do
+    article = Blog.get_article!(id)
+    new_status = if article.status == "published", do: "draft", else: "published"
+
+    attrs = %{
+      "status" => new_status,
+      "published_at" => if(new_status == "published", do: DateTime.utc_now(), else: nil)
+    }
+
+    case Blog.update_article(article, attrs) do
+      {:ok, updated_article} ->
+        message = if new_status == "published", do: "Article published", else: "Article unpublished"
+
+        {:noreply,
+         socket
+         |> stream_insert(:articles, updated_article)
+         |> put_flash(:info, message)}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Failed to update article status")}
+    end
+  end
+
   defp pagination_range(current_page, total_pages) do
     cond do
       # If 7 or fewer pages, show all

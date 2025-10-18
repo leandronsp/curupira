@@ -662,6 +662,16 @@ defmodule Mix.Tasks.BuildStatic do
         [data-theme="dark"] .article-container {
           background-color: oklch(30% 0.015 252); /* base-100 dark */
         }
+        /* Article images styling - consistent sizing */
+        .prose img {
+          max-width: 800px;
+          width: 100%;
+          height: auto;
+          display: block;
+          margin-left: auto;
+          margin-right: auto;
+          border-radius: 0.5rem;
+        }
       </style>
     </head>
     <body class="min-h-screen bg-base-200">

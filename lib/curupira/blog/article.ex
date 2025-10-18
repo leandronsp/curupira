@@ -45,7 +45,33 @@ defmodule Curupira.Blog.Article do
       :language
     ])
     |> validate_required([:title, :content])
+    |> generate_slug_if_missing()
     |> unique_constraint(:slug)
+  end
+
+  defp generate_slug_if_missing(changeset) do
+    case get_change(changeset, :slug) do
+      nil ->
+        title = get_field(changeset, :title)
+        if title do
+          slug = slugify(title)
+          put_change(changeset, :slug, slug)
+        else
+          changeset
+        end
+      _slug ->
+        changeset
+    end
+  end
+
+  defp slugify(title) do
+    title
+    |> String.downcase()
+    |> String.normalize(:nfd)
+    |> String.replace(~r/[^a-z0-9\s-]/u, "")
+    |> String.replace(~r/\s+/, "-")
+    |> String.replace(~r/-+/, "-")
+    |> String.trim("-")
   end
 
   @doc """

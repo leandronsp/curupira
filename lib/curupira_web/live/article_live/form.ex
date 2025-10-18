@@ -173,6 +173,34 @@ defmodule CurupiraWeb.ArticleLive.Form do
   end
 
   @impl true
+  def handle_event("toggle_publish", _params, socket) do
+    article = socket.assigns.article
+    new_status = if article.status == "published", do: "draft", else: "published"
+
+    attrs = %{
+      "status" => new_status,
+      "published_at" => if(new_status == "published", do: DateTime.utc_now(), else: nil)
+    }
+
+    case Blog.update_article(article, attrs) do
+      {:ok, updated_article} ->
+        message = if new_status == "published", do: "Article published", else: "Article unpublished"
+
+        {:noreply,
+         socket
+         |> assign(:article, updated_article)
+         |> assign(:form, to_form(Blog.change_article(updated_article)))
+         |> put_flash(:info, message)}
+
+      {:error, changeset} ->
+        {:noreply,
+         socket
+         |> assign(:form, to_form(changeset))
+         |> put_flash(:error, "Failed to update article status")}
+    end
+  end
+
+  @impl true
   def handle_info(:reset_save_state, socket) do
     {:noreply, assign(socket, :save_state, "idle")}
   end
