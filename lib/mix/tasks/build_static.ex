@@ -114,17 +114,17 @@ defmodule Mix.Tasks.BuildStatic do
 
     priv_static = "priv/static"
 
-    # Minify and copy static JavaScript files
+    # Minify and copy static JavaScript files using esbuild (already installed)
     ["static-theme.js", "static-search.js", "static-pagination.js"]
     |> Enum.each(fn file ->
       src = Path.join(priv_static, file)
       dest = Path.join(@output_dir, file)
 
       if File.exists?(src) do
-        # Minify JS using terser
+        # Minify JS using esbuild (already available in project)
         {output, status} = System.cmd(
           "npx",
-          ["terser", src, "-c", "-m", "-o", dest],
+          ["esbuild", src, "--minify", "--outfile=#{dest}"],
           stderr_to_stdout: true
         )
 
