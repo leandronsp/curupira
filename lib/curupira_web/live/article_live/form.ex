@@ -155,17 +155,21 @@ defmodule CurupiraWeb.ArticleLive.Form do
   @impl true
   def handle_event("change_language", %{"language" => language}, socket) do
     article = socket.assigns.article
-    updated_article = %{article | language: language}
 
-    changeset =
-      updated_article
-      |> Blog.change_article(%{"language" => language})
-      |> Map.put(:action, :validate)
+    case Blog.update_article(article, %{"language" => language}) do
+      {:ok, updated_article} ->
+        {:noreply,
+         socket
+         |> assign(:article, updated_article)
+         |> assign(:form, to_form(Blog.change_article(updated_article)))
+         |> put_flash(:info, "Language updated successfully")}
 
-    {:noreply,
-     socket
-     |> assign(:article, updated_article)
-     |> assign(:form, to_form(changeset))}
+      {:error, changeset} ->
+        {:noreply,
+         socket
+         |> assign(:form, to_form(changeset))
+         |> put_flash(:error, "Failed to update language")}
+    end
   end
 
   @impl true

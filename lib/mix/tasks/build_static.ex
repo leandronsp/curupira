@@ -161,8 +161,8 @@ defmodule Mix.Tasks.BuildStatic do
       %{
         slug: article.slug,
         title: article.title,
-        content: String.slice(article.content || "", 0, 200),
-        tags: article.tags || []
+        tags: article.tags || [],
+        language: article.language || "en"
       }
     end)
 
@@ -402,13 +402,13 @@ defmodule Mix.Tasks.BuildStatic do
               </span>
             </div>
 
-            <div class="flex justify-between items-center gap-4 mb-6">
+            <div class="flex items-center gap-4 mb-6">
               <div class="flex-1 max-w-lg">
                 <div class="relative">
                   <input
                     type="text"
                     id="search-input"
-                    placeholder="Search articles by title..."
+                    placeholder="Search articles by title, tags..."
                     class="w-full h-12 pr-12 text-base bg-base-100 border-2 border-base-300 rounded-lg px-4 transition-all duration-200 ease-in-out focus:border-primary focus:outline-none hover:border-base-content/30 hover:shadow-sm"
                     autocomplete="off"
                   />
@@ -418,10 +418,19 @@ defmodule Mix.Tasks.BuildStatic do
                 </div>
               </div>
 
+              <div class="flex items-center gap-2">
+                <span class="text-sm text-base-content/60 font-medium whitespace-nowrap">Filter:</span>
+                <div class="flex rounded-lg border-2 border-base-300 overflow-hidden">
+                  <button class="lang-filter-btn px-3 py-1.5 text-sm font-medium transition-colors bg-primary text-white" data-lang="all" onclick="setLanguageFilter('all')">All</button>
+                  <button class="lang-filter-btn px-3 py-1.5 text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="pt" onclick="setLanguageFilter('pt')">🇧🇷 PT</button>
+                  <button class="lang-filter-btn px-3 py-1.5 text-sm font-medium transition-colors bg-base-100 hover:bg-base-200 border-l-2 border-base-300" data-lang="en" onclick="setLanguageFilter('en')">🇺🇸 EN</button>
+                </div>
+              </div>
+
               <button
                 type="button"
                 id="theme-toggle"
-                class="inline-flex items-center justify-center rounded-full h-12 w-12 hover:bg-base-content/10 transition-colors"
+                class="inline-flex items-center justify-center rounded-full h-12 w-12 hover:bg-base-content/10 transition-colors flex-shrink-0"
                 title="Toggle theme"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" class="sun-icon h-6 w-6 hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -729,6 +738,7 @@ defmodule Mix.Tasks.BuildStatic do
 
       """
       <div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer h-[160px] bg-base-100"
+           data-slug="#{article.slug}"
            data-title="#{String.downcase(article.title)}"
            data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
            onclick="window.location.href='/articles/#{article.slug}.html'">
