@@ -137,6 +137,13 @@ defmodule Mix.Tasks.BuildStatic do
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>#{profile.name || "Blog"}</title>
+      <script>
+        // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+        (function() {
+          const theme = localStorage.getItem('theme') || 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        })();
+      </script>
       <link rel="stylesheet" href="/assets/css/app.css">
       <style>
         /* Softer dark theme colors */
@@ -290,6 +297,13 @@ defmodule Mix.Tasks.BuildStatic do
       <meta charset="UTF-8">
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>#{article.title} - #{profile.name || "Blog"}</title>
+      <script>
+        // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
+        (function() {
+          const theme = localStorage.getItem('theme') || 'light';
+          document.documentElement.setAttribute('data-theme', theme);
+        })();
+      </script>
       <link rel="stylesheet" href="/assets/css/app.css">
       <style>
         /* Softer dark theme colors */
