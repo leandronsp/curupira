@@ -1,4 +1,4 @@
-.PHONY: help dev-up dev-down dev-logs dev-reset dev-seeds prod-build prod-up prod-down prod-logs prod-reset prod-seeds prod-create-admin test-all clean static-build static-serve static-test deploy-build deploy-push deploy
+.PHONY: help dev-up dev-down dev-logs dev-reset dev-seeds prod-build prod-up prod-down prod-logs prod-reset prod-seeds prod-create-admin test-all clean static-build static-serve static-test deploy-build deploy-push deploy backup-create backup-upload backup-download backup-restore backup-full backup-list
 
 # Default target
 help:
@@ -36,6 +36,14 @@ help:
 	@echo "  make deploy-build    - Build AMD64 image for production servers"
 	@echo "  make deploy-push     - Push image to Docker Hub registry"
 	@echo "  make deploy          - Build, push, and deploy to server (all-in-one)"
+	@echo ""
+	@echo "Backup & Restore:"
+	@echo "  make backup-create   - Create database backup (.sql file)"
+	@echo "  make backup-upload   - Upload backup to S3"
+	@echo "  make backup-download - Download latest backup from S3"
+	@echo "  make backup-restore  - Restore database from downloaded backup"
+	@echo "  make backup-full     - Create and upload backup (all-in-one)"
+	@echo "  make backup-list     - List all backups in S3"
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean           - Stop everything and remove containers/volumes"
@@ -266,6 +274,57 @@ clean: dev-down prod-down
 	@echo "Removing images..."
 	-docker rmi curupira:prod 2>/dev/null || true
 	@echo "✓ Cleanup complete"
+
+# ======================
+# Backup & Restore
+# ======================
+
+AWS_PROFILE ?= personal
+S3_BUCKET ?= curupira-backups
+S3_PREFIX ?= database/
+BACKUP_DIR ?= ./backups
+TIMESTAMP := $(shell date +%Y%m%d_%H%M%S)
+BACKUP_FILE := curupira_backup_$(TIMESTAMP).sql
+
+backup-create:
+	@mkdir -p $(BACKUP_DIR)
+	@echo "Creating backup: $(BACKUP_FILE)"
+	@docker-compose exec -T db pg_dump -U postgres -d curupira_dev --clean --if-exists > $(BACKUP_DIR)/$(BACKUP_FILE)
+	@echo "✓ Backup created: $(BACKUP_DIR)/$(BACKUP_FILE) ($$(du -h $(BACKUP_DIR)/$(BACKUP_FILE) | cut -f1))"
+
+backup-upload:
+	@LATEST=$$(ls -t $(BACKUP_DIR)/*.sql 2>/dev/null | head -1); \
+	if [ -z "$$LATEST" ]; then echo "Error: no backup found. Run 'make backup-create' first"; exit 1; fi; \
+	NAME=$$(basename $$LATEST); \
+	echo "Uploading $$NAME to s3://$(S3_BUCKET)/$(S3_PREFIX) (profile: $(AWS_PROFILE))"; \
+	AWS_PROFILE=$(AWS_PROFILE) aws s3 cp "$$LATEST" "s3://$(S3_BUCKET)/$(S3_PREFIX)$$NAME" && \
+	echo "✓ Uploaded successfully"
+
+backup-download:
+	@mkdir -p $(BACKUP_DIR)
+	@LATEST=$$(AWS_PROFILE=$(AWS_PROFILE) aws s3 ls s3://$(S3_BUCKET)/$(S3_PREFIX) | grep '.sql$$' | sort | tail -1 | awk '{print $$4}'); \
+	if [ -z "$$LATEST" ]; then echo "Error: no backups in s3://$(S3_BUCKET)/$(S3_PREFIX)"; exit 1; fi; \
+	echo "Downloading $$LATEST from S3 (profile: $(AWS_PROFILE))"; \
+	AWS_PROFILE=$(AWS_PROFILE) aws s3 cp "s3://$(S3_BUCKET)/$(S3_PREFIX)$$LATEST" "$(BACKUP_DIR)/$$LATEST" && \
+	echo "✓ Downloaded to $(BACKUP_DIR)/$$LATEST"
+
+backup-restore:
+	@LATEST=$$(ls -t $(BACKUP_DIR)/*.sql 2>/dev/null | head -1); \
+	if [ -z "$$LATEST" ]; then echo "Error: no backup found. Run 'make backup-download' first"; exit 1; fi; \
+	NAME=$$(basename $$LATEST); \
+	echo "⚠️  WARNING: This will replace ALL data in curupira_dev"; \
+	echo "Backup: $$NAME"; \
+	read -p "Continue? [y/N] " -n 1 -r; echo ""; \
+	if [[ ! $$REPLY =~ ^[Yy]$$ ]]; then echo "Cancelled"; exit 1; fi; \
+	docker-compose exec -T db psql -U postgres -d curupira_dev < "$$LATEST" && \
+	echo "✓ Database restored from $$NAME"
+
+backup-full: backup-create backup-upload
+	@echo "✓ Full backup complete"
+
+backup-list:
+	@echo "S3 backups: s3://$(S3_BUCKET)/$(S3_PREFIX) (profile: $(AWS_PROFILE))"
+	@AWS_PROFILE=$(AWS_PROFILE) aws s3 ls s3://$(S3_BUCKET)/$(S3_PREFIX) --human-readable | grep '.sql$$' || echo "No backups found"
 
 # ======================
 # Deployment Commands

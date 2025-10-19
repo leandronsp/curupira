@@ -42,3 +42,6 @@ npm-debug.log
 # Static site output
 /static_output/
 
+# Database backups
+/backups/
+
