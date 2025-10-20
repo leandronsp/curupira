@@ -154,8 +154,14 @@ Hooks.TitleEditor = {
 // Markdown content editor with keyboard shortcuts (no custom undo/redo - use browser native)
 Hooks.MarkdownEditor = {
   mounted() {
-    // Auto-save state
+    // Configuration
+    this.AUTO_SAVE_DELAY_MS = 5000
+    this.PREVIEW_SYNC_DELAY_MS = 500  // Quick response for preview sync
+    this.BOTTOM_THRESHOLD_LINES = 5   // Consider "at bottom" if within 5 lines from end
+
+    // State
     this.autoSaveTimeout = null
+    this.previewSyncTimeout = null
 
     // Setup input handler
     this.el.addEventListener('input', (e) => {
@@ -182,7 +188,57 @@ Hooks.MarkdownEditor = {
         const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
         form.dispatchEvent(submitEvent)
       }
-    }, 5000)
+    }, this.AUTO_SAVE_DELAY_MS)
+
+    // Sync preview scroll after brief delay (responsive but not every keystroke)
+    clearTimeout(this.previewSyncTimeout)
+    this.previewSyncTimeout = setTimeout(() => {
+      this.syncPreviewScroll()
+    }, this.PREVIEW_SYNC_DELAY_MS)
+  },
+  syncPreviewScroll() {
+    const preview = document.getElementById('preview-container')
+    if (!preview) return
+
+    // Don't interrupt if user is manually scrolling preview
+    const previewHook = this.findHookById('preview-container')
+    if (previewHook && previewHook.isManuallyScrolling) return
+
+    // Calculate cursor position in text
+    const cursorPos = this.el.selectionStart
+    const textBeforeCursor = this.el.value.substring(0, cursorPos)
+    const currentLine = (textBeforeCursor.match(/\n/g) || []).length
+    const totalLines = (this.el.value.match(/\n/g) || []).length + 1
+
+    // Check if typing near the bottom
+    const linesFromBottom = totalLines - currentLine
+    const isNearBottom = linesFromBottom <= this.BOTTOM_THRESHOLD_LINES
+
+    // Only scroll to bottom if typing near bottom
+    // When typing in the middle, don't touch preview scroll (user does manual scroll)
+    if (isNearBottom) {
+      preview.scrollTo({
+        top: preview.scrollHeight,
+        behavior: 'smooth'
+      })
+    }
+  },
+  findHookById(elementId) {
+    const element = document.getElementById(elementId)
+    if (!element) return null
+
+    // Access LiveView's hook instance (if available)
+    const hookAttr = element.getAttribute('data-phx-hook')
+    if (hookAttr && window.liveSocket) {
+      // Try to access the view's hooks
+      const view = window.liveSocket.getViewByEl(element)
+      if (view && view.liveSocket && view.liveSocket.hooks) {
+        return view.liveSocket.hooks[hookAttr]
+      }
+    }
+
+    // Fallback: store in global namespace (simpler approach)
+    return window.__previewHook
   },
   setupPasteUpload() {
     this.el.addEventListener('paste', (e) => {
@@ -469,42 +525,37 @@ Hooks.PreserveScroll = {
 
 Hooks.PreviewAnchorScroll = {
   mounted() {
-    // Configuration constants
-    this.SCROLL_RESET_DELAY_MS = 2000  // Time before considering user stopped scrolling
-    this.NEAR_BOTTOM_THRESHOLD_PX = 200  // Distance from bottom to consider "near bottom"
-    this.DOM_RENDER_DELAY_MS = 50  // Delay to ensure DOM is fully rendered before scrolling
+    // Configuration
+    this.MANUAL_SCROLL_RESET_MS = 3000  // Consider user "done scrolling" after 3s
+
+    // State
+    this.isManuallyScrolling = false
+    this.manualScrollTimeout = null
+
+    // Expose hook instance globally for MarkdownEditor to access
+    window.__previewHook = this
+
+    // Track manual scrolling
+    this.el.addEventListener('scroll', (e) => {
+      // Only consider it "manual" if it's a real user scroll, not programmatic
+      // Check if this scroll event was triggered by user interaction
+      const isProgrammatic = e.isTrusted === false
+
+      if (!isProgrammatic) {
+        this.isManuallyScrolling = true
+        clearTimeout(this.manualScrollTimeout)
+
+        // Reset after user stops scrolling
+        this.manualScrollTimeout = setTimeout(() => {
+          this.isManuallyScrolling = false
+        }, this.MANUAL_SCROLL_RESET_MS)
+      }
+    })
 
     this.setupAnchorNavigation()
-    this.userScrolling = false
-    this.scrollTimeout = null
-
-    // Track user manual scrolling
-    this.el.addEventListener('scroll', () => {
-      this.userScrolling = true
-      clearTimeout(this.scrollTimeout)
-
-      this.scrollTimeout = setTimeout(() => {
-        this.userScrolling = false
-      }, this.SCROLL_RESET_DELAY_MS)
-    })
   },
   updated() {
     this.setupAnchorNavigation()
-
-    // Only auto-scroll to bottom if:
-    // 1. User hasn't manually scrolled recently, AND
-    // 2. Preview is already scrolled near the bottom
-    // This allows users to type in the middle while viewing that area
-    if (!this.userScrolling) {
-      const distanceFromBottom = this.el.scrollHeight - this.el.scrollTop - this.el.clientHeight
-      const isNearBottom = distanceFromBottom < this.NEAR_BOTTOM_THRESHOLD_PX
-
-      if (isNearBottom) {
-        setTimeout(() => {
-          this.el.scrollTop = this.el.scrollHeight
-        }, this.DOM_RENDER_DELAY_MS)
-      }
-    }
   },
   setupAnchorNavigation() {
     // Find all anchor links in the preview
