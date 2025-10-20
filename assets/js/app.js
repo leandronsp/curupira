@@ -469,6 +469,11 @@ Hooks.PreserveScroll = {
 
 Hooks.PreviewAnchorScroll = {
   mounted() {
+    // Configuration constants
+    this.SCROLL_RESET_DELAY_MS = 2000  // Time before considering user stopped scrolling
+    this.NEAR_BOTTOM_THRESHOLD_PX = 200  // Distance from bottom to consider "near bottom"
+    this.DOM_RENDER_DELAY_MS = 50  // Delay to ensure DOM is fully rendered before scrolling
+
     this.setupAnchorNavigation()
     this.userScrolling = false
     this.scrollTimeout = null
@@ -477,22 +482,28 @@ Hooks.PreviewAnchorScroll = {
     this.el.addEventListener('scroll', () => {
       this.userScrolling = true
       clearTimeout(this.scrollTimeout)
-      // Reset after 2 seconds of no scrolling
+
       this.scrollTimeout = setTimeout(() => {
         this.userScrolling = false
-      }, 2000)
+      }, this.SCROLL_RESET_DELAY_MS)
     })
   },
   updated() {
     this.setupAnchorNavigation()
 
-    // Auto-scroll to bottom when preview updates (user is typing)
-    // Only if user hasn't manually scrolled recently
+    // Only auto-scroll to bottom if:
+    // 1. User hasn't manually scrolled recently, AND
+    // 2. Preview is already scrolled near the bottom
+    // This allows users to type in the middle while viewing that area
     if (!this.userScrolling) {
-      // Small delay to ensure DOM is fully rendered
-      setTimeout(() => {
-        this.el.scrollTop = this.el.scrollHeight
-      }, 50)
+      const distanceFromBottom = this.el.scrollHeight - this.el.scrollTop - this.el.clientHeight
+      const isNearBottom = distanceFromBottom < this.NEAR_BOTTOM_THRESHOLD_PX
+
+      if (isNearBottom) {
+        setTimeout(() => {
+          this.el.scrollTop = this.el.scrollHeight
+        }, this.DOM_RENDER_DELAY_MS)
+      }
     }
   },
   setupAnchorNavigation() {
