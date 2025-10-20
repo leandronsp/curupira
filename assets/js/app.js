@@ -41,47 +41,32 @@ Hooks.AutoResize = {
   }
 }
 
-// Combined hook for title textarea: AutoResize + Keyboard shortcuts with undo/redo
+// Combined hook for title textarea: AutoResize + Keyboard shortcuts (no custom undo/redo - use browser native)
 Hooks.TitleEditor = {
   mounted() {
-    // Initialize undo/redo history
-    this.history = [this.el.value]
-    this.historyIndex = 0
-    this.maxHistory = 50
+    // Auto-save state
+    this.autoSaveTimeout = null
 
     // AutoResize functionality
     this.resize()
-    this.el.addEventListener('input', () => this.resize())
+    this.el.addEventListener('input', (e) => {
+      this.resize()
+      this.handleInput(e)
+    })
 
-    // Keyboard shortcuts
+    // Keyboard shortcuts (formatting only, undo/redo is native browser)
     this.setupKeyboardShortcuts()
-
-    // Setup auto-save
-    this.setupAutoSave()
   },
-  setupAutoSave() {
-    // Auto-save after 2 seconds of inactivity
-    const AUTO_SAVE_DELAY = 2000
-    let autoSaveTimeout = null
-
-    const triggerAutoSave = () => {
-      // Find the form and trigger submit
+  handleInput(e) {
+    // Auto-save after 5 seconds of inactivity
+    clearTimeout(this.autoSaveTimeout)
+    this.autoSaveTimeout = setTimeout(() => {
       const form = document.getElementById('article-form')
       if (form) {
-        // Dispatch submit event
         const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
         form.dispatchEvent(submitEvent)
       }
-    }
-
-    // Listen to input events
-    this.el.addEventListener('input', () => {
-      // Clear existing timeout
-      clearTimeout(autoSaveTimeout)
-
-      // Set new timeout for auto-save
-      autoSaveTimeout = setTimeout(triggerAutoSave, AUTO_SAVE_DELAY)
-    })
+    }, 5000)
   },
   updated() {
     this.resize()
@@ -97,71 +82,35 @@ Hooks.TitleEditor = {
 
       if (!modifier) return
 
-      // Undo: Cmd/Ctrl + Z (without Shift)
-      if (e.key === 'z' && !e.shiftKey) {
-        e.preventDefault()
-        this.undo()
-        return
-      }
+      const key = e.key.toLowerCase()
 
-      // Redo: Cmd/Ctrl + Shift + Z
-      if (e.key === 'z' && e.shiftKey) {
-        e.preventDefault()
-        this.redo()
-        return
-      }
+      // NOTE: Undo/Redo (Ctrl+Z / Ctrl+Shift+Z) is handled natively by the browser
+      // We don't intercept these - browser native undo/redo works perfectly
 
       // Save: Cmd/Ctrl + S
-      if (e.key === 's') {
+      if (key === 's') {
         e.preventDefault()
         const submitButton = document.querySelector('button[type="submit"][form="article-form"]')
         if (submitButton) {
           submitButton.click()
         }
-        return
+        return false
       }
 
       // Bold: Cmd/Ctrl + B
-      if (e.key === 'b') {
+      if (key === 'b') {
         e.preventDefault()
         this.toggleFormatting('**', '**')
-        return
+        return false
       }
 
       // Italic: Cmd/Ctrl + I
-      if (e.key === 'i') {
+      if (key === 'i') {
         e.preventDefault()
         this.toggleFormatting('*', '*')
-        return
+        return false
       }
     })
-  },
-  saveToHistory() {
-    this.history = this.history.slice(0, this.historyIndex + 1)
-    this.history.push(this.el.value)
-    if (this.history.length > this.maxHistory) {
-      this.history.shift()
-    } else {
-      this.historyIndex++
-    }
-  },
-  undo() {
-    if (this.historyIndex > 0) {
-      this.historyIndex--
-      const value = this.history[this.historyIndex]
-      this.el.value = value
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-      this.resize()
-    }
-  },
-  redo() {
-    if (this.historyIndex < this.history.length - 1) {
-      this.historyIndex++
-      const value = this.history[this.historyIndex]
-      this.el.value = value
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-      this.resize()
-    }
   },
   toggleFormatting(before, after) {
     const start = this.el.selectionStart
@@ -179,14 +128,12 @@ Hooks.TitleEditor = {
         // Remove formatting
         const newText = text.substring(0, beforeStart) + selectedText + text.substring(afterEnd)
         this.el.value = newText
-        this.saveToHistory()
         this.el.dispatchEvent(new Event('input', { bubbles: true }))
         this.el.setSelectionRange(beforeStart, beforeStart + selectedText.length)
       } else {
         // Add formatting
         const newText = text.substring(0, start) + before + selectedText + after + text.substring(end)
         this.el.value = newText
-        this.saveToHistory()
         this.el.dispatchEvent(new Event('input', { bubbles: true }))
         const newCursorPos = start + before.length + selectedText.length + after.length
         this.el.setSelectionRange(newCursorPos, newCursorPos)
@@ -194,7 +141,6 @@ Hooks.TitleEditor = {
     } else {
       const newText = text.substring(0, start) + before + after + text.substring(end)
       this.el.value = newText
-      this.saveToHistory()
       this.el.dispatchEvent(new Event('input', { bubbles: true }))
       const newCursorPos = start + before.length
       this.el.setSelectionRange(newCursorPos, newCursorPos)
@@ -205,15 +151,18 @@ Hooks.TitleEditor = {
   }
 }
 
-// Markdown content editor with full keyboard shortcuts and undo/redo
+// Markdown content editor with keyboard shortcuts (no custom undo/redo - use browser native)
 Hooks.MarkdownEditor = {
   mounted() {
-    // Initialize undo/redo history
-    this.history = [this.el.value]
-    this.historyIndex = 0
-    this.maxHistory = 50
+    // Auto-save state
+    this.autoSaveTimeout = null
 
-    // Keyboard shortcuts
+    // Setup input handler
+    this.el.addEventListener('input', (e) => {
+      this.handleInput(e)
+    })
+
+    // Keyboard shortcuts (formatting only, undo/redo is native browser)
     this.setupKeyboardShortcuts()
 
     // Listen for image upload completion from server
@@ -223,33 +172,17 @@ Hooks.MarkdownEditor = {
 
     // Setup paste support for images
     this.setupPasteUpload()
-
-    // Setup auto-save
-    this.setupAutoSave()
   },
-  setupAutoSave() {
-    // Auto-save after 2 seconds of inactivity
-    const AUTO_SAVE_DELAY = 2000
-    let autoSaveTimeout = null
-
-    const triggerAutoSave = () => {
-      // Find the form and trigger submit
+  handleInput(e) {
+    // Auto-save after 5 seconds of inactivity
+    clearTimeout(this.autoSaveTimeout)
+    this.autoSaveTimeout = setTimeout(() => {
       const form = document.getElementById('article-form')
       if (form) {
-        // Dispatch submit event
         const submitEvent = new Event('submit', { bubbles: true, cancelable: true })
         form.dispatchEvent(submitEvent)
       }
-    }
-
-    // Listen to input events
-    this.el.addEventListener('input', () => {
-      // Clear existing timeout
-      clearTimeout(autoSaveTimeout)
-
-      // Set new timeout for auto-save
-      autoSaveTimeout = setTimeout(triggerAutoSave, AUTO_SAVE_DELAY)
-    })
+    }, 5000)
   },
   setupPasteUpload() {
     this.el.addEventListener('paste', (e) => {
@@ -293,7 +226,6 @@ Hooks.MarkdownEditor = {
 
     const newText = text.substring(0, start) + imageMarkdown + text.substring(end)
     textarea.value = newText
-    this.saveToHistory()
     textarea.dispatchEvent(new Event('input', { bubbles: true }))
 
     // Position cursor after the inserted image
@@ -308,97 +240,63 @@ Hooks.MarkdownEditor = {
 
       if (!modifier) return
 
-      // Undo: Cmd/Ctrl + Z (without Shift)
-      if (e.key === 'z' && !e.shiftKey) {
-        e.preventDefault()
-        this.undo()
-        return
-      }
+      const key = e.key.toLowerCase()
 
-      // Redo: Cmd/Ctrl + Shift + Z
-      if (e.key === 'z' && e.shiftKey) {
-        e.preventDefault()
-        this.redo()
-        return
-      }
+      // NOTE: Undo/Redo (Ctrl+Z / Ctrl+Shift+Z) is handled natively by the browser
+      // We don't intercept these - browser native undo/redo works perfectly
 
       // Save: Cmd/Ctrl + S
-      if (e.key === 's') {
+      if (key === 's') {
         e.preventDefault()
         const submitButton = document.querySelector('button[type="submit"][form="article-form"]')
         if (submitButton) {
           submitButton.click()
         }
-        return
+        return false
       }
 
       // Bold: Cmd/Ctrl + B
-      if (e.key === 'b') {
+      if (key === 'b') {
         e.preventDefault()
         this.toggleFormatting('**', '**')
-        return
+        return false
       }
 
       // Italic: Cmd/Ctrl + I
-      if (e.key === 'i') {
+      if (key === 'i') {
         e.preventDefault()
         this.toggleFormatting('*', '*')
-        return
+        return false
       }
 
       // Code: Cmd/Ctrl + E
-      if (e.key === 'e') {
+      if (key === 'e') {
         e.preventDefault()
         this.toggleFormatting('`', '`')
-        return
+        return false
       }
 
       // Link: Cmd/Ctrl + K
-      if (e.key === 'k') {
+      if (key === 'k' && !e.shiftKey) {
         e.preventDefault()
         this.insertLink()
-        return
+        return false
       }
 
       // Strikethrough: Cmd/Ctrl + Shift + X
-      if (e.key === 'X' && e.shiftKey) {
+      if (key === 'x' && e.shiftKey) {
         e.preventDefault()
         this.toggleFormatting('~~', '~~')
-        return
+        return false
       }
 
       // Code Block: Cmd/Ctrl + Shift + K
-      if (e.key === 'K' && e.shiftKey) {
+      if (key === 'k' && e.shiftKey) {
         e.preventDefault()
         this.toggleCodeBlock()
-        return
+        return false
       }
     })
-  },
-  saveToHistory() {
-    this.history = this.history.slice(0, this.historyIndex + 1)
-    this.history.push(this.el.value)
-    if (this.history.length > this.maxHistory) {
-      this.history.shift()
-    } else {
-      this.historyIndex++
-    }
-  },
-  undo() {
-    if (this.historyIndex > 0) {
-      this.historyIndex--
-      const value = this.history[this.historyIndex]
-      this.el.value = value
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-    }
-  },
-  redo() {
-    if (this.historyIndex < this.history.length - 1) {
-      this.historyIndex++
-      const value = this.history[this.historyIndex]
-      this.el.value = value
-      this.el.dispatchEvent(new Event('input', { bubbles: true }))
-    }
   },
   toggleFormatting(before, after) {
     const start = this.el.selectionStart
@@ -416,14 +314,12 @@ Hooks.MarkdownEditor = {
         // Remove formatting
         const newText = text.substring(0, beforeStart) + selectedText + text.substring(afterEnd)
         this.el.value = newText
-        this.saveToHistory()
         this.el.dispatchEvent(new Event('input', { bubbles: true }))
         this.el.setSelectionRange(beforeStart, beforeStart + selectedText.length)
       } else {
         // Add formatting
         const newText = text.substring(0, start) + before + selectedText + after + text.substring(end)
         this.el.value = newText
-        this.saveToHistory()
         this.el.dispatchEvent(new Event('input', { bubbles: true }))
         const newCursorPos = start + before.length + selectedText.length + after.length
         this.el.setSelectionRange(newCursorPos, newCursorPos)
@@ -431,7 +327,6 @@ Hooks.MarkdownEditor = {
     } else {
       const newText = text.substring(0, start) + before + after + text.substring(end)
       this.el.value = newText
-      this.saveToHistory()
       this.el.dispatchEvent(new Event('input', { bubbles: true }))
       const newCursorPos = start + before.length
       this.el.setSelectionRange(newCursorPos, newCursorPos)
@@ -450,7 +345,6 @@ Hooks.MarkdownEditor = {
 
     const newText = text.substring(0, start) + linkFormat + text.substring(end)
     this.el.value = newText
-    this.saveToHistory()
     this.el.dispatchEvent(new Event('input', { bubbles: true }))
 
     // Select the URL part
@@ -506,7 +400,6 @@ Hooks.MarkdownEditor = {
 
         const newText = text.substring(0, newLineStart) + text.substring(newLineStart + 4, newLineEnd - 4) + text.substring(newLineEnd)
         this.el.value = newText
-        this.saveToHistory()
         this.el.dispatchEvent(new Event('input', { bubbles: true }))
         this.el.setSelectionRange(start - 4, end - 4)
         this.el.focus()
@@ -517,7 +410,6 @@ Hooks.MarkdownEditor = {
     // Add code block
     const newText = text.substring(0, lineStart) + before + text.substring(lineStart, lineEnd) + after + text.substring(lineEnd)
     this.el.value = newText
-    this.saveToHistory()
     this.el.dispatchEvent(new Event('input', { bubbles: true }))
     this.el.setSelectionRange(lineStart + before.length, lineEnd + before.length)
     this.el.focus()

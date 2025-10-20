@@ -140,8 +140,8 @@
 
     <div class="container mx-auto max-w-[1800px]">
       <div class={"grid gap-0 " <> if @layout_mode == "split", do: "grid-cols-1 lg:grid-cols-2", else: "grid-cols-1"}>
-        <div class={"h-[calc(100vh-60px)] overflow-y-auto " <> if @layout_mode == "split", do: "border-r border-base-300", else: ""} style={if @layout_mode == "preview", do: "display: none;", else: ""} phx-hook="PreserveScroll" id="editor-container">
-          <div class="p-8 min-h-full flex flex-col">
+        <div class={"h-[calc(100vh-60px)] overflow-hidden " <> if @layout_mode == "split", do: "border-r border-base-300", else: ""} style={if @layout_mode == "preview", do: "display: none;", else: ""} id="editor-container">
+          <div class="p-8 h-full flex flex-col">
             <div class="flex items-center gap-4">
               <h3 class="text-sm font-semibold text-base-content/60 uppercase tracking-wide mb-4">Editor</h3>
 
@@ -264,8 +264,8 @@
               name={@form[:content].name}
               id={@form[:content].id}
               placeholder="Write your markdown content here..."
-              class="w-full flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-lg resize-none placeholder:text-base-content/30"
-              style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.75; min-height: 500px;"
+              class="w-full flex-1 bg-transparent border-0 focus:outline-none focus:ring-0 text-lg resize-none placeholder:text-base-content/30 overflow-y-auto"
+              style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; line-height: 1.75;"
               phx-hook="MarkdownEditor"
               phx-drop-target={@uploads.images.ref}
             ><%= Phoenix.HTML.Form.normalize_value("textarea", @form[:content].value) %></textarea>
