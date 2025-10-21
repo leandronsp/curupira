@@ -22,9 +22,15 @@ fi
 # Create target directory if it doesn't exist
 mkdir -p "${TARGET_DIR}"
 
-# Sync static files (preserve markdown files in articles/)
+# Sync static files (preserve git and infrastructure files)
 echo "  → Syncing HTML, CSS, JS files..."
 rsync -av --delete \
+    --exclude '.git/' \
+    --exclude '.gitignore' \
+    --exclude 'docker-compose.yml' \
+    --exclude 'nginx.conf' \
+    --exclude 'Makefile' \
+    --exclude 'README.md' \
     --exclude 'articles/*.md' \
     "${SOURCE_DIR}/" \
     "${TARGET_DIR}/"
