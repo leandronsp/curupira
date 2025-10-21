@@ -119,7 +119,7 @@ defmodule Mix.Tasks.BuildStatic do
     priv_static = "priv/static"
 
     # Minify and copy static JavaScript files
-    ["static-theme.js", "static-search.js", "static-pagination.js"]
+    ["static-theme.js", "static-search.js", "static-pagination.js", "static-giscus.js"]
     |> Enum.each(fn file ->
       src = Path.join(priv_static, file)
       dest = Path.join(@output_dir, file)
@@ -767,6 +767,29 @@ defmodule Mix.Tasks.BuildStatic do
       </div>
 
       <script src="/static-theme.js" defer></script>
+      <script src="/static-giscus.js" defer></script>
+
+      <!-- Giscus Comments -->
+      <div class="container mx-auto px-4 max-w-4xl mt-16 mb-8">
+        <div class="border-t border-base-300 pt-8">
+          <h2 class="text-2xl font-bold mb-6">Comments</h2>
+          <script src="https://giscus.app/client.js"
+                  data-repo="leandronsp/leandronsp.com"
+                  data-repo-id="R_kgDOQGG-eQ"
+                  data-category="Announcements"
+                  data-category-id="DIC_kwDOQGG-ec4Cw4TN"
+                  data-mapping="pathname"
+                  data-strict="0"
+                  data-reactions-enabled="1"
+                  data-emit-metadata="0"
+                  data-input-position="bottom"
+                  data-theme="preferred_color_scheme"
+                  data-lang="en"
+                  crossorigin="anonymous"
+                  async>
+          </script>
+        </div>
+      </div>
 
       <!-- Lazy load Google Analytics after page is interactive -->
       <script>
