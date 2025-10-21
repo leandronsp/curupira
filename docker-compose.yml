@@ -34,19 +34,8 @@ services:
     volumes:
       - .:/app
       - mix_deps:/app/deps
-      - static_files:/static_html
     working_dir: /app
-
-  static:
-    image: nginx:alpine
-    ports:
-      - "8000:80"
-    volumes:
-      - static_files:/usr/share/nginx/html:ro
-    depends_on:
-      - web
 
 volumes:
   postgres_data:
   mix_deps:
-  static_files:

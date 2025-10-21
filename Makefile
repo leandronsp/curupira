@@ -1,4 +1,4 @@
-.PHONY: help dev-up dev-down dev-logs dev-reset dev-seeds prod-build prod-up prod-down prod-logs prod-reset prod-seeds prod-create-admin test-all clean static-build static-serve static-test deploy-build deploy-push deploy backup-create backup-upload backup-download backup-restore backup-full backup-list
+.PHONY: help dev-up dev-down dev-logs dev-reset dev-seeds prod-build prod-up prod-down prod-logs prod-reset prod-seeds prod-create-admin test-all clean static-build deploy-build deploy-push deploy backup-create backup-upload backup-download backup-restore backup-full backup-list export-markdown export-static export-full
 
 # Default target
 help:
@@ -28,9 +28,7 @@ help:
 	@echo "  make test-prod       - Test prod endpoint (localhost:4001)"
 	@echo ""
 	@echo "Static Site:"
-	@echo "  make static-build    - Build static site in Docker"
-	@echo "  make static-serve    - Serve static site locally (port 8000)"
-	@echo "  make static-test     - Build and serve static site"
+	@echo "  make static-build    - Build static site (output: ./static_output)"
 	@echo ""
 	@echo "Deployment:"
 	@echo "  make deploy-build    - Build AMD64 image for production servers"
@@ -44,6 +42,11 @@ help:
 	@echo "  make backup-restore  - Restore database from downloaded backup"
 	@echo "  make backup-full     - Create and upload backup (all-in-one)"
 	@echo "  make backup-list     - List all backups in S3"
+	@echo ""
+	@echo "Export to leandronsp.com:"
+	@echo "  make export-markdown - Export articles as markdown files"
+	@echo "  make export-static   - Sync static HTML/CSS/JS files"
+	@echo "  make export-full     - Build static site + export markdown (all-in-one)"
 	@echo ""
 	@echo "Cleanup:"
 	@echo "  make clean           - Stop everything and remove containers/volumes"
@@ -221,17 +224,10 @@ static-build:
 	@echo "2. Generating static site (CSS purge + SEO + pages)..."
 	@docker-compose exec -T web mix build_static
 	@echo ""
-	@echo "3. Copying to nginx volume..."
-	@docker-compose exec -T web sh -c "rm -rf /static_html/* && cp -r static_output/* /static_html/"
-	@echo ""
-	@echo "4. Restarting nginx..."
-	@docker-compose restart static
-	@echo ""
 	@echo "=========================================="
-	@echo "  ✓ Static Site Ready!"
+	@echo "  ✓ Static Site Built!"
 	@echo "=========================================="
 	@echo ""
-	@echo "Preview:  http://localhost:8000"
 	@echo "Output:   ./static_output/"
 	@echo ""
 	@echo "Files generated:"
@@ -241,22 +237,9 @@ static-build:
 	@echo "  • robots.txt"
 	@echo "  • search-index.json"
 	@echo ""
-
-static-serve:
-	@echo "Serving static site on http://localhost:8000"
-	@echo "Press Ctrl+C to stop"
-	@cd static_output && python3 -m http.server 8000
-
-static-test: static-build
+	@echo "Next steps:"
+	@echo "  make export-full    - Export to leandronsp.com"
 	@echo ""
-	@echo "=========================================="
-	@echo "Static site built and ready to test!"
-	@echo "=========================================="
-	@echo ""
-	@echo "Starting server on http://localhost:8000"
-	@echo "Press Ctrl+C to stop"
-	@echo ""
-	@cd static_output && python3 -m http.server 8000
 
 # ======================
 # Cleanup Commands
@@ -403,4 +386,46 @@ deploy: deploy-build deploy-push
 	@echo "  sudo ln -sf /etc/nginx/sites-available/curupira /etc/nginx/sites-enabled/"
 	@echo "  sudo rm -f /etc/nginx/sites-enabled/default"
 	@echo "  sudo nginx -t && sudo systemctl restart nginx"
+	@echo ""
+
+# ======================
+# Export Commands
+# ======================
+
+EXPORT_TARGET ?= ../leandronsp.com
+
+export-markdown:
+	@echo "=========================================="
+	@echo "  Exporting Articles as Markdown"
+	@echo "=========================================="
+	@echo ""
+	@mkdir -p ./markdown_output
+	@docker-compose exec -T web mix export.markdown --output /app/markdown_output
+	@echo ""
+	@echo "Copying to $(EXPORT_TARGET)/articles..."
+	@mkdir -p $(EXPORT_TARGET)/articles
+	@cp -r ./markdown_output/* $(EXPORT_TARGET)/articles/
+	@ARTICLE_COUNT=$$(ls -1 markdown_output 2>/dev/null | wc -l | tr -d ' '); \
+	echo "✓ Exported $$ARTICLE_COUNT markdown files to $(EXPORT_TARGET)/articles"
+
+export-static:
+	@echo "=========================================="
+	@echo "  Syncing Static Files"
+	@echo "=========================================="
+	@echo ""
+	@EXPORT_TARGET=$(EXPORT_TARGET) ./sync_static.sh
+
+export-full: static-build export-markdown export-static
+	@echo ""
+	@echo "=========================================="
+	@echo "  ✓ Full Export Complete"
+	@echo "=========================================="
+	@echo ""
+	@echo "Target directory: $(EXPORT_TARGET)"
+	@echo ""
+	@echo "Contents:"
+	@echo "  • Static HTML/CSS/JS files (root)"
+	@echo "  • Markdown articles (articles/)"
+	@echo ""
+	@echo "Ready for Cloudflare Pages deployment!"
 	@echo ""

@@ -42,6 +42,9 @@ npm-debug.log
 # Static site output
 /static_output/
 
+# Markdown export output
+/markdown_output/
+
 # Database backups
 /backups/
 
