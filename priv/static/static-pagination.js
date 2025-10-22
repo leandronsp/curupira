@@ -7,7 +7,28 @@
   function init() {
     allArticles = Array.from(document.querySelectorAll('.article-card'));
     recalculatePagination();
-    showPage(1);
+
+    // Restore state from sessionStorage if exists
+    const savedState = sessionStorage.getItem('homepage-state');
+    if (savedState) {
+      try {
+        const state = JSON.parse(savedState);
+        showPage(state.page || 1);
+        // Trigger search restoration if needed
+        if (state.search) {
+          const searchInput = document.getElementById('search-input');
+          if (searchInput) {
+            searchInput.value = state.search;
+            // Dispatch input event to trigger search
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+        }
+      } catch (e) {
+        showPage(1);
+      }
+    } else {
+      showPage(1);
+    }
   }
 
   function recalculatePagination() {
@@ -52,11 +73,23 @@
 
     renderPagination();
 
+    // Save state to sessionStorage
+    saveState();
+
     // Scroll articles container to top
     const container = document.getElementById('articles-container');
     if (container) {
       container.scrollTop = 0;
     }
+  }
+
+  function saveState() {
+    const searchInput = document.getElementById('search-input');
+    const state = {
+      page: currentPage,
+      search: searchInput ? searchInput.value : ''
+    };
+    sessionStorage.setItem('homepage-state', JSON.stringify(state));
   }
 
   function renderPagination() {

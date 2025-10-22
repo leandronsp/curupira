@@ -393,12 +393,12 @@ defmodule Mix.Tasks.BuildStatic do
           </div>
 
           <!-- Main Content - Articles List -->
-          <div class="lg:col-span-8">
+          <main class="lg:col-span-8">
             <div class="flex items-center gap-2 mb-2">
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
               </svg>
-              <span class="text-sm text-base-content/50 font-mono" id="page-indicator">
+              <span class="text-sm text-base-content/70 font-mono" id="page-indicator">
                 <span id="current-page">1</span> / <span id="total-pages">#{total_pages}</span>
               </span>
             </div>
@@ -456,31 +456,31 @@ defmodule Mix.Tasks.BuildStatic do
             </div>
 
             <div id="pagination-container" class="mt-8"></div>
-          </div>
+          </main>
         </div>
 
         <!-- Footer -->
         <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-          <div class="text-center text-sm text-base-content/60">
+          <div class="text-center text-sm text-base-content/80">
             <p>
               Powered by
               <a
                 href="https://github.com/leandronsp/curupira"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="font-semibold text-primary hover:underline"
+                class="font-semibold text-blue-600 hover:underline"
               >
                 Curupira
               </a>
               | Open source blog platform built with Phoenix LiveView
             </p>
-            <p class="mt-2 text-xs text-base-content/50">
+            <p class="mt-2 text-xs text-base-content/70">
               Licensed under
               <a
                 href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="hover:underline"
+                class="text-blue-600 hover:underline"
               >
                 AGPL-3.0
               </a>
@@ -700,7 +700,7 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
       </div>
 
-      <div class="article-container py-8">
+      <main class="article-container py-8">
         <article class="container mx-auto px-4 max-w-8xl">
           <h1 class="text-5xl font-bold mb-6">#{article.title}</h1>
 
@@ -760,33 +760,33 @@ defmodule Mix.Tasks.BuildStatic do
 
         <!-- Footer -->
         <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
-          <div class="text-center text-sm text-base-content/60">
+          <div class="text-center text-sm text-base-content/80">
             <p>
               Powered by
               <a
                 href="https://github.com/leandronsp/curupira"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="font-semibold text-primary hover:underline"
+                class="font-semibold text-blue-600 hover:underline"
               >
                 Curupira
               </a>
               | Open source blog platform built with Phoenix LiveView
             </p>
-            <p class="mt-2 text-xs text-base-content/50">
+            <p class="mt-2 text-xs text-base-content/70">
               Licensed under
               <a
                 href="https://github.com/leandronsp/curupira/blob/master/LICENSE"
                 target="_blank"
                 rel="noopener noreferrer"
-                class="hover:underline"
+                class="text-blue-600 hover:underline"
               >
                 AGPL-3.0
               </a>
             </p>
           </div>
         </footer>
-      </div>
+      </main>
 
       <script src="/static-theme.js" defer></script>
       <script src="/static-giscus.js" defer></script>
@@ -830,11 +830,11 @@ defmodule Mix.Tasks.BuildStatic do
       end
 
       """
-      <div class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors cursor-pointer min-h-[140px] sm:h-[160px] bg-base-100"
-           data-slug="#{article.slug}"
-           data-title="#{String.downcase(article.title)}"
-           data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
-           onclick="window.location.href='/articles/#{article.slug}.html'">
+      <a href="/articles/#{article.slug}.html"
+         class="article-card rounded-lg border border-base-300 hover:border-base-content/20 transition-colors block min-h-[140px] sm:h-[160px] bg-base-100 no-underline"
+         data-slug="#{article.slug}"
+         data-title="#{String.downcase(article.title)}"
+         data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}">
         <div class="p-4 sm:p-6 h-full">
           <div class="flex items-start gap-3 sm:gap-4 h-full">
             <div class="flex-1 min-w-0 flex flex-col h-full">
@@ -882,7 +882,7 @@ defmodule Mix.Tasks.BuildStatic do
             </div>
           </div>
         </div>
-      </div>
+      </a>
       """
     end)
     |> Enum.join("\n")
