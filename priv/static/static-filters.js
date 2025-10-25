@@ -1,0 +1,227 @@
+// Blog filters management with URL persistence
+(function() {
+  let tagCategories = [];
+  let currentFilters = {
+    lang: 'all',
+    tag: null,
+    search: ''
+  };
+
+  // URL params management
+  function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      lang: params.get('lang') || 'all',
+      tag: params.get('tag') || null,
+      search: params.get('q') || '',
+      page: parseInt(params.get('page')) || 1
+    };
+  }
+
+  function updateUrlParams(updates) {
+    const params = new URLSearchParams(window.location.search);
+
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === null || value === '' || value === 'all' || value === 1) {
+        params.delete(key);
+      } else {
+        params.set(key, value);
+      }
+    });
+
+    const newUrl = params.toString()
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname;
+
+    window.history.pushState({}, '', newUrl);
+  }
+
+  // Load tags from tags.json (curated with categories)
+  async function loadTags() {
+    try {
+      const response = await fetch('/tags.json');
+      tagCategories = await response.json();
+    } catch (error) {
+      console.error('Failed to load tags:', error);
+      tagCategories = [];
+    }
+  }
+
+  // Render tag pills in header
+  function renderTagsPills() {
+    const container = document.getElementById('tags-pills');
+    if (!container) return;
+
+    // Filter to only show specific main tags
+    const mainTags = ['ruby', 'rust', 'haskell', 'assembly', 'bash', 'postgres', 'kubernetes'];
+
+    const filteredTags = tagCategories
+      .flatMap(category => category.tags)
+      .filter(({ tag }) => mainTags.includes(tag.toLowerCase()));
+
+    container.innerHTML = filteredTags.map(({ tag, count }) => {
+      const isActive = currentFilters.tag === tag;
+      const classes = isActive
+        ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary'
+        : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300';
+
+      return `<button
+        class="${classes}"
+        onclick="window.blogFilters.setTag('${tag}')"
+        data-tag="${tag}"
+      >
+        ${tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()}
+      </button>`;
+    }).join('');
+  }
+
+  // Update language filter UI
+  function updateLanguageUI() {
+    document.querySelectorAll('.lang-filter-btn').forEach(btn => {
+      const lang = btn.getAttribute('data-lang');
+      if (lang === currentFilters.lang) {
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary';
+      } else {
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300';
+      }
+    });
+  }
+
+  // Update active filters display
+  function updateActiveFilters() {
+    const container = document.getElementById('active-filters');
+    const list = document.getElementById('active-filters-list');
+    if (!container || !list) return;
+
+    const filters = [];
+
+    if (currentFilters.lang !== 'all') {
+      const langLabel = currentFilters.lang === 'pt' ? '🇧🇷 PT' : '🇺🇸 EN';
+      filters.push({
+        label: langLabel,
+        type: 'lang'
+      });
+    }
+
+    if (currentFilters.tag) {
+      filters.push({
+        label: currentFilters.tag,
+        type: 'tag'
+      });
+    }
+
+    if (filters.length === 0) {
+      container.classList.add('hidden');
+      return;
+    }
+
+    container.classList.remove('hidden');
+    list.innerHTML = filters.map(filter => `
+      <button
+        class="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium bg-primary text-white rounded-full hover:bg-primary/90 transition-all"
+        onclick="window.blogFilters.remove('${filter.type}')"
+      >
+        <span>${filter.label}</span>
+        <span class="text-lg">×</span>
+      </button>
+    `).join('');
+  }
+
+  // Public API
+  window.blogFilters = {
+    setLanguage(lang) {
+      currentFilters.lang = lang;
+      updateUrlParams({ lang, page: 1 });
+      updateLanguageUI();
+      updateActiveFilters();
+
+      // Trigger search/filter update
+      if (window.blogSearch && window.blogSearch.filter) {
+        window.blogSearch.filter();
+      }
+    },
+
+    setTag(tag) {
+      // Toggle tag if clicking same one
+      if (currentFilters.tag === tag) {
+        currentFilters.tag = null;
+      } else {
+        currentFilters.tag = tag;
+      }
+
+      updateUrlParams({ tag: currentFilters.tag, page: 1 });
+      renderTagsPills();
+      updateActiveFilters();
+
+      // Trigger search/filter update
+      if (window.blogSearch && window.blogSearch.filter) {
+        window.blogSearch.filter();
+      }
+    },
+
+    remove(type) {
+      if (type === 'lang') {
+        this.setLanguage('all');
+      } else if (type === 'tag') {
+        this.setTag(currentFilters.tag); // Toggle off
+      }
+    },
+
+    clearAll() {
+      currentFilters.lang = 'all';
+      currentFilters.tag = null;
+      updateUrlParams({ lang: null, tag: null, page: 1 });
+      updateLanguageUI();
+      renderTagsPills();
+      updateActiveFilters();
+
+      // Trigger search/filter update
+      if (window.blogSearch && window.blogSearch.filter) {
+        window.blogSearch.filter();
+      }
+    },
+
+    getFilters() {
+      return { ...currentFilters };
+    },
+
+    init() {
+      // Restore from URL
+      const params = getUrlParams();
+      currentFilters.lang = params.lang;
+      currentFilters.tag = params.tag;
+      currentFilters.search = params.search;
+
+      // Update UI
+      updateLanguageUI();
+      updateActiveFilters();
+
+      // Restore search input
+      const searchInput = document.getElementById('search-input');
+      if (searchInput && params.search) {
+        searchInput.value = params.search;
+      }
+
+      // Trigger initial filter after state restoration
+      // Use a small delay to ensure search.js has initialized
+      setTimeout(() => {
+        if (window.blogSearch && window.blogSearch.filter) {
+          window.blogSearch.filter();
+        }
+      }, 0);
+    }
+  };
+
+  // Initialize on DOM ready
+  async function init() {
+    await loadTags();
+    window.blogFilters.init();
+    renderTagsPills();
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
+  }
+})();

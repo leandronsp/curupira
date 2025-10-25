@@ -1,4 +1,4 @@
-// Enhanced client-side search for static site
+// Enhanced client-side search with filters integration
 (function() {
   const searchInput = document.getElementById('search-input');
   if (!searchInput) return;
@@ -7,7 +7,6 @@
   const noResults = document.getElementById('no-results');
   let allArticles = [];
   let searchIndex = [];
-  let currentLanguageFilter = 'all';
 
   // Load search index
   async function loadSearchIndex() {
@@ -23,6 +22,14 @@
   async function init() {
     allArticles = Array.from(articlesContainer.querySelectorAll('.article-card'));
     await loadSearchIndex();
+
+    // Check if we need to apply initial filters from URL
+    // This ensures filters are applied even if blogFilters hasn't called us yet
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('lang') || params.has('tag') || params.has('q')) {
+      // Delay slightly to ensure blogFilters has restored state
+      setTimeout(() => filter(), 50);
+    }
   }
 
   function normalizeText(text) {
@@ -42,15 +49,16 @@
       return title.includes(query) || tags.includes(query);
     }
 
-    // Search in title and tags
+    // Search in title, tags, and snippet
     const title = normalizeText(indexData.title);
     const tags = normalizeText((indexData.tags || []).join(' '));
+    const snippet = normalizeText(indexData.snippet || '');
 
-    return title.includes(query) || tags.includes(query);
+    return title.includes(query) || tags.includes(query) || snippet.includes(query);
   }
 
-  function matchesLanguage(article) {
-    if (currentLanguageFilter === 'all') return true;
+  function matchesLanguage(article, lang) {
+    if (lang === 'all') return true;
 
     const slug = article.getAttribute('data-slug') || '';
     const indexData = searchIndex.find(item => item.slug === slug);
@@ -59,20 +67,53 @@
 
     const language = indexData.language || 'en';
 
-    if (currentLanguageFilter === 'pt') {
+    if (lang === 'pt') {
       return language === 'pt-BR' || language === 'pt';
     }
 
-    return language === currentLanguageFilter;
+    return language === lang;
   }
 
-  function filterArticles() {
+  function matchesTag(article, tag) {
+    if (!tag) return true;
+
+    const slug = article.getAttribute('data-slug') || '';
+    const indexData = searchIndex.find(item => item.slug === slug);
+
+    if (!indexData) return false; // Don't show if not in index
+
+    return (indexData.tags || []).includes(tag);
+  }
+
+  function filter(resetPage = false) {
     const query = normalizeText(searchInput.value);
+    const filters = window.blogFilters ? window.blogFilters.getFilters() : { lang: 'all', tag: null };
+
+    // Update URL with search query
+    if (window.blogFilters) {
+      const params = new URLSearchParams(window.location.search);
+      if (query) {
+        params.set('q', query);
+      } else {
+        params.delete('q');
+      }
+
+      // Reset page when search query changes (user typing)
+      if (resetPage) {
+        params.delete('page');
+      }
+
+      const newUrl = params.toString()
+        ? `${window.location.pathname}?${params.toString()}`
+        : window.location.pathname;
+      window.history.replaceState({}, '', newUrl);
+    }
 
     allArticles.forEach(card => {
       const matchesQ = matchesSearch(card, query);
-      const matchesLang = matchesLanguage(card);
-      const matches = matchesQ && matchesLang;
+      const matchesLang = matchesLanguage(card, filters.lang);
+      const matchesT = matchesTag(card, filters.tag);
+      const matches = matchesQ && matchesLang && matchesT;
 
       if (matches) {
         card.style.display = '';
@@ -100,29 +141,12 @@
     }
   }
 
-  // Search input handler
-  searchInput.addEventListener('input', filterArticles);
+  // Search input handler - reset page when user types
+  searchInput.addEventListener('input', () => filter(true));
 
-  // Language filter buttons
-  window.setLanguageFilter = function(lang) {
-    currentLanguageFilter = lang;
-
-    // Update button states
-    document.querySelectorAll('.lang-filter-btn').forEach(btn => {
-      if (btn.getAttribute('data-lang') === lang) {
-        btn.className = 'lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-blue-600 text-white';
-        if (btn.getAttribute('data-lang') !== 'all') {
-          btn.classList.add('border-l-2', 'border-base-300');
-        }
-      } else {
-        btn.className = 'lang-filter-btn px-2 sm:px-3 py-1 sm:py-1.5 text-xs sm:text-sm font-medium transition-colors bg-base-100 hover:bg-base-200';
-        if (btn.getAttribute('data-lang') !== 'all') {
-          btn.classList.add('border-l-2', 'border-base-300');
-        }
-      }
-    });
-
-    filterArticles();
+  // Expose public API
+  window.blogSearch = {
+    filter
   };
 
   // Initialize on DOM ready

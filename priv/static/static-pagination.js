@@ -1,34 +1,38 @@
+// Pagination with URL persistence
 (function() {
   const ARTICLES_PER_PAGE = 10;
   let currentPage = 1;
   let totalPages = 1;
   let allArticles = [];
 
+  function getUrlParams() {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      page: parseInt(params.get('page')) || 1
+    };
+  }
+
+  function updateUrlParams(page) {
+    const params = new URLSearchParams(window.location.search);
+
+    if (page === 1) {
+      params.delete('page');
+    } else {
+      params.set('page', page);
+    }
+
+    const newUrl = params.toString()
+      ? `${window.location.pathname}?${params.toString()}`
+      : window.location.pathname;
+
+    window.history.pushState({}, '', newUrl);
+  }
+
   function init() {
     allArticles = Array.from(document.querySelectorAll('.article-card'));
-    recalculatePagination();
 
-    // Restore state from sessionStorage if exists
-    const savedState = sessionStorage.getItem('homepage-state');
-    if (savedState) {
-      try {
-        const state = JSON.parse(savedState);
-        showPage(state.page || 1);
-        // Trigger search restoration if needed
-        if (state.search) {
-          const searchInput = document.getElementById('search-input');
-          if (searchInput) {
-            searchInput.value = state.search;
-            // Dispatch input event to trigger search
-            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
-          }
-        }
-      } catch (e) {
-        showPage(1);
-      }
-    } else {
-      showPage(1);
-    }
+    // Don't show page yet - let filters initialize first
+    // The filter system will trigger handleSearch() which will restore the page from URL
   }
 
   function recalculatePagination() {
@@ -44,12 +48,16 @@
   }
 
   function handleSearch() {
-    currentPage = 1;
     recalculatePagination();
-    showPage(1);
+
+    // Restore page from URL if available, otherwise reset to page 1
+    const params = getUrlParams();
+    const targetPage = params.page <= totalPages ? params.page : 1;
+
+    showPage(targetPage, false);  // Don't scroll when filtering
   }
 
-  function showPage(page) {
+  function showPage(page, shouldScroll = true) {
     currentPage = page;
 
     const visibleArticles = allArticles.filter(
@@ -72,24 +80,7 @@
     });
 
     renderPagination();
-
-    // Save state to sessionStorage
-    saveState();
-
-    // Scroll articles container to top
-    const container = document.getElementById('articles-container');
-    if (container) {
-      container.scrollTop = 0;
-    }
-  }
-
-  function saveState() {
-    const searchInput = document.getElementById('search-input');
-    const state = {
-      page: currentPage,
-      search: searchInput ? searchInput.value : ''
-    };
-    sessionStorage.setItem('homepage-state', JSON.stringify(state));
+    updateUrlParams(page);
   }
 
   function renderPagination() {
@@ -115,28 +106,22 @@
     const end = Math.min(currentPage * ARTICLES_PER_PAGE, visibleArticles.length);
 
     container.innerHTML = `
-      <div class="flex flex-col items-center gap-4">
-        <div class="text-sm text-base-content/70">
-          Showing ${start}-${end} of ${visibleArticles.length} articles
-        </div>
+      <div class="flex items-center justify-center gap-4">
+        <button class="px-3 py-2 rounded-lg border border-base-300 bg-transparent hover:bg-base-200 text-base-content transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent cursor-pointer" id="prev-page" onclick="window.pagination.prevPage()" aria-label="Previous page">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 pointer-events-none" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
+          </svg>
+        </button>
 
-        <div class="join">
-          <button class="join-item btn btn-sm" id="prev-page" onclick="window.pagination.prevPage()" aria-label="Previous page">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
-            </svg>
-          </button>
+        <span class="text-sm text-base-content/70">
+          Page ${currentPage} of ${totalPages}
+        </span>
 
-          <button class="join-item btn btn-sm no-animation" aria-label="Page ${currentPage} of ${totalPages}">
-            Page ${currentPage} of ${totalPages}
-          </button>
-
-          <button class="join-item btn btn-sm" id="next-page" onclick="window.pagination.nextPage()" aria-label="Next page">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
-            </svg>
-          </button>
-        </div>
+        <button class="px-3 py-2 rounded-lg border border-base-300 bg-transparent hover:bg-base-200 text-base-content transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent cursor-pointer" id="next-page" onclick="window.pagination.nextPage()" aria-label="Next page">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 pointer-events-none" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
+          </svg>
+        </button>
       </div>
     `;
 
@@ -149,20 +134,10 @@
 
     if (prevBtn) {
       prevBtn.disabled = currentPage === 1;
-      if (currentPage === 1) {
-        prevBtn.classList.add('btn-disabled');
-      } else {
-        prevBtn.classList.remove('btn-disabled');
-      }
     }
 
     if (nextBtn) {
       nextBtn.disabled = currentPage === totalPages;
-      if (currentPage === totalPages) {
-        nextBtn.classList.add('btn-disabled');
-      } else {
-        nextBtn.classList.remove('btn-disabled');
-      }
     }
   }
 
