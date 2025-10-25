@@ -755,10 +755,10 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
 
         <!-- Navigation Bar: Back to home -->
-        <div class="border-t border-base-300 bg-base-200/50">
+        <div class="border-t border-base-300">
           <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
             <div class="py-3">
-              <a href="/" onclick="event.preventDefault(); history.back();" class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content cursor-pointer">
+              <a href="/" onclick="event.preventDefault(); history.back();" class="inline-flex items-center gap-2 px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                 </svg>
