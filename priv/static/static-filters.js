@@ -93,9 +93,9 @@
     document.querySelectorAll('.lang-filter-btn').forEach(btn => {
       const lang = btn.getAttribute('data-lang');
       if (lang === currentFilters.lang) {
-        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary';
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary cursor-pointer';
       } else {
-        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300';
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300 cursor-pointer';
       }
     });
   }
