@@ -23,6 +23,27 @@ defmodule Curupira.Blog do
   end
 
   @doc """
+  Returns the list of published articles ordered by published_at DESC.
+
+  ## Examples
+
+      iex> list_published_articles()
+      [%Article{}, ...]
+
+  """
+  def list_published_articles do
+    from(a in Article,
+      where: a.status == "published",
+      order_by: [
+        desc: a.pinned,
+        desc: a.published_at,
+        desc: a.inserted_at
+      ]
+    )
+    |> Repo.all()
+  end
+
+  @doc """
   Returns paginated articles ordered by published_at DESC.
 
   ## Options
@@ -53,6 +74,7 @@ defmodule Curupira.Blog do
       base_query
       |> maybe_filter_by_search(search)
       |> order_by([a], [
+        desc: a.pinned,
         asc: fragment("CASE WHEN ? = 'published' THEN 1 ELSE 0 END", a.status),
         desc: a.published_at,
         desc: a.inserted_at
@@ -179,6 +201,60 @@ defmodule Curupira.Blog do
   """
   def change_article(%Article{} = article, attrs \\ %{}) do
     Article.changeset(article, attrs)
+  end
+
+  @doc """
+  Pins an article. Unpins any other pinned articles first (only one article can be pinned at a time).
+
+  ## Examples
+
+      iex> pin_article(article)
+      {:ok, %Article{pinned: true}}
+
+  """
+  def pin_article(%Article{} = article) do
+    Repo.transaction(fn ->
+      # Unpin all articles first
+      from(a in Article, where: a.pinned == true)
+      |> Repo.update_all(set: [pinned: false])
+
+      # Pin the selected article
+      article
+      |> Article.changeset(%{pinned: true})
+      |> Repo.update!()
+    end)
+  end
+
+  @doc """
+  Unpins an article.
+
+  ## Examples
+
+      iex> unpin_article(article)
+      {:ok, %Article{pinned: false}}
+
+  """
+  def unpin_article(%Article{} = article) do
+    article
+    |> Article.changeset(%{pinned: false})
+    |> Repo.update()
+  end
+
+  @doc """
+  Gets the currently pinned article, if any.
+
+  ## Examples
+
+      iex> get_pinned_article()
+      %Article{}
+
+      iex> get_pinned_article()
+      nil
+
+  """
+  def get_pinned_article do
+    from(a in Article, where: a.pinned == true)
+    |> Repo.one()
   end
 
   # Blog Profile functions

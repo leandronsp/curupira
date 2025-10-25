@@ -59,7 +59,7 @@
       .flatMap(category => category.tags)
       .filter(({ tag }) => mainTags.includes(tag.toLowerCase()));
 
-    container.innerHTML = filteredTags.map(({ tag, count }) => {
+    const tagButtons = filteredTags.map(({ tag, count }) => {
       const isActive = currentFilters.tag === tag;
       const classes = isActive
         ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary'
@@ -73,6 +73,19 @@
         ${tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()}
       </button>`;
     }).join('');
+
+    // Add Clear All link if filters are active
+    const hasActiveFilters = currentFilters.lang !== 'all' || currentFilters.tag !== null;
+    const clearLink = hasActiveFilters
+      ? `<a
+          class="ml-auto text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer underline"
+          onclick="window.blogFilters.clearAll()"
+        >
+          Clear All ×
+        </a>`
+      : '';
+
+    container.innerHTML = tagButtons + clearLink;
   }
 
   // Update language filter UI
@@ -87,53 +100,13 @@
     });
   }
 
-  // Update active filters display
-  function updateActiveFilters() {
-    const container = document.getElementById('active-filters');
-    const list = document.getElementById('active-filters-list');
-    if (!container || !list) return;
-
-    const filters = [];
-
-    if (currentFilters.lang !== 'all') {
-      const langLabel = currentFilters.lang === 'pt' ? '🇧🇷 PT' : '🇺🇸 EN';
-      filters.push({
-        label: langLabel,
-        type: 'lang'
-      });
-    }
-
-    if (currentFilters.tag) {
-      filters.push({
-        label: currentFilters.tag,
-        type: 'tag'
-      });
-    }
-
-    if (filters.length === 0) {
-      container.classList.add('hidden');
-      return;
-    }
-
-    container.classList.remove('hidden');
-    list.innerHTML = filters.map(filter => `
-      <button
-        class="inline-flex items-center gap-1.5 px-3 py-1 text-sm font-medium bg-primary text-white rounded-full hover:bg-primary/90 transition-all"
-        onclick="window.blogFilters.remove('${filter.type}')"
-      >
-        <span>${filter.label}</span>
-        <span class="text-lg">×</span>
-      </button>
-    `).join('');
-  }
-
   // Public API
   window.blogFilters = {
     setLanguage(lang) {
       currentFilters.lang = lang;
       updateUrlParams({ lang, page: 1 });
       updateLanguageUI();
-      updateActiveFilters();
+      renderTagsPills();
 
       // Trigger search/filter update
       if (window.blogSearch && window.blogSearch.filter) {
@@ -151,7 +124,6 @@
 
       updateUrlParams({ tag: currentFilters.tag, page: 1 });
       renderTagsPills();
-      updateActiveFilters();
 
       // Trigger search/filter update
       if (window.blogSearch && window.blogSearch.filter) {
@@ -173,7 +145,6 @@
       updateUrlParams({ lang: null, tag: null, page: 1 });
       updateLanguageUI();
       renderTagsPills();
-      updateActiveFilters();
 
       // Trigger search/filter update
       if (window.blogSearch && window.blogSearch.filter) {
@@ -194,7 +165,6 @@
 
       // Update UI
       updateLanguageUI();
-      updateActiveFilters();
 
       // Restore search input
       const searchInput = document.getElementById('search-input');

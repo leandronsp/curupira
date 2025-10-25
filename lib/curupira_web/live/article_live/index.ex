@@ -95,6 +95,39 @@ defmodule CurupiraWeb.ArticleLive.Index do
     end
   end
 
+  @impl true
+  def handle_event("toggle_pin", %{"id" => id}, socket) do
+    article = Blog.get_article!(id)
+
+    result = if article.pinned do
+      Blog.unpin_article(article)
+    else
+      Blog.pin_article(article)
+    end
+
+    case result do
+      {:ok, updated_article} ->
+        message = if updated_article.pinned, do: "Article pinned", else: "Article unpinned"
+
+        # Refresh all articles to reflect pinned changes
+        opts = [page: socket.assigns.pagination.page, per_page: 10]
+        opts = if socket.assigns.search_query != "",
+          do: Keyword.put(opts, :search, socket.assigns.search_query),
+          else: opts
+
+        pagination = Blog.list_articles_paginated(opts)
+
+        {:noreply,
+         socket
+         |> assign(:pagination, pagination)
+         |> stream(:articles, pagination.articles, reset: true)
+         |> put_flash(:info, message)}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Failed to pin/unpin article")}
+    end
+  end
+
   defp pagination_range(current_page, total_pages) do
     cond do
       # If 7 or fewer pages, show all

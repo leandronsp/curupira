@@ -19,6 +19,7 @@ defmodule Curupira.Blog.Article do
     field :published_at, :utc_datetime
     field :tags, {:array, :string}
     field :language, :string, default: "en"
+    field :pinned, :boolean, default: false
 
     timestamps(type: :utc_datetime)
   end
@@ -42,7 +43,8 @@ defmodule Curupira.Blog.Article do
       :dev_to_url,
       :published_at,
       :tags,
-      :language
+      :language,
+      :pinned
     ])
     |> validate_required([:title, :content])
     |> generate_slug_if_missing()

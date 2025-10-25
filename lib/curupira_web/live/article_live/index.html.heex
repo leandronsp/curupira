@@ -90,7 +90,13 @@
           <div
             :for={{id, article} <- @streams.articles}
             id={id}
-            class={"card border border-base-content/20 hover:border-base-content/30 transition-colors cursor-pointer h-[200px] bg-transparent " <> if article.status != "published", do: "border-l-4 border-l-warning", else: ""}
+            class={"card border hover:border-base-content/30 transition-colors cursor-pointer h-[200px] " <>
+              cond do
+                article.pinned -> "border-info border-2 bg-info/5"
+                article.status != "published" -> "border-base-content/20 border-l-4 border-l-warning bg-transparent"
+                true -> "border-base-content/20 bg-transparent"
+              end
+            }
             phx-click={JS.navigate(~p"/articles/#{article}/edit")}
           >
             <div class="card-body p-6 h-full">
@@ -131,6 +137,15 @@
                         <% end %>
                       </div>
 
+                      <div :if={article.pinned} class="flex items-center gap-1.5">
+                        <span class="badge badge-info badge-sm gap-1">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                          </svg>
+                          Pinned
+                        </span>
+                      </div>
+
                       <div :if={article.published_at} class="flex items-center gap-1.5">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                           <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -156,10 +171,29 @@
 
                 <div class="flex flex-col items-end justify-between h-full flex-shrink-0">
                   <div class="flex gap-2">
+                    <%= if article.status == "published" do %>
+                      <button
+                        type="button"
+                        phx-click="toggle_pin"
+                        phx-value-id={article.id}
+                        phx-hook="TogglePin"
+                        id={"pin-#{article.id}"}
+                        class={"btn btn-sm gap-1 " <> if article.pinned, do: "btn-info", else: "btn-ghost btn-outline"}
+                        title={if article.pinned, do: "Unpin article", else: "Pin article"}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                        </svg>
+                        <%= if article.pinned, do: "Unpin", else: "Pin" %>
+                      </button>
+                    <% end %>
+
                     <button
                       type="button"
                       phx-click="toggle_publish"
                       phx-value-id={article.id}
+                      phx-hook="TogglePublish"
+                      id={"publish-#{article.id}"}
                       class={"btn btn-sm gap-1 " <> if article.status == "published", do: "btn-warning btn-outline", else: "btn-success btn-outline"}
                       title={if article.status == "published", do: "Unpublish article", else: "Publish article"}
                     >
@@ -181,6 +215,7 @@
                       class="btn btn-sm btn-error btn-outline gap-1"
                       phx-click="delete"
                       phx-value-id={article.id}
+                      onclick="event.stopPropagation()"
                       phx-hook="ConfirmDelete"
                       id={"delete-#{article.id}"}
                     >

@@ -89,6 +89,9 @@
     const query = normalizeText(searchInput.value);
     const filters = window.blogFilters ? window.blogFilters.getFilters() : { lang: 'all', tag: null };
 
+    // Check if any filter is active
+    const hasActiveFilters = filters.lang !== 'all' || filters.tag !== null || query !== '';
+
     // Update URL with search query
     if (window.blogFilters) {
       const params = new URLSearchParams(window.location.search);
@@ -110,6 +113,35 @@
     }
 
     allArticles.forEach(card => {
+      const isPinnedHighlight = card.classList.contains('pinned-article');
+      const slug = card.getAttribute('data-slug') || '';
+
+      // Check if this is the regular card version of the pinned article
+      const pinnedHighlight = document.querySelector('.pinned-article');
+      const pinnedSlug = pinnedHighlight ? pinnedHighlight.getAttribute('data-slug') : null;
+      const isRegularPinnedCard = !isPinnedHighlight && slug === pinnedSlug;
+
+      // Hide pinned highlight when filter is active
+      if (isPinnedHighlight && hasActiveFilters) {
+        card.style.display = 'none';
+        card.classList.add('hidden');
+        return;
+      }
+
+      // Show pinned highlight when no filter
+      if (isPinnedHighlight && !hasActiveFilters) {
+        card.style.display = '';
+        card.classList.remove('hidden');
+        return;
+      }
+
+      // Hide regular pinned card when no filter (show highlight instead)
+      if (isRegularPinnedCard && !hasActiveFilters) {
+        card.style.display = 'none';
+        card.classList.add('hidden');
+        return;
+      }
+
       const matchesQ = matchesSearch(card, query);
       const matchesLang = matchesLanguage(card, filters.lang);
       const matchesT = matchesTag(card, filters.tag);

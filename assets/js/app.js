@@ -486,6 +486,30 @@ Hooks.ConfirmDelete = {
   }
 }
 
+Hooks.TogglePin = {
+  mounted() {
+    this.el.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const id = this.el.getAttribute('phx-value-id')
+      this.pushEvent('toggle_pin', {id: id})
+    })
+  }
+}
+
+Hooks.TogglePublish = {
+  mounted() {
+    this.el.addEventListener('click', (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+
+      const id = this.el.getAttribute('phx-value-id')
+      this.pushEvent('toggle_publish', {id: id})
+    })
+  }
+}
+
 Hooks.TagInput = {
   mounted() {
     this.el.addEventListener('keydown', (e) => {

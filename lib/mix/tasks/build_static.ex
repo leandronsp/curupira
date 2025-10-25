@@ -40,8 +40,8 @@ defmodule Mix.Tasks.BuildStatic do
     build_optimized_css()
 
     # Get all published articles
-    articles = Curupira.Blog.list_articles()
-    Logger.info("📄 Found #{length(articles)} articles")
+    articles = Curupira.Blog.list_published_articles()
+    Logger.info("📄 Found #{length(articles)} published articles")
 
     # Get profile
     profile = Curupira.Blog.get_or_create_profile()
@@ -466,12 +466,12 @@ defmodule Mix.Tasks.BuildStatic do
         <div class="border-t border-base-300 bg-base-200/50">
           <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
             <div class="flex items-center gap-3 py-3 overflow-x-auto">
-              <div class="flex gap-2 items-center flex-nowrap">
+              <div class="flex gap-2 items-center flex-wrap">
                 <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
                 <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
                 <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
                 <span class="text-base-content/30 mx-1">|</span>
-                <div id="tags-pills" class="flex gap-2 flex-nowrap">
+                <div id="tags-pills" class="flex gap-2 flex-1 items-center">
                   <!-- Tag pills loaded by JavaScript -->
                 </div>
               </div>
@@ -482,20 +482,12 @@ defmodule Mix.Tasks.BuildStatic do
 
       <!-- Main Content -->
       <main class="container mx-auto px-4 sm:px-6 py-8 max-w-6xl">
-        <!-- Active Filters -->
-        <div id="active-filters" class="mb-6 hidden">
-          <div class="flex items-center gap-3 flex-wrap p-4 bg-primary/5 rounded-lg border border-primary/20">
-            <span class="text-sm font-medium text-base-content/70">Filtering:</span>
-            <div id="active-filters-list" class="flex gap-2 flex-wrap"></div>
-            <button onclick="window.blogFilters.clearAll()" class="ml-auto text-sm text-primary hover:text-primary/80 font-medium">
-              Clear all ×
-            </button>
-          </div>
-        </div>
+        <!-- Pinned Article (Full Width) -->
+        #{render_pinned_article_section(articles)}
 
         <!-- Articles Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="articles-container">
-          #{render_article_list(articles)}
+          #{render_regular_articles_only(articles)}
         </div>
 
         <!-- No Results -->
@@ -922,6 +914,30 @@ defmodule Mix.Tasks.BuildStatic do
     end
   end
 
+  defp generate_pinned_snippet_html(content) do
+    # Convert markdown to HTML
+    {:ok, html} = Curupira.Markdown.Parser.to_html(content)
+
+    # Remove all HTML tags to get plain text only
+    # Remove links but keep link text: <a href="...">text</a> -> text
+    html = Regex.replace(~r/<a[^>]*>(.*?)<\/a>/i, html, "\\1")
+
+    # Remove all other HTML tags (block-level and inline formatting)
+    html = html
+      |> String.replace(~r/<[^>]*>/, " ")
+      |> String.replace("---", "")  # Remove horizontal rules
+      |> String.replace(~r/\s+/, " ")
+      |> String.trim()
+
+    # Truncate to ~320 chars (larger for pinned articles)
+    max_length = 320
+    if String.length(html) > max_length do
+      String.slice(html, 0, max_length) <> "..."
+    else
+      html
+    end
+  end
+
   # Truncate HTML while preserving tags
   defp truncate_html(html, max_chars) do
     # Simple approach: extract text, truncate, then extract HTML up to that point
@@ -966,61 +982,151 @@ defmodule Mix.Tasks.BuildStatic do
   end
 
   defp render_article_list(articles) do
-    articles
-    |> Enum.sort_by(& &1.published_at || &1.inserted_at, {:desc, DateTime})
-    |> Enum.map(fn article ->
-      published_date = if article.published_at do
-        Calendar.strftime(article.published_at, "%d %b %Y")
-      else
-        Calendar.strftime(article.inserted_at, "%d %b %Y")
-      end
-
-      # Generate HTML snippet with formatting (no clickable links)
-      snippet_html = generate_snippet_html(article.content || "")
-
-      tag_pills = if article.tags && length(article.tags) > 0 do
-        Enum.take(article.tags, 4)
-        |> Enum.map_join("", fn tag ->
-          ~s(<span class="px-2.5 py-1 text-xs font-medium bg-base-200 text-base-content/80 rounded-md hover:bg-primary/10 transition-colors">#{tag}</span>)
-        end)
-      else
-        ""
-      end
-
-      """
-      <article
-        class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
-        data-slug="#{article.slug}"
-        data-title="#{String.downcase(article.title)}"
-        data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
-        onclick="window.location.href='/articles/#{article.slug}.html'"
-      >
-        <!-- Tags First -->
-        <div class="flex gap-2 flex-wrap mb-3">
-          #{tag_pills}
-        </div>
-
-        <!-- Title -->
-        <h2 class="text-xl sm:text-2xl font-bold text-base-content leading-snug mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
-          #{article.title}
-        </h2>
-
-        <!-- Snippet -->
-        <p class="text-base text-base-content/70 leading-relaxed line-clamp-2 mb-4">
-          #{snippet_html}
-        </p>
-
-        <!-- Meta Footer -->
-        <div class="flex items-center gap-3 text-sm text-base-content/60">
-          <time datetime="#{if article.published_at, do: DateTime.to_iso8601(article.published_at), else: DateTime.to_iso8601(article.inserted_at)}">
-            #{published_date}
-          </time>
-          <span>•</span>
-          <span class="text-lg">#{Curupira.Blog.Article.language_flag(article)}</span>
-        </div>
-      </article>
-      """
+    sorted_articles = articles
+    |> Enum.sort_by(fn a -> {!a.pinned, a.published_at || a.inserted_at} end, fn {p1, d1}, {p2, d2} ->
+      if p1 == p2, do: DateTime.compare(d1, d2) == :gt, else: p1 < p2
     end)
+
+    {pinned, regular} = Enum.split_with(sorted_articles, & &1.pinned)
+
+    pinned_html = case pinned do
+      [article | _] -> render_pinned_article(article)
+      [] -> ""
+    end
+
+    regular_html = Enum.map(regular, &render_regular_article/1)
     |> Enum.join("\n")
+
+    pinned_html <> regular_html
+  end
+
+  defp render_pinned_article_section(articles) do
+    pinned = Enum.find(articles, & &1.pinned)
+
+    case pinned do
+      nil -> ""
+      article -> render_pinned_article(article)
+    end
+  end
+
+  defp render_regular_articles_only(articles) do
+    articles
+    |> Enum.sort_by(fn a -> a.published_at || a.inserted_at end, {:desc, DateTime})
+    |> Enum.map(&render_regular_article/1)
+    |> Enum.join("\n")
+  end
+
+  defp render_pinned_article(article) do
+    published_date = if article.published_at do
+      Calendar.strftime(article.published_at, "%d %b %Y")
+    else
+      Calendar.strftime(article.inserted_at, "%d %b %Y")
+    end
+
+    snippet_html = generate_pinned_snippet_html(article.content || "")
+
+    tag_pills = if article.tags && length(article.tags) > 0 do
+      Enum.take(article.tags, 4)
+      |> Enum.map_join("", fn tag ->
+        ~s(<span class="px-2.5 py-1 text-xs font-medium bg-base-200 text-base-content/80 rounded-md hover:bg-primary/10 transition-colors">#{tag}</span>)
+      end)
+    else
+      ""
+    end
+
+    """
+    <article
+      class="article-card pinned-article group block p-8 bg-amber-50/50 dark:bg-slate-800 border-4 border-orange-500 dark:border-blue-400 shadow-md shadow-orange-200/50 dark:shadow-blue-900/30 rounded-xl hover:border-orange-600 dark:hover:border-blue-300 transition-all cursor-pointer mb-8 relative"
+      data-slug="#{article.slug}"
+      data-title="#{String.downcase(article.title)}"
+      data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
+      onclick="window.location.href='/articles/#{article.slug}.html'"
+    >
+      <!-- Pinned Badge -->
+      <div class="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-full text-xs font-semibold">
+        <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+        </svg>
+        Pinned
+      </div>
+
+      <!-- Tags First -->
+      <div class="flex gap-2 flex-wrap mb-4">
+        #{tag_pills}
+      </div>
+
+      <!-- Title -->
+      <h2 class="text-2xl sm:text-3xl font-bold text-base-content leading-tight mb-4 group-hover:text-primary transition-colors">
+        #{article.title}
+      </h2>
+
+      <!-- Snippet -->
+      <p class="text-lg text-base-content/75 leading-relaxed line-clamp-5 mb-4">
+        #{snippet_html}
+      </p>
+
+      <!-- Meta Footer -->
+      <div class="flex items-center gap-3 text-sm text-base-content/60">
+        <time datetime="#{if article.published_at, do: DateTime.to_iso8601(article.published_at), else: DateTime.to_iso8601(article.inserted_at)}">
+          #{published_date}
+        </time>
+        <span>•</span>
+        <span class="text-xl">#{Curupira.Blog.Article.language_flag(article)}</span>
+      </div>
+    </article>
+    """
+  end
+
+  defp render_regular_article(article) do
+    published_date = if article.published_at do
+      Calendar.strftime(article.published_at, "%d %b %Y")
+    else
+      Calendar.strftime(article.inserted_at, "%d %b %Y")
+    end
+
+    snippet_html = generate_snippet_html(article.content || "")
+
+    tag_pills = if article.tags && length(article.tags) > 0 do
+      Enum.take(article.tags, 4)
+      |> Enum.map_join("", fn tag ->
+        ~s(<span class="px-2.5 py-1 text-xs font-medium bg-base-200 text-base-content/80 rounded-md hover:bg-primary/10 transition-colors">#{tag}</span>)
+      end)
+    else
+      ""
+    end
+
+    """
+    <article
+      class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+      data-slug="#{article.slug}"
+      data-title="#{String.downcase(article.title)}"
+      data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
+      onclick="window.location.href='/articles/#{article.slug}.html'"
+    >
+      <!-- Tags First -->
+      <div class="flex gap-2 flex-wrap mb-3">
+        #{tag_pills}
+      </div>
+
+      <!-- Title -->
+      <h2 class="text-xl sm:text-2xl font-bold text-base-content leading-snug mb-3 group-hover:text-primary transition-colors line-clamp-2 min-h-[3.5rem]">
+        #{article.title}
+      </h2>
+
+      <!-- Snippet -->
+      <p class="text-base text-base-content/70 leading-relaxed line-clamp-2 mb-4">
+        #{snippet_html}
+      </p>
+
+      <!-- Meta Footer -->
+      <div class="flex items-center gap-3 text-sm text-base-content/60">
+        <time datetime="#{if article.published_at, do: DateTime.to_iso8601(article.published_at), else: DateTime.to_iso8601(article.inserted_at)}">
+          #{published_date}
+        </time>
+        <span>•</span>
+        <span class="text-lg">#{Curupira.Blog.Article.language_flag(article)}</span>
+      </div>
+    </article>
+    """
   end
 end
