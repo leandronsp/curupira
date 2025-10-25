@@ -467,9 +467,9 @@ defmodule Mix.Tasks.BuildStatic do
           <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
             <div class="flex items-center gap-3 py-3 overflow-x-auto">
               <div class="flex gap-2 items-center flex-wrap">
-                <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
-                <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
-                <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
+                <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white cursor-pointer" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
+                <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content cursor-pointer" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
+                <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content cursor-pointer" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
                 <span class="text-base-content/30 mx-1">|</span>
                 <div id="tags-pills" class="flex gap-2 flex-1 items-center">
                   <!-- Tag pills loaded by JavaScript -->

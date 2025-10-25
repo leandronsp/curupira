@@ -62,8 +62,8 @@
     const tagButtons = filteredTags.map(({ tag, count }) => {
       const isActive = currentFilters.tag === tag;
       const classes = isActive
-        ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary'
-        : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300';
+        ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary cursor-pointer'
+        : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300 cursor-pointer';
 
       return `<button
         class="${classes}"
