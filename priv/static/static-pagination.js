@@ -36,8 +36,9 @@
   }
 
   function recalculatePagination() {
+    // Exclude pinned article from pagination count
     const visibleArticles = allArticles.filter(
-      article => article.style.display !== 'none'
+      article => article.style.display !== 'none' && !article.classList.contains('pinned-article')
     );
     totalPages = Math.max(1, Math.ceil(visibleArticles.length / ARTICLES_PER_PAGE));
 
@@ -60,8 +61,13 @@
   function showPage(page, shouldScroll = true) {
     currentPage = page;
 
-    const visibleArticles = allArticles.filter(
-      article => article.style.display !== 'none'
+    // Separate pinned and regular articles
+    const pinnedArticle = allArticles.find(
+      article => article.style.display !== 'none' && article.classList.contains('pinned-article')
+    );
+
+    const regularArticles = allArticles.filter(
+      article => article.style.display !== 'none' && !article.classList.contains('pinned-article')
     );
 
     const start = (page - 1) * ARTICLES_PER_PAGE;
@@ -72,8 +78,13 @@
       article.classList.add('hidden');
     });
 
-    // Show only current page items
-    visibleArticles.forEach((article, index) => {
+    // Always show pinned article if it's visible
+    if (pinnedArticle) {
+      pinnedArticle.classList.remove('hidden');
+    }
+
+    // Show only current page items from regular articles
+    regularArticles.forEach((article, index) => {
       if (index >= start && index < end) {
         article.classList.remove('hidden');
       }
