@@ -962,8 +962,8 @@ defmodule Mix.Tasks.BuildStatic do
       <main class="container mx-auto px-4 sm:px-6 py-8 max-w-6xl">
         <article class="bg-base-100">
           <!-- Back link -->
-          <a href="/" onclick="event.preventDefault(); history.back();" class="inline-flex items-center gap-2 text-base font-medium transition-colors text-base-content/70 hover:text-primary cursor-pointer mb-6">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <a href="/" onclick="event.preventDefault(); history.back();" class="inline-flex items-center gap-2 text-lg font-medium transition-colors text-base-content/70 hover:text-primary cursor-pointer mb-6">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             Back
@@ -1003,9 +1003,9 @@ defmodule Mix.Tasks.BuildStatic do
           </div>
 
           <!-- Back to top -->
-          <div class="mt-12 mb-8">
-            <a href="#" onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });" class="inline-flex items-center gap-2 text-base font-medium transition-colors text-base-content/70 hover:text-primary cursor-pointer">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+          <div class="mt-12 mb-8 text-center">
+            <a href="#" onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });" class="inline-flex items-center gap-2 text-xl font-medium transition-colors text-base-content/70 hover:text-primary cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
               </svg>
               Back to top
