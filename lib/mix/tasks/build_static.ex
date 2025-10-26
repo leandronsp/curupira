@@ -538,11 +538,38 @@ defmodule Mix.Tasks.BuildStatic do
             <div class="overflow-x-auto py-3">
               <div class="flex gap-2 items-center min-w-max">
                 <div id="tags-pills" class="flex gap-2 items-center">
-                  <!-- Tag pills loaded by JavaScript -->
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-tag="all" onclick="window.blogFilters.clearTag()">All</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="ruby" onclick="window.blogFilters.setTag('ruby')">Ruby</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="rust" onclick="window.blogFilters.setTag('rust')">Rust</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="haskell" onclick="window.blogFilters.setTag('haskell')">Haskell</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="assembly" onclick="window.blogFilters.setTag('assembly')">Assembly</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="bash" onclick="window.blogFilters.setTag('bash')">Bash</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="postgres" onclick="window.blogFilters.setTag('postgres')">Postgres</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="kubernetes" onclick="window.blogFilters.setTag('kubernetes')">Kubernetes</button>
                 </div>
               </div>
             </div>
           </div>
+          <script>
+            // Apply tag state immediately (sync, no event listener)
+            (function() {
+              const urlParams = new URLSearchParams(window.location.search);
+              const urlTag = urlParams.get('tag');
+              const savedTag = localStorage.getItem('blog-filter-tag');
+              const currentTag = urlTag || savedTag || null;
+
+              const buttons = document.querySelectorAll('.tag-pill');
+              buttons.forEach(function(btn) {
+                const tag = btn.getAttribute('data-tag');
+                const isActive = (tag === 'all' && !currentTag) || (tag === currentTag);
+                if (isActive) {
+                  btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+                } else {
+                  btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
+                }
+              });
+            })();
+          </script>
         </div>
       </header>
 
@@ -896,11 +923,38 @@ defmodule Mix.Tasks.BuildStatic do
             <div class="overflow-x-auto py-3">
               <div class="flex gap-2 items-center min-w-max">
                 <div id="tags-pills" class="flex gap-2 items-center">
-                  <!-- Tag pills loaded by JavaScript -->
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-tag="all" onclick="window.blogFilters.clearTag()">All</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="ruby" onclick="window.blogFilters.setTag('ruby')">Ruby</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="rust" onclick="window.blogFilters.setTag('rust')">Rust</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="haskell" onclick="window.blogFilters.setTag('haskell')">Haskell</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="assembly" onclick="window.blogFilters.setTag('assembly')">Assembly</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="bash" onclick="window.blogFilters.setTag('bash')">Bash</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="postgres" onclick="window.blogFilters.setTag('postgres')">Postgres</button>
+                  <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="kubernetes" onclick="window.blogFilters.setTag('kubernetes')">Kubernetes</button>
                 </div>
               </div>
             </div>
           </div>
+          <script>
+            // Apply tag state immediately (sync, no event listener)
+            (function() {
+              const urlParams = new URLSearchParams(window.location.search);
+              const urlTag = urlParams.get('tag');
+              const savedTag = localStorage.getItem('blog-filter-tag');
+              const currentTag = urlTag || savedTag || null;
+
+              const buttons = document.querySelectorAll('.tag-pill');
+              buttons.forEach(function(btn) {
+                const tag = btn.getAttribute('data-tag');
+                const isActive = (tag === 'all' && !currentTag) || (tag === currentTag);
+                if (isActive) {
+                  btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+                } else {
+                  btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
+                }
+              });
+            })();
+          </script>
         </div>
       </header>
 

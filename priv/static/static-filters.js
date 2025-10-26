@@ -47,48 +47,18 @@
     }
   }
 
-  // Render tag pills in header
-  function renderTagsPills() {
-    const container = document.getElementById('tags-pills');
-    if (!container) return;
-
-    // Add "All" button first
-    const allActive = currentFilters.tag === null;
-    const allButtonClasses = allActive
-      ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white cursor-pointer'
-      : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content cursor-pointer';
-
-    const allButton = `<button
-      class="${allButtonClasses}"
-      onclick="window.blogFilters.clearTag()"
-      data-tag="all"
-    >
-      All
-    </button>`;
-
-    // Filter to only show specific main tags
-    const mainTags = ['ruby', 'rust', 'haskell', 'assembly', 'bash', 'postgres', 'kubernetes'];
-
-    const filteredTags = tagCategories
-      .flatMap(category => category.tags)
-      .filter(({ tag }) => mainTags.includes(tag.toLowerCase()));
-
-    const tagButtons = filteredTags.map(({ tag, count }) => {
-      const isActive = currentFilters.tag === tag;
-      const classes = isActive
-        ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white cursor-pointer'
-        : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content cursor-pointer';
-
-      return `<button
-        class="${classes}"
-        onclick="window.blogFilters.setTag('${tag}')"
-        data-tag="${tag}"
-      >
-        ${tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()}
-      </button>`;
-    }).join('');
-
-    container.innerHTML = allButton + tagButtons;
+  // Update tag pills UI (tags are already rendered in HTML by server)
+  function updateTagsUI() {
+    const buttons = document.querySelectorAll('.tag-pill');
+    buttons.forEach(btn => {
+      const tag = btn.getAttribute('data-tag');
+      const isActive = (tag === 'all' && !currentFilters.tag) || (tag === currentFilters.tag);
+      if (isActive) {
+        btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+      } else {
+        btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
+      }
+    });
   }
 
   // Update language filter UI
@@ -125,7 +95,7 @@
       currentFilters.lang = lang;
       updateUrlParams({ lang, page: 1 });
       updateLanguageUI();
-      renderTagsPills();
+      updateTagsUI();
 
       // Trigger search/filter update
       if (window.blogSearch && window.blogSearch.filter) {
@@ -158,7 +128,7 @@
       }
 
       updateUrlParams({ tag: currentFilters.tag, page: 1 });
-      renderTagsPills();
+      updateTagsUI();
 
       // Trigger search/filter update
       if (window.blogSearch && window.blogSearch.filter) {
@@ -178,7 +148,7 @@
 
       currentFilters.tag = null;
       updateUrlParams({ tag: null, page: 1 });
-      renderTagsPills();
+      updateTagsUI();
 
       // Trigger search/filter update
       if (window.blogSearch && window.blogSearch.filter) {
