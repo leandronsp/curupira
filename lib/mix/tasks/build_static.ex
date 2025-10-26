@@ -935,6 +935,16 @@ defmodule Mix.Tasks.BuildStatic do
           <div class="prose prose-lg max-w-none">
             #{html_content}
           </div>
+
+          <!-- Back to top -->
+          <div class="mt-12 mb-8">
+            <a href="#" onclick="event.preventDefault(); window.scrollTo({ top: 0, behavior: 'smooth' });" class="inline-flex items-center gap-2 text-sm font-medium transition-colors text-base-content/70 hover:text-primary cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+              Back to top
+            </a>
+          </div>
         </article>
 
         <!-- Giscus Comments -->
