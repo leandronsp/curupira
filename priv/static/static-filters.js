@@ -111,6 +111,9 @@
   // Public API
   window.blogFilters = {
     setLanguage(lang) {
+      // Save to localStorage for article pages
+      localStorage.setItem('blog-filter-lang', lang);
+
       // If on article page, navigate to home with filter
       if (isArticlePage()) {
         const params = new URLSearchParams();
@@ -131,6 +134,13 @@
     },
 
     setTag(tag) {
+      // Save to localStorage for article pages
+      if (tag) {
+        localStorage.setItem('blog-filter-tag', tag);
+      } else {
+        localStorage.removeItem('blog-filter-tag');
+      }
+
       // If on article page, navigate to home with filter
       if (isArticlePage()) {
         const params = new URLSearchParams();
@@ -142,6 +152,7 @@
       // Toggle tag if clicking same one
       if (currentFilters.tag === tag) {
         currentFilters.tag = null;
+        localStorage.removeItem('blog-filter-tag');
       } else {
         currentFilters.tag = tag;
       }
@@ -156,6 +167,9 @@
     },
 
     clearTag() {
+      // Remove from localStorage
+      localStorage.removeItem('blog-filter-tag');
+
       // If on article page, navigate to home
       if (isArticlePage()) {
         window.location.href = '/';
@@ -198,18 +212,43 @@
     },
 
     init() {
-      // If on article page, try to restore filters from referrer
-      if (isArticlePage() && document.referrer) {
-        try {
-          const referrerUrl = new URL(document.referrer);
-          // Only read from referrer if it's from the same site
-          if (referrerUrl.origin === window.location.origin) {
-            const referrerParams = new URLSearchParams(referrerUrl.search);
-            currentFilters.lang = referrerParams.get('lang') || 'all';
-            currentFilters.tag = referrerParams.get('tag') || null;
+      // If on article page, try to restore filters from referrer or localStorage
+      if (isArticlePage()) {
+        let langRestored = false;
+        let tagRestored = false;
+
+        // Try to restore from referrer first
+        if (document.referrer) {
+          try {
+            const referrerUrl = new URL(document.referrer);
+            // Only read from referrer if it's from the same site
+            if (referrerUrl.origin === window.location.origin) {
+              const referrerParams = new URLSearchParams(referrerUrl.search);
+              const langParam = referrerParams.get('lang');
+              const tagParam = referrerParams.get('tag');
+
+              if (langParam) {
+                currentFilters.lang = langParam;
+                langRestored = true;
+              }
+              if (tagParam) {
+                currentFilters.tag = tagParam;
+                tagRestored = true;
+              }
+            }
+          } catch (e) {
+            // Ignore invalid referrer URLs
           }
-        } catch (e) {
-          // Ignore invalid referrer URLs
+        }
+
+        // Fallback to localStorage if not restored from referrer
+        if (!langRestored) {
+          const savedLang = localStorage.getItem('blog-filter-lang');
+          currentFilters.lang = savedLang || 'all';
+        }
+        if (!tagRestored) {
+          const savedTag = localStorage.getItem('blog-filter-tag');
+          currentFilters.tag = savedTag || null;
         }
       } else {
         // Restore from current URL (homepage)
@@ -217,6 +256,14 @@
         currentFilters.lang = params.lang;
         currentFilters.tag = params.tag;
         currentFilters.search = params.search;
+
+        // Save to localStorage for article pages to use
+        localStorage.setItem('blog-filter-lang', currentFilters.lang);
+        if (currentFilters.tag) {
+          localStorage.setItem('blog-filter-tag', currentFilters.tag);
+        } else {
+          localStorage.removeItem('blog-filter-tag');
+        }
       }
 
       // Update UI

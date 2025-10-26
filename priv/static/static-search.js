@@ -89,8 +89,8 @@
     const query = normalizeText(searchInput.value);
     const filters = window.blogFilters ? window.blogFilters.getFilters() : { lang: 'all', tag: null };
 
-    // Check if any filter is active
-    const hasActiveFilters = filters.lang !== 'all' || filters.tag !== null || query !== '';
+    // Hide pinned only when TAG is active (not when language or search is active)
+    const hasTagFilter = filters.tag !== null;
 
     // Update URL with search query
     if (window.blogFilters) {
@@ -121,22 +121,22 @@
       const pinnedSlug = pinnedHighlight ? pinnedHighlight.getAttribute('data-slug') : null;
       const isRegularPinnedCard = !isPinnedHighlight && slug === pinnedSlug;
 
-      // Hide pinned highlight when filter is active
-      if (isPinnedHighlight && hasActiveFilters) {
+      // Hide pinned highlight when TAG filter is active (not language or search)
+      if (isPinnedHighlight && hasTagFilter) {
         card.style.display = 'none';
         card.classList.add('hidden');
         return;
       }
 
-      // Show pinned highlight when no filter
-      if (isPinnedHighlight && !hasActiveFilters) {
+      // Show pinned highlight when no TAG filter
+      if (isPinnedHighlight && !hasTagFilter) {
         card.style.display = '';
         card.classList.remove('hidden');
         return;
       }
 
-      // Hide regular pinned card when no filter (show highlight instead)
-      if (isRegularPinnedCard && !hasActiveFilters) {
+      // Hide regular pinned card when no TAG filter (show highlight instead)
+      if (isRegularPinnedCard && !hasTagFilter) {
         card.style.display = 'none';
         card.classList.add('hidden');
         return;
