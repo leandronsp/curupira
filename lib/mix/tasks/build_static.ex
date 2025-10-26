@@ -826,19 +826,29 @@ defmodule Mix.Tasks.BuildStatic do
             </div>
           </div>
 
-          <!-- Search Bar -->
-          <div class="relative max-w-2xl">
-            <input
-              type="text"
-              id="search-input"
-              placeholder="Search articles..."
-              class="w-full h-12 pl-12 pr-4 text-base bg-base-200 border-2 border-base-300 rounded-full transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
-              autocomplete="off"
-              disabled
-            />
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
+          <!-- Search Bar + Language Switcher -->
+          <div class="flex gap-4 items-center">
+            <!-- Search -->
+            <div class="relative flex-1 max-w-2xl">
+              <input
+                type="text"
+                id="search-input"
+                placeholder="Search articles..."
+                class="w-full h-12 pl-12 pr-4 text-base bg-base-200 border-2 border-base-300 rounded-full transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                autocomplete="off"
+                disabled
+              />
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+            </div>
+
+            <!-- Language Switcher -->
+            <div class="lang-switcher-bg flex gap-0 bg-blue-50/80 border border-blue-100 rounded-full p-1 ml-auto shadow-sm">
+              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
+              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
+              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
+            </div>
           </div>
         </div>
 

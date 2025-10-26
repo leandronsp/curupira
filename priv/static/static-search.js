@@ -142,6 +142,13 @@
         return;
       }
 
+      // ALSO hide regular pinned card when TAG filter is active
+      if (isRegularPinnedCard && hasTagFilter) {
+        card.style.display = 'none';
+        card.classList.add('hidden');
+        return;
+      }
+
       const matchesQ = matchesSearch(card, query);
       const matchesLang = matchesLanguage(card, filters.lang);
       const matchesT = matchesTag(card, filters.tag);
