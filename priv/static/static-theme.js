@@ -1,33 +1,44 @@
 // Client-side theme toggle for static site
 (function() {
   const themeToggle = document.getElementById('theme-toggle');
-  if (!themeToggle) return;
+  const themeToggleMobile = document.getElementById('theme-toggle-mobile');
+
+  if (!themeToggle && !themeToggleMobile) return;
 
   // Load theme from localStorage or default to 'light'
   const savedTheme = localStorage.getItem('theme') || 'light';
   setTheme(savedTheme);
 
-  themeToggle.addEventListener('click', () => {
+  // Add event listener to desktop toggle
+  if (themeToggle) {
+    themeToggle.addEventListener('click', toggleTheme);
+  }
+
+  // Add event listener to mobile toggle
+  if (themeToggleMobile) {
+    themeToggleMobile.addEventListener('click', toggleTheme);
+  }
+
+  function toggleTheme() {
     const currentTheme = document.documentElement.getAttribute('data-theme');
     const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
     setTheme(newTheme);
     localStorage.setItem('theme', newTheme);
-  });
+  }
 
   function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
 
-    const sunIcon = document.querySelector('.sun-icon');
-    const moonIcon = document.querySelector('.moon-icon');
+    // Update all sun/moon icons (both mobile and desktop)
+    const sunIcons = document.querySelectorAll('.sun-icon');
+    const moonIcons = document.querySelectorAll('.moon-icon');
 
-    if (sunIcon && moonIcon) {
-      if (theme === 'dark') {
-        sunIcon.classList.remove('hidden');
-        moonIcon.classList.add('hidden');
-      } else {
-        sunIcon.classList.add('hidden');
-        moonIcon.classList.remove('hidden');
-      }
+    if (theme === 'dark') {
+      sunIcons.forEach(icon => icon.classList.remove('hidden'));
+      moonIcons.forEach(icon => icon.classList.add('hidden'));
+    } else {
+      sunIcons.forEach(icon => icon.classList.add('hidden'));
+      moonIcons.forEach(icon => icon.classList.remove('hidden'));
     }
   }
 })();
