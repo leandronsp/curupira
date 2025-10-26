@@ -455,6 +455,32 @@ defmodule Mix.Tasks.BuildStatic do
           color: #d4d4d8; /* Lighter pastel gray for dark theme */
         }
       </style>
+      <script>
+        // Preload filter state to prevent FOUC
+        (function() {
+          // Get saved language from localStorage or URL params
+          const urlParams = new URLSearchParams(window.location.search);
+          const urlLang = urlParams.get('lang');
+          const savedLang = localStorage.getItem('blog-filter-lang') || 'all';
+          const currentLang = urlLang || savedLang;
+
+          // Store for later use by scripts
+          window.__PRELOADED_LANG__ = currentLang;
+
+          // Set correct button state on DOMContentLoaded (as early as possible)
+          document.addEventListener('DOMContentLoaded', function() {
+            const buttons = document.querySelectorAll('.lang-filter-btn');
+            buttons.forEach(function(btn) {
+              const lang = btn.getAttribute('data-lang');
+              if (lang === currentLang) {
+                btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+              } else {
+                btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
+              }
+            });
+          });
+        })();
+      </script>
     </head>
     <body class="min-h-screen bg-base-100">
       <!-- Fixed Header -->
@@ -1146,6 +1172,7 @@ defmodule Mix.Tasks.BuildStatic do
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
+      data-pinned="true"
       onclick="window.location.href='/articles/#{article.slug}.html'"
     >
       <!-- Pinned Badge -->
@@ -1207,6 +1234,7 @@ defmodule Mix.Tasks.BuildStatic do
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
+      #{if article.pinned, do: ~s(data-pinned="true"), else: ""}
       onclick="window.location.href='/articles/#{article.slug}.html'"
     >
       <!-- Tags First -->

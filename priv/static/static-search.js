@@ -114,15 +114,10 @@
 
     allArticles.forEach(card => {
       const isPinnedHighlight = card.classList.contains('pinned-article');
-      const slug = card.getAttribute('data-slug') || '';
+      const isPinned = card.getAttribute('data-pinned') === 'true';
 
-      // Check if this is the regular card version of the pinned article
-      const pinnedHighlight = document.querySelector('.pinned-article');
-      const pinnedSlug = pinnedHighlight ? pinnedHighlight.getAttribute('data-slug') : null;
-      const isRegularPinnedCard = !isPinnedHighlight && slug === pinnedSlug;
-
-      // Hide pinned highlight when TAG filter is active (not language or search)
-      if (isPinnedHighlight && hasTagFilter) {
+      // Hide ALL pinned cards (both highlight and regular) when TAG filter is active
+      if (isPinned && hasTagFilter) {
         card.style.display = 'none';
         card.classList.add('hidden');
         return;
@@ -136,19 +131,13 @@
       }
 
       // Hide regular pinned card when no TAG filter (show highlight instead)
-      if (isRegularPinnedCard && !hasTagFilter) {
+      if (isPinned && !isPinnedHighlight && !hasTagFilter) {
         card.style.display = 'none';
         card.classList.add('hidden');
         return;
       }
 
-      // ALSO hide regular pinned card when TAG filter is active
-      if (isRegularPinnedCard && hasTagFilter) {
-        card.style.display = 'none';
-        card.classList.add('hidden');
-        return;
-      }
-
+      // For non-pinned cards, apply normal filtering
       const matchesQ = matchesSearch(card, query);
       const matchesLang = matchesLanguage(card, filters.lang);
       const matchesT = matchesTag(card, filters.tag);
