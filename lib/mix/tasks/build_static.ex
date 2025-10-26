@@ -527,12 +527,21 @@ defmodule Mix.Tasks.BuildStatic do
                 type="text"
                 id="search-input"
                 placeholder="Search articles..."
-                class="w-full h-12 pl-12 pr-4 text-base bg-base-200 border-2 border-base-300 rounded-full transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+                class="w-full h-12 pl-12 pr-12 text-base bg-base-200 border-2 border-base-300 rounded-full transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 autocomplete="off"
               />
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
+              <button
+                id="search-clear"
+                class="hidden absolute right-4 top-1/2 -translate-y-1/2 text-base-content/40 hover:text-base-content transition-colors"
+                title="Clear search"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
 
               <!-- Search Results Dropdown -->
               <div id="search-results" class="hidden absolute top-full mt-2 w-full bg-base-100 border-2 border-base-300 rounded-2xl shadow-2xl max-h-[500px] overflow-y-auto z-50 p-3">

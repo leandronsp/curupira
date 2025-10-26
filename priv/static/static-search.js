@@ -4,6 +4,7 @@
   if (!searchInput) return;
 
   const searchResults = document.getElementById('search-results');
+  const searchClear = document.getElementById('search-clear');
   let searchIndex = [];
 
   // Load search index
@@ -129,9 +130,31 @@
     searchResults.classList.remove('hidden');
   }
 
+  // Toggle clear button visibility
+  function toggleClearButton() {
+    if (searchClear) {
+      if (searchInput.value.length > 0) {
+        searchClear.classList.remove('hidden');
+      } else {
+        searchClear.classList.add('hidden');
+      }
+    }
+  }
+
+  // Clear search
+  if (searchClear) {
+    searchClear.addEventListener('click', () => {
+      searchInput.value = '';
+      searchResults.classList.add('hidden');
+      toggleClearButton();
+      searchInput.focus();
+    });
+  }
+
   // Search on input
   searchInput.addEventListener('input', (e) => {
     search(e.target.value);
+    toggleClearButton();
   });
 
   // Close dropdown when clicking outside
