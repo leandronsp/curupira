@@ -44,7 +44,7 @@ mix phx.server
 # Start with IEx console
 iex -S mix phx.server
 
-# Pre-commit checks (compile with warnings as errors, format, test)
+# Pre-commit checks (compile with warnings as errors, unlock unused deps, format, test)
 mix precommit
 ```
 
@@ -115,9 +115,11 @@ make export-full      # Build + export markdown + sync (recommended)
 export EXPORT_TARGET=../mysite.com
 make export-full
 
-# Manual build (without Docker, requires running dev environment)
+# Manual build (requires running dev environment with assets compiled)
+docker-compose exec -T web mix build_static
+
+# Or use local script (requires local Elixir/Phoenix setup)
 ./build_static.sh
-# Or: docker-compose exec web mix assets.build && docker-compose exec web mix build_static
 ```
 
 **Export workflow** (see `EXPORT_DEPLOY.md` for details):
@@ -233,6 +235,17 @@ Production requires:
 
 ## Project Structure Patterns
 
+### Mix Aliases
+Custom mix tasks defined in `mix.exs`:
+- `mix setup` - Full project setup: deps.get → ecto.setup → assets.setup → assets.build
+- `mix ecto.setup` - Database setup: create → migrate → seeds
+- `mix ecto.reset` - Database reset: drop → setup
+- `mix test` - Auto-creates and migrates test database before running tests
+- `mix assets.setup` - Install tailwind and esbuild if missing
+- `mix assets.build` - Compile assets: tailwind → esbuild
+- `mix assets.deploy` - Production assets: minify tailwind → minify esbuild → phx.digest
+- `mix precommit` - Quality checks: compile with --warning-as-errors → unlock unused deps → format → test
+
 ### LiveView Routing
 - Routes use the default `:browser` pipeline which aliases `CurupiraWeb`
 - No need to duplicate module prefixes: `live "/", ArticleLive.Index, :index`
@@ -243,6 +256,7 @@ Production requires:
 - `html_preview` generated from markdown during import
 - `tags` stored as array of strings
 - `language` field stores article language code ("en", "pt", "pt-BR")
+- `pinned` boolean - pinned articles appear first in list (ordered by: pinned DESC, published_at DESC)
 - Helper functions: `language_flag/1` returns emoji (🇺🇸, 🇧🇷), `language_code/1` returns display code (EN, PT)
 
 ### DevToImporter Behavior
@@ -254,6 +268,11 @@ Production requires:
 ### Blog Profile (Singleton)
 - Only one profile record exists, managed by `Blog.get_or_create_profile/0`
 - Used for site-wide settings (name, bio, avatar, social links)
+
+### Article Ordering
+- Published articles ordered by: `pinned DESC`, `published_at DESC`, `inserted_at DESC`
+- Pinned articles always appear first, regardless of publish date
+- Used in both dynamic LiveView and static site generation
 
 ### Static Site Generation & Export System
 
@@ -276,11 +295,15 @@ Production requires:
 - Default: only published articles (use `--all` for drafts)
 - Output: `markdown_output/` → copied to target repo's `articles/` subdirectory
 
-**Sync Script** (`sync_static.sh`):
+**Sync Script** (`sync_static.sh` in project root):
 - Uses rsync to sync `static_output/` to target repository
 - Preserves git metadata and infrastructure files in target repo
 - Controlled via `EXPORT_TARGET` env var (default: `../leandronsp.com`)
 - Exclusions: `.git/`, `docker-compose.yml`, `nginx.conf`, `Makefile`, `README.md`, `articles/*.md`
+
+**Build Script** (`build_static.sh` in project root):
+- Wrapper for static site generation in development environment
+- Requires running dev server (use Docker version via `make export-full` instead)
 
 **Deployment** (see `EXPORT_DEPLOY.md`):
 - Curupira acts as backoffice/CMS
