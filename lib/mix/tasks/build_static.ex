@@ -1253,7 +1253,7 @@ defmodule Mix.Tasks.BuildStatic do
     """
     <a
       href="/articles/#{article.slug}.html"
-      class="article-card pinned-article group block p-8 bg-amber-50/50 dark:bg-slate-800 border-2 border-amber-200/70 dark:border-blue-400 shadow-md shadow-orange-100/30 dark:shadow-blue-900/30 rounded-xl hover:border-amber-300/90 dark:hover:border-blue-300 transition-all cursor-pointer mb-8 relative no-underline"
+      class="article-card pinned-article group block p-8 bg-amber-50/50 dark:bg-slate-800 border border-amber-300/60 dark:border-blue-400 shadow-md shadow-orange-100/30 dark:shadow-blue-900/30 rounded-xl hover:border-amber-400/70 dark:hover:border-blue-300 transition-all cursor-pointer mb-8 relative no-underline"
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
@@ -1316,7 +1316,7 @@ defmodule Mix.Tasks.BuildStatic do
     """
     <a
       href="/articles/#{article.slug}.html"
-      class="article-card group block p-6 bg-base-100 border border-base-200/50 rounded-xl hover:shadow-lg hover:border-primary/20 transition-all cursor-pointer no-underline"
+      class="article-card group block p-6 bg-base-100 rounded-xl hover:shadow-lg hover:border hover:border-primary/20 transition-all cursor-pointer no-underline"
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
