@@ -1316,7 +1316,7 @@ defmodule Mix.Tasks.BuildStatic do
     """
     <a
       href="/articles/#{article.slug}.html"
-      class="article-card group block p-6 bg-base-100 border border-base-100 rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
+      class="article-card group block p-6 bg-base-100 border border-transparent rounded-xl hover:shadow-lg hover:border-primary/20 dark:hover:border-base-content/10 transition-all cursor-pointer no-underline"
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
