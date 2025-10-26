@@ -1055,12 +1055,12 @@ defmodule Mix.Tasks.BuildStatic do
       <!-- Main Content -->
       <main class="container mx-auto max-w-6xl">
         <article class="bg-base-100">
-          <!-- Back link -->
-          <a href="/" onclick="event.preventDefault(); history.back();" class="inline-flex items-center gap-2 text-lg font-medium transition-colors text-base-content/70 hover:text-primary cursor-pointer mb-6">
+          <!-- Back to home link -->
+          <a href="/" class="inline-flex items-center gap-2 text-lg font-medium transition-colors text-base-content/70 hover:text-primary mb-6">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            Back
+            Back to home
           </a>
 
           <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6">#{article.title}</h1>
