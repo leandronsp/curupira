@@ -1,4 +1,4 @@
-.PHONY: help dev-up dev-down dev-logs dev-reset dev-seeds prod-build prod-up prod-down prod-logs prod-reset prod-seeds prod-create-admin test-all clean static-build deploy-build deploy-push deploy backup-create backup-upload backup-download backup-restore backup-full backup-list export-markdown export-static export-full
+.PHONY: help dev-up dev-down dev-logs dev-reset dev-seeds prod-build prod-up prod-down prod-logs prod-reset prod-seeds prod-create-admin test-all clean deploy-build deploy-push deploy backup-create backup-upload backup-download backup-restore backup-full backup-list export-markdown export-static export-full
 
 # Default target
 help:
@@ -26,9 +26,6 @@ help:
 	@echo "  make test-all        - Start both dev and prod for testing"
 	@echo "  make test-dev        - Test dev endpoint (localhost:4000)"
 	@echo "  make test-prod       - Test prod endpoint (localhost:4001)"
-	@echo ""
-	@echo "Static Site:"
-	@echo "  make static-build    - Build static site (output: ./static_output)"
 	@echo ""
 	@echo "Deployment:"
 	@echo "  make deploy-build    - Build AMD64 image for production servers"
@@ -210,38 +207,6 @@ test-prod:
 	@curl -s -o /dev/null -w "Prod (4001): HTTP %{http_code}\n" http://localhost:4001/
 
 # ======================
-# Static Site Commands
-# ======================
-
-static-build:
-	@echo "=========================================="
-	@echo "  Building Optimized Static Site"
-	@echo "=========================================="
-	@echo ""
-	@echo "1. Ensuring development environment is running..."
-	@docker-compose up -d --wait
-	@echo ""
-	@echo "2. Generating static site (CSS purge + SEO + pages)..."
-	@docker-compose exec -T web mix build_static
-	@echo ""
-	@echo "=========================================="
-	@echo "  ✓ Static Site Built!"
-	@echo "=========================================="
-	@echo ""
-	@echo "Output:   ./static_output/"
-	@echo ""
-	@echo "Files generated:"
-	@echo "  • Optimized CSS (purged + minified)"
-	@echo "  • SEO meta tags (OG, Twitter, Schema)"
-	@echo "  • sitemap.xml"
-	@echo "  • robots.txt"
-	@echo "  • search-index.json"
-	@echo ""
-	@echo "Next steps:"
-	@echo "  make export-full    - Export to leandronsp.com"
-	@echo ""
-
-# ======================
 # Cleanup Commands
 # ======================
 
@@ -415,7 +380,25 @@ export-static:
 	@echo ""
 	@EXPORT_TARGET=$(EXPORT_TARGET) ./sync_static.sh
 
-export-full: static-build export-markdown export-static
+export-full:
+	@echo "=========================================="
+	@echo "  Building Optimized Static Site"
+	@echo "=========================================="
+	@echo ""
+	@echo "1. Ensuring development environment is running..."
+	@docker-compose up -d --wait
+	@echo ""
+	@echo "2. Generating static site (CSS purge + SEO + pages)..."
+	@docker-compose exec -T web mix build_static
+	@echo ""
+	@echo "3. Exporting markdown articles..."
+	@mkdir -p ./markdown_output
+	@docker-compose exec -T web mix export.markdown --output /app/markdown_output
+	@mkdir -p $(EXPORT_TARGET)/articles
+	@cp -r ./markdown_output/* $(EXPORT_TARGET)/articles/
+	@echo ""
+	@echo "4. Syncing static files..."
+	@EXPORT_TARGET=$(EXPORT_TARGET) ./sync_static.sh
 	@echo ""
 	@echo "=========================================="
 	@echo "  ✓ Full Export Complete"
