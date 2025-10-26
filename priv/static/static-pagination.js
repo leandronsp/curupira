@@ -117,19 +117,19 @@
     const end = Math.min(currentPage * ARTICLES_PER_PAGE, visibleArticles.length);
 
     container.innerHTML = `
-      <div class="flex items-center justify-center gap-4">
-        <button class="px-3 py-2 rounded-lg border border-base-300 bg-transparent hover:bg-base-200 text-base-content transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent cursor-pointer" id="prev-page" onclick="window.pagination.prevPage()" aria-label="Previous page">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 pointer-events-none" aria-hidden="true">
+      <div class="flex items-center justify-center gap-6 mt-16">
+        <button class="px-4 py-3 rounded-full border-2 border-base-300 bg-base-100 hover:bg-base-200 hover:border-primary/30 text-base-content transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-base-100 disabled:hover:border-base-300 cursor-pointer shadow-sm" id="prev-page" onclick="window.pagination.prevPage()" aria-label="Previous page">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 pointer-events-none" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5 8.25 12l7.5-7.5"/>
           </svg>
         </button>
 
-        <span class="text-sm text-base-content/70">
+        <span class="text-base text-base-content/80 font-medium px-4">
           Page ${currentPage} of ${totalPages}
         </span>
 
-        <button class="px-3 py-2 rounded-lg border border-base-300 bg-transparent hover:bg-base-200 text-base-content transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent cursor-pointer" id="next-page" onclick="window.pagination.nextPage()" aria-label="Next page">
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 pointer-events-none" aria-hidden="true">
+        <button class="px-4 py-3 rounded-full border-2 border-base-300 bg-base-100 hover:bg-base-200 hover:border-primary/30 text-base-content transition-all disabled:opacity-30 disabled:cursor-not-allowed disabled:hover:bg-base-100 disabled:hover:border-base-300 cursor-pointer shadow-sm" id="next-page" onclick="window.pagination.nextPage()" aria-label="Next page">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-5 h-5 pointer-events-none" aria-hidden="true">
             <path stroke-linecap="round" stroke-linejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5"/>
           </svg>
         </button>

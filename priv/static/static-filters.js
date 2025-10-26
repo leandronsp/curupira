@@ -62,8 +62,8 @@
     const tagButtons = filteredTags.map(({ tag, count }) => {
       const isActive = currentFilters.tag === tag;
       const classes = isActive
-        ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary cursor-pointer'
-        : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300 cursor-pointer';
+        ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white cursor-pointer'
+        : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content cursor-pointer';
 
       return `<button
         class="${classes}"
@@ -93,16 +93,29 @@
     document.querySelectorAll('.lang-filter-btn').forEach(btn => {
       const lang = btn.getAttribute('data-lang');
       if (lang === currentFilters.lang) {
-        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white border border-primary cursor-pointer';
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white cursor-pointer';
       } else {
-        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content border border-base-300 cursor-pointer';
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content cursor-pointer';
       }
     });
+  }
+
+  // Check if we're on an article page (not homepage)
+  function isArticlePage() {
+    return window.location.pathname.includes('/articles/');
   }
 
   // Public API
   window.blogFilters = {
     setLanguage(lang) {
+      // If on article page, navigate to home with filter
+      if (isArticlePage()) {
+        const params = new URLSearchParams();
+        if (lang !== 'all') params.set('lang', lang);
+        window.location.href = '/' + (params.toString() ? '?' + params.toString() : '');
+        return;
+      }
+
       currentFilters.lang = lang;
       updateUrlParams({ lang, page: 1 });
       updateLanguageUI();
@@ -115,6 +128,14 @@
     },
 
     setTag(tag) {
+      // If on article page, navigate to home with filter
+      if (isArticlePage()) {
+        const params = new URLSearchParams();
+        params.set('tag', tag);
+        window.location.href = '/' + '?' + params.toString();
+        return;
+      }
+
       // Toggle tag if clicking same one
       if (currentFilters.tag === tag) {
         currentFilters.tag = null;
