@@ -934,7 +934,7 @@ defmodule Mix.Tasks.BuildStatic do
       </header>
 
       <!-- Main Content -->
-      <main class="container mx-auto px-4 sm:px-6 py-8 max-w-6xl">
+      <main class="container mx-auto max-w-6xl">
         <article class="bg-base-100">
           <!-- Back link -->
           <a href="/" onclick="event.preventDefault(); history.back();" class="inline-flex items-center gap-2 text-lg font-medium transition-colors text-base-content/70 hover:text-primary cursor-pointer mb-6">
