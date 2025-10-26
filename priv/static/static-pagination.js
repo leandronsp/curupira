@@ -36,9 +36,9 @@
   }
 
   function recalculatePagination() {
-    // Exclude pinned article from pagination count
+    // Exclude pinned article from pagination count (use class-based filtering)
     const visibleArticles = allArticles.filter(
-      article => article.style.display !== 'none' && !article.classList.contains('pinned-article')
+      article => !article.classList.contains('js-hidden') && !article.classList.contains('pinned-article')
     );
     totalPages = Math.max(1, Math.ceil(visibleArticles.length / ARTICLES_PER_PAGE));
 
@@ -61,13 +61,13 @@
   function showPage(page, shouldScroll = true) {
     currentPage = page;
 
-    // Separate pinned and regular articles
+    // Separate pinned and regular articles (use class-based filtering)
     const pinnedArticle = allArticles.find(
-      article => article.style.display !== 'none' && article.classList.contains('pinned-article')
+      article => !article.classList.contains('js-hidden') && article.classList.contains('pinned-article')
     );
 
     const regularArticles = allArticles.filter(
-      article => article.style.display !== 'none' && !article.classList.contains('pinned-article')
+      article => !article.classList.contains('js-hidden') && !article.classList.contains('pinned-article')
     );
 
     const start = (page - 1) * ARTICLES_PER_PAGE;
@@ -106,7 +106,7 @@
     if (totalPagesEl) totalPagesEl.textContent = totalPages;
 
     const visibleArticles = allArticles.filter(
-      article => article.style.display !== 'none'
+      article => !article.classList.contains('js-hidden')
     );
 
     if (totalPages <= 1) {

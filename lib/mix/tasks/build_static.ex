@@ -36,8 +36,8 @@ defmodule Mix.Tasks.BuildStatic do
     # Copy favicon
     File.cp!("priv/static/images/favicon.svg", Path.join([@output_dir, "images", "favicon.svg"]))
 
-    # Build optimized CSS for static site
-    build_optimized_css()
+    # Build optimized CSS for static site (returns hashed filename)
+    css_file = build_optimized_css()
 
     # Get all published articles
     articles = Curupira.Blog.list_published_articles()
@@ -46,12 +46,14 @@ defmodule Mix.Tasks.BuildStatic do
     # Get profile
     profile = Curupira.Blog.get_or_create_profile()
 
-    # Generate pages
-    generate_homepage(articles, profile)
-    generate_article_pages(articles, profile)
+    # Copy and hash JavaScript assets
+    js_files = copy_assets()
 
-    # Copy assets
-    copy_assets()
+    # Generate pages with hashed asset filenames
+    generate_homepage(articles, profile, css_file, js_files)
+    generate_article_pages(articles, profile, css_file, js_files)
+
+    # Copy uploads
     copy_uploads()
 
     # Generate SEO files
@@ -71,14 +73,14 @@ defmodule Mix.Tasks.BuildStatic do
     Logger.info("🎨 Building optimized CSS...")
 
     # Create temporary config for minified build
-    css_output = Path.join([@output_dir, "assets", "css", "app.css"])
+    css_temp = Path.join([@output_dir, "assets", "css", "app.css"])
 
     # Use shell to run tailwind with static CSS (no DaisyUI components)
     cmd = """
     _build/tailwind-* \
       -c tailwind.static.config.js \
       -i assets/css/app.static.css \
-      -o #{css_output} \
+      -o #{css_temp} \
       --minify
     """
 
@@ -89,25 +91,36 @@ defmodule Mix.Tasks.BuildStatic do
       raise "CSS build failed"
     end
 
+    # Calculate MD5 hash for cache busting
+    content = File.read!(css_temp)
+    hash = :crypto.hash(:md5, content) |> Base.encode16(case: :lower) |> String.slice(0, 8)
+
+    # Rename file with hash
+    css_hashed = Path.join([@output_dir, "assets", "css", "app.#{hash}.css"])
+    File.rename!(css_temp, css_hashed)
+
     # Get file size for logging
-    {:ok, stat} = File.stat(css_output)
+    {:ok, stat} = File.stat(css_hashed)
     size_kb = Float.round(stat.size / 1024, 1)
-    Logger.info("  ✓ CSS optimized: #{size_kb}KB")
+    Logger.info("  ✓ CSS optimized: #{size_kb}KB (#{hash})")
+
+    # Return the hashed filename for use in templates
+    "/assets/css/app.#{hash}.css"
   end
 
-  defp generate_homepage(articles, profile) do
+  defp generate_homepage(articles, profile, css_file, js_files) do
     Logger.info("🏠 Generating homepage...")
 
-    html = render_homepage(articles, profile)
+    html = render_homepage(articles, profile, css_file, js_files)
     File.write!(Path.join(@output_dir, "index.html"), html)
   end
 
-  defp generate_article_pages(articles, profile) do
+  defp generate_article_pages(articles, profile, css_file, js_files) do
     Logger.info("📝 Generating article pages...")
 
     Enum.each(articles, fn article ->
       slug = article.slug
-      html = render_article(article, profile)
+      html = render_article(article, profile, css_file, js_files)
       File.write!(Path.join([@output_dir, "articles", "#{slug}.html"]), html)
       Logger.info("  ✓ #{slug}")
     end)
@@ -118,27 +131,56 @@ defmodule Mix.Tasks.BuildStatic do
 
     priv_static = "priv/static"
 
-    # Minify and copy static JavaScript files
-    ["static-theme.js", "static-filters.js", "static-search.js", "static-pagination.js", "static-giscus.js"]
-    |> Enum.each(fn file ->
+    # Minify and hash static JavaScript files
+    js_files = ["static-theme.js", "static-filters.js", "static-search.js", "static-pagination.js", "static-giscus.js"]
+    |> Enum.reduce(%{}, fn file, acc ->
       src = Path.join(priv_static, file)
-      dest = Path.join(@output_dir, file)
+      dest_temp = Path.join(@output_dir, file)
 
       if File.exists?(src) do
         # Minify JS using esbuild binary (use wildcard pattern for cross-platform)
-        cmd = "_build/esbuild-* #{src} --minify --outfile=#{dest}"
+        cmd = "_build/esbuild-* #{src} --minify --outfile=#{dest_temp}"
         {output, status} = System.cmd("sh", ["-c", cmd], stderr_to_stdout: true)
 
         if status != 0 do
           Logger.warning("Failed to minify #{file}, copying original: #{output}")
-          File.cp!(src, dest)
-        else
-          {:ok, stat} = File.stat(dest)
-          size_kb = Float.round(stat.size / 1024, 1)
-          Logger.info("  ✓ #{file} minified: #{size_kb}KB")
+          File.cp!(src, dest_temp)
         end
+
+        # Calculate hash and rename with cache busting
+        content = File.read!(dest_temp)
+        hash = :crypto.hash(:md5, content) |> Base.encode16(case: :lower) |> String.slice(0, 8)
+
+        base_name = Path.basename(file, ".js")
+        hashed_name = "#{base_name}.#{hash}.js"
+        dest_hashed = Path.join(@output_dir, hashed_name)
+
+        File.rename!(dest_temp, dest_hashed)
+
+        {:ok, stat} = File.stat(dest_hashed)
+        size_kb = Float.round(stat.size / 1024, 1)
+        Logger.info("  ✓ #{file} minified: #{size_kb}KB (#{hash})")
+
+        # Store mapping of original name to hashed filename
+        Map.put(acc, file, "/#{hashed_name}")
+      else
+        acc
       end
     end)
+
+    # Copy font files
+    Logger.info("🔤 Copying font files...")
+    fonts_src = Path.join(priv_static, "fonts")
+    fonts_dest = Path.join(@output_dir, "fonts")
+
+    if File.exists?(fonts_src) do
+      File.mkdir_p!(fonts_dest)
+      File.cp_r!(fonts_src, fonts_dest)
+      Logger.info("  ✓ Fonts copied")
+    end
+
+    # Return map of JS files with their hashed paths
+    js_files
   end
 
   defp copy_uploads do
@@ -328,7 +370,7 @@ defmodule Mix.Tasks.BuildStatic do
     File.write!(Path.join(@output_dir, "robots.txt"), robots)
   end
 
-  defp render_homepage(articles, profile) do
+  defp render_homepage(articles, profile, css_file, js_files) do
     total_pages = ceil(length(articles) / @articles_per_page)
 
     # SEO metadata for homepage
@@ -342,11 +384,6 @@ defmodule Mix.Tasks.BuildStatic do
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>#{profile.name || "Blog"}</title>
       <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
-
-      <!-- Google Fonts - Nunito for name, Caveat for bio -->
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 
       <!-- SEO Meta Tags -->
       <meta name="description" content="#{site_description}">
@@ -374,7 +411,7 @@ defmodule Mix.Tasks.BuildStatic do
       }
       </script>
 
-      <link rel="preload" href="/assets/css/app.css" as="style">
+      <link rel="preload" href="#{css_file}" as="style">
       <script>
         // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
         (function() {
@@ -382,7 +419,7 @@ defmodule Mix.Tasks.BuildStatic do
           document.documentElement.setAttribute('data-theme', theme);
         })();
       </script>
-      <link rel="stylesheet" href="/assets/css/app.css">
+      <link rel="stylesheet" href="#{css_file}">
       <style>
         /* Force scrollbar to always be visible to prevent layout shift */
         html {
@@ -436,15 +473,15 @@ defmodule Mix.Tasks.BuildStatic do
           background-color: rgba(59, 130, 246, 0.15) !important;
           border-color: rgba(59, 130, 246, 0.3) !important;
         }
-        /* Blog name styling */
+        /* Blog name styling - system font first, Google Font loads async */
         .blog-name {
-          font-family: 'Nunito', sans-serif;
+          font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
           font-weight: 800;
           letter-spacing: -0.02em;
         }
-        /* Intro text styling */
+        /* Intro text styling - system font first, Google Font loads async */
         .intro-text {
-          font-family: 'Caveat', cursive;
+          font-family: 'Caveat', 'Bradley Hand', 'Comic Sans MS', cursive;
           font-weight: 600;
           color: #6b7280; /* Darker pastel gray for light theme */
         }
@@ -536,9 +573,9 @@ defmodule Mix.Tasks.BuildStatic do
 
             <!-- Language Switcher -->
             <div class="lang-switcher-bg flex gap-0 bg-blue-50/80 border border-blue-100 rounded-full p-1 md:ml-auto shadow-sm">
-              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
-              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
-              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
+              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
+              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
+              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
             </div>
             <script>
               // Apply language state immediately (sync, no event listener)
@@ -552,9 +589,9 @@ defmodule Mix.Tasks.BuildStatic do
                 buttons.forEach(function(btn) {
                   const lang = btn.getAttribute('data-lang');
                   if (lang === currentLang) {
-                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
                   } else {
-                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
+                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
                   }
                 });
               })();
@@ -594,9 +631,9 @@ defmodule Mix.Tasks.BuildStatic do
                 const tag = btn.getAttribute('data-tag');
                 const isActive = (tag === 'all' && !currentTag) || (tag === currentTag);
                 if (isActive) {
-                  btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+                  btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
                 } else {
-                  btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
+                  btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
                 }
               });
             })();
@@ -696,12 +733,12 @@ defmodule Mix.Tasks.BuildStatic do
         </footer>
       </div>
 
-      <script src="/static-theme.js" defer></script>
-      <script src="/static-filters.js" defer></script>
-      <script src="/static-search.js" defer></script>
-      <script src="/static-pagination.js" defer></script>
+      <script src="#{js_files["static-theme.js"]}" defer></script>
+      <script src="#{js_files["static-filters.js"]}" defer></script>
+      <script src="#{js_files["static-search.js"]}" defer></script>
+      <script src="#{js_files["static-pagination.js"]}" defer></script>
 
-      <!-- Lazy load Google Analytics after page is interactive -->
+      <!-- Lazy load Google Analytics after page is fully interactive -->
       <script>
         (function() {
           function loadGTM() {
@@ -716,11 +753,11 @@ defmodule Mix.Tasks.BuildStatic do
             document.head.appendChild(script);
           }
 
-          // Load after page is idle, or after 2 seconds as fallback
+          // Load after page is idle, or after 5 seconds as fallback
           if ('requestIdleCallback' in window) {
-            requestIdleCallback(loadGTM, { timeout: 2000 });
+            requestIdleCallback(loadGTM, { timeout: 5000 });
           } else {
-            setTimeout(loadGTM, 2000);
+            setTimeout(loadGTM, 5000);
           }
         })();
       </script>
@@ -729,7 +766,7 @@ defmodule Mix.Tasks.BuildStatic do
     """
   end
 
-  defp render_article(article, profile) do
+  defp render_article(article, profile, css_file, js_files) do
     {:ok, html_content} = Curupira.Markdown.Parser.to_html(article.content || "")
 
     published_date = if article.published_at do
@@ -760,11 +797,6 @@ defmodule Mix.Tasks.BuildStatic do
       <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <title>#{article.title} - #{profile.name || "Blog"}</title>
       <link rel="icon" type="image/svg+xml" href="/images/favicon.svg">
-
-      <!-- Google Fonts - Nunito for name, Caveat for bio -->
-      <link rel="preconnect" href="https://fonts.googleapis.com">
-      <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-      <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@700;800&family=Caveat:wght@500;700&display=swap" rel="stylesheet">
 
       <!-- SEO Meta Tags -->
       <meta name="description" content="#{description}">
@@ -805,7 +837,7 @@ defmodule Mix.Tasks.BuildStatic do
       }
       </script>
 
-      <link rel="preload" href="/assets/css/app.css" as="style">
+      <link rel="preload" href="#{css_file}" as="style">
       <script>
         // Prevent FOUC (Flash of Unstyled Content) by setting theme before CSS loads
         (function() {
@@ -813,7 +845,7 @@ defmodule Mix.Tasks.BuildStatic do
           document.documentElement.setAttribute('data-theme', theme);
         })();
       </script>
-      <link rel="stylesheet" href="/assets/css/app.css">
+      <link rel="stylesheet" href="#{css_file}">
       <style>
         /* Force scrollbar to always be visible to prevent layout shift */
         html {
@@ -867,15 +899,15 @@ defmodule Mix.Tasks.BuildStatic do
           background-color: rgba(59, 130, 246, 0.15) !important;
           border-color: rgba(59, 130, 246, 0.3) !important;
         }
-        /* Blog name styling */
+        /* Blog name styling - system font first, Google Font loads async */
         .blog-name {
-          font-family: 'Nunito', sans-serif;
+          font-family: 'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
           font-weight: 800;
           letter-spacing: -0.02em;
         }
-        /* Intro text styling */
+        /* Intro text styling - system font first, Google Font loads async */
         .intro-text {
-          font-family: 'Caveat', cursive;
+          font-family: 'Caveat', 'Bradley Hand', 'Comic Sans MS', cursive;
           font-weight: 600;
           color: #6b7280; /* Darker pastel gray for light theme */
         }
@@ -1064,12 +1096,12 @@ defmodule Mix.Tasks.BuildStatic do
         </footer>
       </main>
 
-      <script src="/static-theme.js" defer></script>
-      <script src="/static-filters.js" defer></script>
-      <script src="/static-search.js" defer></script>
-      <script src="/static-giscus.js" defer></script>
+      <script src="#{js_files["static-theme.js"]}" defer></script>
+      <script src="#{js_files["static-filters.js"]}" defer></script>
+      <script src="#{js_files["static-search.js"]}" defer></script>
+      <script src="#{js_files["static-giscus.js"]}" defer></script>
 
-      <!-- Lazy load Google Analytics after page is interactive -->
+      <!-- Lazy load Google Analytics after page is fully interactive -->
       <script>
         (function() {
           function loadGTM() {
@@ -1084,11 +1116,11 @@ defmodule Mix.Tasks.BuildStatic do
             document.head.appendChild(script);
           }
 
-          // Load after page is idle, or after 2 seconds as fallback
+          // Load after page is idle, or after 5 seconds as fallback
           if ('requestIdleCallback' in window) {
-            requestIdleCallback(loadGTM, { timeout: 2000 });
+            requestIdleCallback(loadGTM, { timeout: 5000 });
           } else {
-            setTimeout(loadGTM, 2000);
+            setTimeout(loadGTM, 5000);
           }
         })();
       </script>

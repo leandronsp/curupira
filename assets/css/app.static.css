@@ -2,6 +2,23 @@
 
 @import "tailwindcss" source(none);
 
+/* Self-hosted fonts for better performance and no FOUT */
+@font-face {
+  font-family: 'Nunito';
+  src: url('/fonts/nunito-latin.woff2') format('woff2');
+  font-weight: 700 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  src: url('/fonts/caveat-latin.woff2') format('woff2');
+  font-weight: 500 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Only scan static site generator code */
 @source "../../lib/mix/tasks/build_static.ex";
 
@@ -428,4 +445,74 @@ article {
 /* Article header background - slightly different from article background in light theme */
 .article-header {
   background-color: oklch(94% 0.01 80) !important;
+}
+
+/* Accessibility fixes - Better contrast for buttons */
+.lang-filter-btn.bg-primary,
+.tag-pill.bg-primary {
+  background-color: oklch(50% 0.12 240) !important;
+  color: oklch(100% 0 0) !important;
+}
+
+[data-theme="dark"] .lang-filter-btn.bg-primary,
+[data-theme="dark"] .tag-pill.bg-primary {
+  background-color: oklch(60% 0.15 240) !important;
+  color: oklch(100% 0 0) !important;
+}
+
+/* Better contrast for pinned badge */
+.bg-primary.text-white {
+  background-color: oklch(50% 0.12 240) !important;
+  color: oklch(100% 0 0) !important;
+}
+
+[data-theme="dark"] .bg-primary.text-white {
+  background-color: oklch(60% 0.15 240) !important;
+  color: oklch(100% 0 0) !important;
+}
+
+/* Performance fixes - GPU acceleration for animations */
+.lang-filter-btn,
+.tag-pill,
+.article-card {
+  transform: translateZ(0);
+  will-change: background-color, border-color, box-shadow;
+  transition-property: background-color, border-color, box-shadow, color;
+  transition-duration: 0.2s;
+  transition-timing-function: ease;
+}
+
+/* Accessibility - Link underlines for text links only */
+footer a:not(.no-underline) {
+  text-decoration: underline;
+  text-decoration-color: currentColor;
+  text-underline-offset: 0.15em;
+  text-decoration-thickness: 1px;
+}
+
+footer a:not(.no-underline):hover {
+  text-decoration-thickness: 2px;
+}
+
+/* Social icon links - add focus ring for keyboard navigation */
+a[title="LinkedIn"],
+a[title="GitHub"],
+a[title^="Concorrência"],
+a[title^="Web 101"],
+a[title^="AWS 101"] {
+  outline-offset: 2px;
+}
+
+a[title="LinkedIn"]:focus,
+a[title="GitHub"]:focus,
+a[title^="Concorrência"]:focus,
+a[title^="Web 101"]:focus,
+a[title^="AWS 101"]:focus {
+  outline: 2px solid oklch(70% 0.08 220);
+  outline-offset: 2px;
+}
+
+/* Hidden class for performance (avoid style.display manipulation) */
+.js-hidden {
+  display: none !important;
 }

@@ -47,41 +47,52 @@
     }
   }
 
-  // Filter articles based on current filters
+  // Filter articles based on current filters (optimized to avoid reflows)
   function filterArticles() {
-    const articles = document.querySelectorAll('.article-card');
+    // Use requestAnimationFrame to batch DOM updates
+    requestAnimationFrame(() => {
+      const articles = document.querySelectorAll('.article-card');
 
-    articles.forEach(article => {
-      let visible = true;
+      // Batch class changes to minimize reflows
+      const toShow = [];
+      const toHide = [];
 
-      // Language filter
-      if (currentFilters.lang !== 'all') {
-        const articleLang = article.getAttribute('data-language') || 'en';
-        if (currentFilters.lang === 'pt') {
-          visible = visible && (articleLang === 'pt-BR' || articleLang === 'pt');
-        } else {
-          visible = visible && (articleLang === currentFilters.lang);
+      articles.forEach(article => {
+        let visible = true;
+
+        // Language filter
+        if (currentFilters.lang !== 'all') {
+          const articleLang = article.getAttribute('data-language') || 'en';
+          if (currentFilters.lang === 'pt') {
+            visible = visible && (articleLang === 'pt-BR' || articleLang === 'pt');
+          } else {
+            visible = visible && (articleLang === currentFilters.lang);
+          }
         }
-      }
 
-      // Tag filter
-      if (currentFilters.tag) {
-        const articleTags = article.getAttribute('data-tags') || '';
-        visible = visible && articleTags.includes(currentFilters.tag.toLowerCase());
-      }
+        // Tag filter
+        if (currentFilters.tag) {
+          const articleTags = article.getAttribute('data-tags') || '';
+          visible = visible && articleTags.includes(currentFilters.tag.toLowerCase());
+        }
 
-      // Apply visibility
-      if (visible) {
-        article.style.display = '';
-      } else {
-        article.style.display = 'none';
+        // Collect elements to show/hide
+        if (visible) {
+          toShow.push(article);
+        } else {
+          toHide.push(article);
+        }
+      });
+
+      // Apply visibility changes in batches
+      toShow.forEach(article => article.classList.remove('js-hidden'));
+      toHide.forEach(article => article.classList.add('js-hidden'));
+
+      // Trigger pagination recalculation
+      if (window.pagination && window.pagination.handleSearch) {
+        window.pagination.handleSearch();
       }
     });
-
-    // Trigger pagination recalculation
-    if (window.pagination && window.pagination.handleSearch) {
-      window.pagination.handleSearch();
-    }
   }
 
   // Update tag pills UI (tags are already rendered in HTML by server)
@@ -91,9 +102,9 @@
       const tag = btn.getAttribute('data-tag');
       const isActive = (tag === 'all' && !currentFilters.tag) || (tag === currentFilters.tag);
       if (isActive) {
-        btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+        btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
       } else {
-        btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
+        btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
       }
     });
   }
@@ -108,9 +119,9 @@
     document.querySelectorAll('.lang-filter-btn').forEach(btn => {
       const lang = btn.getAttribute('data-lang');
       if (lang === currentFilters.lang) {
-        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
       } else {
-        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-100 text-base-content';
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-100 text-base-content';
       }
     });
   }
@@ -160,7 +171,7 @@
     chipsContainer.innerHTML = chips.join('');
 
     // Update results count
-    const visibleArticles = document.querySelectorAll('.article-card:not([style*="display: none"])');
+    const visibleArticles = document.querySelectorAll('.article-card:not(.js-hidden)');
     const count = visibleArticles.length;
     resultsCount.innerHTML = `Showing ${count} article${count !== 1 ? 's' : ''}`;
   }
