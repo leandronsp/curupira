@@ -182,7 +182,8 @@ defmodule Mix.Tasks.BuildStatic do
         title: article.title,
         tags: normalized_tags,
         language: article.language || "en",
-        snippet: snippet
+        snippet: snippet,
+        published_at: article.published_at
       }
     end)
 
@@ -502,6 +503,11 @@ defmodule Mix.Tasks.BuildStatic do
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
+
+              <!-- Search Results Dropdown -->
+              <div id="search-results" class="hidden absolute top-full mt-2 w-full bg-base-100 border-2 border-base-300 rounded-2xl shadow-2xl max-h-[500px] overflow-y-auto z-50 p-3">
+                <!-- Results will be inserted here by JavaScript -->
+              </div>
             </div>
 
             <!-- Language Switcher -->
@@ -582,13 +588,6 @@ defmodule Mix.Tasks.BuildStatic do
         <!-- Articles Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="articles-container">
           #{render_regular_articles_only(articles)}
-        </div>
-
-        <!-- No Results -->
-        <div id="no-results" class="hidden text-center py-16">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/30 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          <h3 class="text-lg font-semibold text-base-content/70 mb-2">No articles found</h3>
-          <p class="text-base-content/50">Try adjusting your filters, search query, or language</p>
         </div>
 
         <!-- Pagination -->
@@ -903,11 +902,15 @@ defmodule Mix.Tasks.BuildStatic do
                 placeholder="Search articles..."
                 class="w-full h-12 pl-12 pr-4 text-base bg-base-200 border-2 border-base-300 rounded-full transition-all focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
                 autocomplete="off"
-                disabled
               />
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 absolute left-4 top-1/2 -translate-y-1/2 text-base-content/40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
+
+              <!-- Search Results Dropdown -->
+              <div id="search-results" class="hidden absolute top-full mt-2 w-full bg-base-100 border-2 border-base-300 rounded-2xl shadow-2xl max-h-[500px] overflow-y-auto z-50 p-3">
+                <!-- Results will be inserted here by JavaScript -->
+              </div>
             </div>
 
             <!-- Language Switcher -->
@@ -1270,6 +1273,7 @@ defmodule Mix.Tasks.BuildStatic do
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
+      data-language="#{article.language || "en"}"
       data-pinned="true"
       onclick="window.location.href='/articles/#{article.slug}.html'"
     >
@@ -1332,6 +1336,7 @@ defmodule Mix.Tasks.BuildStatic do
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
+      data-language="#{article.language || "en"}"
       #{if article.pinned, do: ~s(data-pinned="true"), else: ""}
       onclick="window.location.href='/articles/#{article.slug}.html'"
     >

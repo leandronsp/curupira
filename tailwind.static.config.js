@@ -5,6 +5,10 @@ module.exports = {
     "./lib/mix/tasks/build_static.ex",
     "./priv/static/static-*.js"
   ],
+  safelist: [
+    'bg-yellow-100',
+    'bg-yellow-200',
+  ],
   theme: {
     extend: {
       colors: {

@@ -26,6 +26,7 @@ mkdir -p "${TARGET_DIR}"
 echo "  → Syncing HTML, CSS, JS files..."
 rsync -av --delete \
     --exclude '.git/' \
+    --exclude '.github/' \
     --exclude '.gitignore' \
     --exclude 'docker-compose.yml' \
     --exclude 'nginx.conf' \

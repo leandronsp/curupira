@@ -47,6 +47,43 @@
     }
   }
 
+  // Filter articles based on current filters
+  function filterArticles() {
+    const articles = document.querySelectorAll('.article-card');
+
+    articles.forEach(article => {
+      let visible = true;
+
+      // Language filter
+      if (currentFilters.lang !== 'all') {
+        const articleLang = article.getAttribute('data-language') || 'en';
+        if (currentFilters.lang === 'pt') {
+          visible = visible && (articleLang === 'pt-BR' || articleLang === 'pt');
+        } else {
+          visible = visible && (articleLang === currentFilters.lang);
+        }
+      }
+
+      // Tag filter
+      if (currentFilters.tag) {
+        const articleTags = article.getAttribute('data-tags') || '';
+        visible = visible && articleTags.includes(currentFilters.tag.toLowerCase());
+      }
+
+      // Apply visibility
+      if (visible) {
+        article.style.display = '';
+      } else {
+        article.style.display = 'none';
+      }
+    });
+
+    // Trigger pagination recalculation
+    if (window.pagination && window.pagination.handleSearch) {
+      window.pagination.handleSearch();
+    }
+  }
+
   // Update tag pills UI (tags are already rendered in HTML by server)
   function updateTagsUI() {
     const buttons = document.querySelectorAll('.tag-pill');
@@ -59,6 +96,11 @@
         btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
       }
     });
+  }
+
+  // Render tag pills (stub function for compatibility)
+  function renderTagsPills() {
+    updateTagsUI();
   }
 
   // Update language filter UI
@@ -96,11 +138,7 @@
       updateUrlParams({ lang, page: 1 });
       updateLanguageUI();
       updateTagsUI();
-
-      // Trigger search/filter update
-      if (window.blogSearch && window.blogSearch.filter) {
-        window.blogSearch.filter();
-      }
+      filterArticles();
     },
 
     setTag(tag) {
@@ -129,11 +167,7 @@
 
       updateUrlParams({ tag: currentFilters.tag, page: 1 });
       updateTagsUI();
-
-      // Trigger search/filter update
-      if (window.blogSearch && window.blogSearch.filter) {
-        window.blogSearch.filter();
-      }
+      filterArticles();
     },
 
     clearTag() {
@@ -149,11 +183,7 @@
       currentFilters.tag = null;
       updateUrlParams({ tag: null, page: 1 });
       updateTagsUI();
-
-      // Trigger search/filter update
-      if (window.blogSearch && window.blogSearch.filter) {
-        window.blogSearch.filter();
-      }
+      filterArticles();
     },
 
     remove(type) {
@@ -170,11 +200,7 @@
       updateUrlParams({ lang: null, tag: null, page: 1 });
       updateLanguageUI();
       renderTagsPills();
-
-      // Trigger search/filter update
-      if (window.blogSearch && window.blogSearch.filter) {
-        window.blogSearch.filter();
-      }
+      filterArticles();
     },
 
     getFilters() {
@@ -241,14 +267,6 @@
         searchInput.value = currentFilters.search;
       }
 
-      // Trigger initial filter after state restoration (homepage only)
-      if (!isArticlePage()) {
-        setTimeout(() => {
-          if (window.blogSearch && window.blogSearch.filter) {
-            window.blogSearch.filter();
-          }
-        }, 0);
-      }
     }
   };
 
@@ -257,6 +275,7 @@
     await loadTags();
     window.blogFilters.init();
     renderTagsPills();
+    filterArticles();  // Apply filters on page load
   }
 
   if (document.readyState === 'loading') {
