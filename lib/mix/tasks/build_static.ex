@@ -488,9 +488,14 @@ defmodule Mix.Tasks.BuildStatic do
               <!-- Name only (large) -->
               <h1 class="hidden lg:block blog-name text-2xl sm:text-3xl font-bold text-base-content flex-shrink-0">#{profile.name || "Blog"}</h1>
 
-              <!-- Bio (without links on small/medium, with links on large) -->
+              <!-- Bio: plain on small, with links inline on medium, with links and <br> on large -->
               <p class="intro-text text-xl lg:text-2xl leading-tight">
-                <span class="lg:hidden">Software Developer 15+ years programming and counting.</span>
+                <span class="md:hidden">Software Developer 15+ years programming and counting.</span>
+                <span class="hidden md:inline lg:hidden">Software Developer 15+ years programming and counting. See my guides at
+                  <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">web101</a>,
+                  <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">concorrencia101</a>,
+                  <a href="https://aws101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">aws101</a>
+                </span>
                 <span class="hidden lg:inline">Software Developer 15+ years programming and counting.<br>See my guides at
                   <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">web101</a>,
                   <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">concorrencia101</a>,
