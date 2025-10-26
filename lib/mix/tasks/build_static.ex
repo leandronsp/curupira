@@ -560,7 +560,7 @@ defmodule Mix.Tasks.BuildStatic do
         <div id="no-results" class="hidden text-center py-16">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/30 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           <h3 class="text-lg font-semibold text-base-content/70 mb-2">No articles found</h3>
-          <p class="text-base-content/50">Try adjusting your filters or search query or changing language</p>
+          <p class="text-base-content/50">Try adjusting your filters, search query, or language</p>
         </div>
 
         <!-- Pagination -->
