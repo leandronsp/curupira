@@ -541,10 +541,10 @@ defmodule Mix.Tasks.BuildStatic do
             </p>
           </div>
 
-          <!-- Small: Language only | Medium: Search + Language | Large: Search + Language -->
-          <div class="flex gap-4 items-center">
-            <!-- Search (medium and up) -->
-            <div class="hidden md:block relative flex-1 max-w-2xl">
+          <!-- Mobile: Search + Filter button | Desktop: Search + Language switcher -->
+          <div class="flex gap-3 items-center relative">
+            <!-- Search Container -->
+            <div class="relative flex-1 md:max-w-2xl">
               <input
                 type="text"
                 id="search-input"
@@ -565,42 +565,105 @@ defmodule Mix.Tasks.BuildStatic do
                 </svg>
               </button>
 
-              <!-- Search Results Dropdown -->
-              <div id="search-results" class="hidden absolute top-full mt-2 w-full bg-base-100 border-2 border-base-300 rounded-2xl shadow-2xl max-h-[500px] overflow-y-auto z-50 p-3">
+              <!-- Search Results Dropdown (Mobile: full width including filter button space | Desktop: input width) -->
+              <div id="search-results" class="hidden absolute top-full mt-2 left-0 w-[calc(100%+60px)] md:w-full bg-base-100 border-2 border-base-300 rounded-2xl shadow-2xl max-h-[60vh] md:max-h-[500px] overflow-y-auto z-50 p-3">
                 <!-- Results will be inserted here by JavaScript -->
               </div>
             </div>
 
-            <!-- Language Switcher -->
-            <div class="lang-switcher-bg flex gap-0 bg-blue-50/80 border border-blue-100 rounded-full p-1 md:ml-auto shadow-sm">
+            <!-- Mobile: Filter Button (shows dropdown) -->
+            <button
+              id="mobile-filter-toggle"
+              class="md:hidden flex items-center justify-center h-12 w-12 bg-base-200 border-2 border-base-300 rounded-full hover:border-primary transition-all"
+              title="Toggle filters"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-base-content/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+            </button>
+
+            <!-- Desktop: Language Switcher -->
+            <div class="hidden md:flex lang-switcher-bg gap-0 bg-blue-50/80 border border-blue-100 rounded-full p-1 ml-auto shadow-sm">
               <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
               <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
               <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
             </div>
-            <script>
-              // Apply language state immediately (sync, no event listener)
-              (function() {
-                const urlParams = new URLSearchParams(window.location.search);
-                const urlLang = urlParams.get('lang');
-                const savedLang = localStorage.getItem('blog-filter-lang') || 'all';
-                const currentLang = urlLang || savedLang;
 
-                const buttons = document.querySelectorAll('.lang-filter-btn');
-                buttons.forEach(function(btn) {
-                  const lang = btn.getAttribute('data-lang');
-                  if (lang === currentLang) {
-                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
-                  } else {
-                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
+            <!-- Mobile: Filters Dropdown (hidden by default) -->
+            <div id="mobile-filters-dropdown" class="hidden md:hidden absolute top-full right-0 mt-2 w-80 max-w-[calc(100vw-2rem)] bg-base-100 border-2 border-base-300 rounded-2xl shadow-2xl z-50 p-4">
+              <!-- Language Group -->
+              <div class="mb-4">
+                <h3 class="text-sm font-semibold text-base-content/70 mb-3">Language</h3>
+                <div class="flex flex-wrap gap-2">
+                  <button class="mobile-lang-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
+                  <button class="mobile-lang-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
+                  <button class="mobile-lang-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
+                </div>
+              </div>
+
+              <!-- Tags Group -->
+              <div>
+                <h3 class="text-sm font-semibold text-base-content/70 mb-3">Tags</h3>
+                <div class="flex flex-wrap gap-2">
+                  <button class="mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-primary text-white" data-tag="all" onclick="window.blogFilters.clearTag()">All</button>
+                  <button class="mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-tag="ruby" onclick="window.blogFilters.setTag('ruby')">Ruby</button>
+                  <button class="mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-tag="rust" onclick="window.blogFilters.setTag('rust')">Rust</button>
+                  <button class="mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-tag="haskell" onclick="window.blogFilters.setTag('haskell')">Haskell</button>
+                  <button class="mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-tag="assembly" onclick="window.blogFilters.setTag('assembly')">Assembly</button>
+                  <button class="mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-tag="bash" onclick="window.blogFilters.setTag('bash')">Bash</button>
+                  <button class="mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-tag="postgres" onclick="window.blogFilters.setTag('postgres')">Postgres</button>
+                  <button class="mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content" data-tag="kubernetes" onclick="window.blogFilters.setTag('kubernetes')">Kubernetes</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <script>
+            // Mobile filter dropdown toggle
+            (function() {
+              var toggleBtn = document.getElementById('mobile-filter-toggle');
+              var dropdown = document.getElementById('mobile-filters-dropdown');
+
+              if (toggleBtn && dropdown) {
+                toggleBtn.addEventListener('click', function(e) {
+                  e.stopPropagation();
+                  dropdown.classList.toggle('hidden');
+                });
+
+                // Close dropdown when clicking outside
+                document.addEventListener('click', function(e) {
+                  if (!dropdown.contains(e.target) && !toggleBtn.contains(e.target)) {
+                    dropdown.classList.add('hidden');
                   }
                 });
-              })();
-            </script>
+              }
+            })();
+          </script>
+
+          <script>
+            // Apply desktop language state immediately (sync, no event listener)
+            (function() {
+              const urlParams = new URLSearchParams(window.location.search);
+              const urlLang = urlParams.get('lang');
+              const savedLang = localStorage.getItem('blog-filter-lang') || 'all';
+              const currentLang = urlLang || savedLang;
+
+              const buttons = document.querySelectorAll('.lang-filter-btn');
+              buttons.forEach(function(btn) {
+                const lang = btn.getAttribute('data-lang');
+                if (lang === currentLang) {
+                  btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
+                } else {
+                  btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
+                }
+              });
+            })();
+          </script>
           </div>
         </div>
 
-        <!-- Tags Navigation -->
-        <div class="border-t border-base-300 bg-base-200/50">
+        <!-- Tags Navigation (Desktop only) -->
+        <div class="hidden md:block border-t border-base-300 bg-base-200/50">
           <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
             <div class="py-3">
               <div class="flex flex-wrap gap-2 items-center">
@@ -1000,7 +1063,7 @@ defmodule Mix.Tasks.BuildStatic do
             Back
           </a>
 
-          <h1 class="text-5xl font-bold leading-tight mb-6">#{article.title}</h1>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-bold leading-tight mb-6">#{article.title}</h1>
 
           <div class="flex flex-wrap items-center gap-3 mb-8 text-base text-base-content/85">
             <div class="flex items-center gap-1.5">

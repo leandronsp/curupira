@@ -97,6 +97,7 @@
 
   // Update tag pills UI (tags are already rendered in HTML by server)
   function updateTagsUI() {
+    // Desktop tag pills
     const buttons = document.querySelectorAll('.tag-pill');
     buttons.forEach(btn => {
       const tag = btn.getAttribute('data-tag');
@@ -105,6 +106,18 @@
         btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
       } else {
         btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
+      }
+    });
+
+    // Mobile tag pills
+    const mobileButtons = document.querySelectorAll('.mobile-tag-pill');
+    mobileButtons.forEach(btn => {
+      const tag = btn.getAttribute('data-tag');
+      const isActive = (tag === 'all' && !currentFilters.tag) || (tag === currentFilters.tag);
+      if (isActive) {
+        btn.className = 'mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-primary text-white';
+      } else {
+        btn.className = 'mobile-tag-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content';
       }
     });
   }
@@ -116,12 +129,23 @@
 
   // Update language filter UI
   function updateLanguageUI() {
+    // Desktop language buttons
     document.querySelectorAll('.lang-filter-btn').forEach(btn => {
       const lang = btn.getAttribute('data-lang');
       if (lang === currentFilters.lang) {
         btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-primary text-white';
       } else {
         btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-100 text-base-content';
+      }
+    });
+
+    // Mobile language pills
+    document.querySelectorAll('.mobile-lang-pill').forEach(btn => {
+      const lang = btn.getAttribute('data-lang');
+      if (lang === currentFilters.lang) {
+        btn.className = 'mobile-lang-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-primary text-white';
+      } else {
+        btn.className = 'mobile-lang-pill px-4 py-2 text-sm font-medium rounded-full transition-all bg-base-200 hover:bg-base-300 text-base-content';
       }
     });
   }

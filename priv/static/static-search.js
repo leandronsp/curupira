@@ -123,7 +123,6 @@
         return true;
       })
       .sort((a, b) => b.score - a.score)
-      .slice(0, 5)
       .map(({item}) => item);
 
     renderResults(scored);
