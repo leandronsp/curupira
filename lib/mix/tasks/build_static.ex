@@ -1308,7 +1308,7 @@ defmodule Mix.Tasks.BuildStatic do
       </p>
 
       <!-- Meta Footer -->
-      <div class="flex items-center gap-3 text-sm text-base-content/60">
+      <div class="flex items-center gap-3 text-sm text-base-content/85">
         <time datetime="#{if article.published_at, do: DateTime.to_iso8601(article.published_at), else: DateTime.to_iso8601(article.inserted_at)}">
           #{published_date}
         </time>
@@ -1363,7 +1363,7 @@ defmodule Mix.Tasks.BuildStatic do
       </p>
 
       <!-- Meta Footer -->
-      <div class="flex items-center gap-3 text-sm text-base-content/60">
+      <div class="flex items-center gap-3 text-sm text-base-content/85">
         <time datetime="#{if article.published_at, do: DateTime.to_iso8601(article.published_at), else: DateTime.to_iso8601(article.inserted_at)}">
           #{published_date}
         </time>
