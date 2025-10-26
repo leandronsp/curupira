@@ -115,6 +115,56 @@
     });
   }
 
+  // Update mobile active filters UI
+  function updateMobileFilters() {
+    const container = document.getElementById('active-filters-mobile');
+    const chipsContainer = document.getElementById('filter-chips');
+    const resultsCount = document.getElementById('results-count');
+
+    if (!container || !chipsContainer) return;
+
+    const hasActiveFilters = currentFilters.lang !== 'all' || currentFilters.tag;
+
+    if (!hasActiveFilters) {
+      container.classList.add('hidden');
+      return;
+    }
+
+    container.classList.remove('hidden');
+
+    // Build filter chips
+    let chips = [];
+
+    // Language chip
+    if (currentFilters.lang !== 'all') {
+      const langLabel = currentFilters.lang === 'pt' ? '🇧🇷 PT' : '🇺🇸 EN';
+      chips.push(`
+        <button onclick="window.blogFilters.setLanguage('all')" class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium hover:bg-primary/20 transition-colors">
+          <span>${langLabel}</span>
+          <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      `);
+    }
+
+    // Tag chip
+    if (currentFilters.tag) {
+      const tagLabel = currentFilters.tag.charAt(0).toUpperCase() + currentFilters.tag.slice(1);
+      chips.push(`
+        <button onclick="window.blogFilters.clearTag()" class="inline-flex items-center gap-2 px-3 py-1.5 bg-primary/10 text-primary rounded-full text-sm font-medium hover:bg-primary/20 transition-colors">
+          <span>${tagLabel}</span>
+          <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      `);
+    }
+
+    chipsContainer.innerHTML = chips.join('');
+
+    // Update results count
+    const visibleArticles = document.querySelectorAll('.article-card:not([style*="display: none"])');
+    const count = visibleArticles.length;
+    resultsCount.innerHTML = `Showing ${count} article${count !== 1 ? 's' : ''}`;
+  }
+
   // Check if we're on an article page (not homepage)
   function isArticlePage() {
     return window.location.pathname.includes('/articles/');
@@ -139,6 +189,7 @@
       updateLanguageUI();
       updateTagsUI();
       filterArticles();
+      updateMobileFilters();
     },
 
     setTag(tag) {
@@ -168,6 +219,7 @@
       updateUrlParams({ tag: currentFilters.tag, page: 1 });
       updateTagsUI();
       filterArticles();
+      updateMobileFilters();
     },
 
     clearTag() {
@@ -184,6 +236,7 @@
       updateUrlParams({ tag: null, page: 1 });
       updateTagsUI();
       filterArticles();
+      updateMobileFilters();
     },
 
     remove(type) {
@@ -201,6 +254,7 @@
       updateLanguageUI();
       renderTagsPills();
       filterArticles();
+      updateMobileFilters();
     },
 
     getFilters() {
@@ -276,6 +330,7 @@
     window.blogFilters.init();
     renderTagsPills();
     filterArticles();  // Apply filters on page load
+    updateMobileFilters();  // Update mobile filter chips on page load
   }
 
   if (document.readyState === 'loading') {

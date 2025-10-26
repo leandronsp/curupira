@@ -490,9 +490,9 @@ defmodule Mix.Tasks.BuildStatic do
           </div>
 
           <!-- Search Bar + Language Switcher -->
-          <div class="hidden md:flex gap-4 items-center">
+          <div class="flex gap-4 items-center">
             <!-- Search -->
-            <div class="relative flex-1 max-w-2xl">
+            <div class="hidden md:block relative flex-1 max-w-2xl">
               <input
                 type="text"
                 id="search-input"
@@ -539,11 +539,11 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
 
         <!-- Tags Navigation -->
-        <div class="hidden md:block border-t border-base-300 bg-base-200/50">
+        <div class="border-t border-base-300 bg-base-200/50">
           <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
-            <div class="overflow-x-auto py-3">
-              <div class="flex gap-2 items-center min-w-max">
-                <div id="tags-pills" class="flex gap-2 items-center">
+            <div class="py-3">
+              <div class="flex flex-wrap gap-2 items-center">
+                <div id="tags-pills" class="flex flex-wrap gap-2 items-center">
                   <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-tag="all" onclick="window.blogFilters.clearTag()">All</button>
                   <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="ruby" onclick="window.blogFilters.setTag('ruby')">Ruby</button>
                   <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="rust" onclick="window.blogFilters.setTag('rust')">Rust</button>
@@ -582,6 +582,30 @@ defmodule Mix.Tasks.BuildStatic do
 
       <!-- Main Content -->
       <main class="container mx-auto px-4 sm:px-6 py-8 max-w-6xl">
+        <!-- Active Filters (Mobile Only) -->
+        <div id="active-filters-mobile" class="hidden mb-6 p-4 bg-base-200/50 rounded-xl border border-base-300">
+          <div class="space-y-3">
+            <!-- Top row: Title + Filter chips on left, Clear All on right -->
+            <div class="flex items-center justify-between gap-3">
+              <div class="flex items-center gap-3 flex-wrap flex-1">
+                <h3 class="text-sm font-semibold text-base-content/70">Active Filters</h3>
+                <div id="filter-chips" class="flex flex-wrap gap-2">
+                  <!-- Filter chips will be inserted here by JavaScript -->
+                </div>
+              </div>
+              <button onclick="window.blogFilters.clearAll()" class="inline-flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/80 transition-colors whitespace-nowrap">
+                <span>Clear All</span>
+                <svg class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+              </button>
+            </div>
+
+            <!-- Results count row -->
+            <div id="results-count" class="text-xs text-base-content/60">
+              <!-- Results count will be inserted here by JavaScript -->
+            </div>
+          </div>
+        </div>
+
         <!-- Pinned Article (Full Width) -->
         #{render_pinned_article_section(articles)}
 
@@ -893,9 +917,9 @@ defmodule Mix.Tasks.BuildStatic do
           </div>
 
           <!-- Search Bar + Language Switcher -->
-          <div class="hidden md:flex gap-4 items-center">
+          <div class="flex gap-4 items-center">
             <!-- Search -->
-            <div class="relative flex-1 max-w-2xl">
+            <div class="hidden md:block relative flex-1 max-w-2xl">
               <input
                 type="text"
                 id="search-input"
@@ -942,11 +966,11 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
 
         <!-- Tags Navigation -->
-        <div class="hidden md:block border-t border-base-300 bg-base-200/50">
+        <div class="border-t border-base-300 bg-base-200/50">
           <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
-            <div class="overflow-x-auto py-3">
-              <div class="flex gap-2 items-center min-w-max">
-                <div id="tags-pills" class="flex gap-2 items-center">
+            <div class="py-3">
+              <div class="flex flex-wrap gap-2 items-center">
+                <div id="tags-pills" class="flex flex-wrap gap-2 items-center">
                   <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-tag="all" onclick="window.blogFilters.clearTag()">All</button>
                   <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="ruby" onclick="window.blogFilters.setTag('ruby')">Ruby</button>
                   <button class="tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content" data-tag="rust" onclick="window.blogFilters.setTag('rust')">Rust</button>
