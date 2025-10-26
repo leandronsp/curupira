@@ -464,7 +464,7 @@ defmodule Mix.Tasks.BuildStatic do
           <!-- All screens: Name + Social Icons on top | Bio below -->
 
           <div class="flex flex-col gap-2 mb-4">
-            <!-- Name + Social Icons (all screens) -->
+            <!-- Name + Social Icons + Guide Links (all screens) -->
             <div class="flex items-center gap-3">
               <h1 class="blog-name text-2xl sm:text-3xl font-bold text-base-content flex-shrink-0">#{profile.name || "Blog"}</h1>
               <div class="flex items-center gap-2">
@@ -479,16 +479,32 @@ defmodule Mix.Tasks.BuildStatic do
                   <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                 </button>
               </div>
+              <!-- Guide Links (medium and up) -->
+              <div class="hidden md:flex items-center gap-3 ml-4">
+                <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="Concorrência 101">
+                  <span>Concorrência 101</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+                <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="Web 101">
+                  <span>Web 101</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+                <a href="https://aws101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="AWS 101">
+                  <span>AWS 101</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
             </div>
 
-            <!-- Bio: plain on small, with guide links inline on medium/large -->
-            <p class="intro-text text-xl lg:text-2xl leading-tight">
-              <span class="md:hidden">Software Developer 15+ years programming and counting.</span>
-              <span class="hidden md:inline">Software Developer 15+ years programming and counting. See my guides at
-                <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">web101</a>,
-                <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">concorrencia101</a>,
-                <a href="https://aws101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">aws101</a>
-              </span>
+            <!-- Bio -->
+            <p class="intro-text text-xl sm:text-2xl leading-tight">
+              Software Developer 15+ years working for companies worldwide
             </p>
           </div>
 
@@ -902,7 +918,7 @@ defmodule Mix.Tasks.BuildStatic do
         <div class="container mx-auto px-4 sm:px-6 py-4 max-w-6xl">
           <!-- Same structure as homepage, no search/language/tags -->
           <div class="flex flex-col gap-2">
-            <!-- Name + Social Icons (icons hidden on small) -->
+            <!-- Name + Social Icons + Guide Links (icons hidden on small) -->
             <div class="flex items-center gap-3">
               <h1 class="blog-name text-2xl sm:text-3xl font-bold text-base-content flex-shrink-0">#{profile.name || "Blog"}</h1>
               <div class="hidden md:flex items-center gap-2">
@@ -917,16 +933,32 @@ defmodule Mix.Tasks.BuildStatic do
                   <svg xmlns="http://www.w3.org/2000/svg" class="moon-icon h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" /></svg>
                 </button>
               </div>
+              <!-- Guide Links (medium and up) -->
+              <div class="hidden md:flex items-center gap-3 ml-4">
+                <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="Concorrência 101">
+                  <span>Concorrência 101</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+                <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="Web 101">
+                  <span>Web 101</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+                <a href="https://aws101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-sm font-medium text-base-content/70 hover:text-primary transition-colors" title="AWS 101">
+                  <span>AWS 101</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                  </svg>
+                </a>
+              </div>
             </div>
 
-            <!-- Bio: plain on small/medium, with guide links on large -->
-            <p class="intro-text text-xl lg:text-2xl leading-tight">
-              <span class="lg:hidden">Software Developer 15+ years programming and counting.</span>
-              <span class="hidden lg:inline">Software Developer 15+ years programming and counting. See my guides at
-                <a href="https://web101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">web101</a>,
-                <a href="https://concorrencia101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">concorrencia101</a>,
-                <a href="https://aws101.leandronsp.com" target="_blank" rel="noopener noreferrer" class="underline decoration-2 hover:opacity-80 transition-opacity cursor-pointer">aws101</a>
-              </span>
+            <!-- Bio -->
+            <p class="intro-text text-xl sm:text-2xl leading-tight">
+              Software Developer 15+ years working for companies worldwide
             </p>
           </div>
 

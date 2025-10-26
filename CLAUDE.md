@@ -106,9 +106,6 @@ mix devto.import --page 2 --per-page 100
 ### Static Site Generation & Export
 
 ```bash
-# Build static HTML/CSS/JS in Docker
-make static-build
-
 # Export to separate repo (default: ../leandronsp.com)
 make export-markdown  # Export markdown with YAML frontmatter
 make export-static    # Sync static files (HTML, CSS, JS, images)
@@ -118,9 +115,9 @@ make export-full      # Build + export markdown + sync (recommended)
 export EXPORT_TARGET=../mysite.com
 make export-full
 
-# Manual build (without Docker)
+# Manual build (without Docker, requires running dev environment)
 ./build_static.sh
-# Or: mix assets.build && mix build_static
+# Or: docker-compose exec web mix assets.build && docker-compose exec web mix build_static
 ```
 
 **Export workflow** (see `EXPORT_DEPLOY.md` for details):
