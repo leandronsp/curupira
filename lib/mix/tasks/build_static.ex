@@ -1251,14 +1251,14 @@ defmodule Mix.Tasks.BuildStatic do
     end
 
     """
-    <article
-      class="article-card pinned-article group block p-8 bg-amber-50/50 dark:bg-slate-800 border-4 border-orange-500 dark:border-blue-400 shadow-md shadow-orange-200/50 dark:shadow-blue-900/30 rounded-xl hover:border-orange-600 dark:hover:border-blue-300 transition-all cursor-pointer mb-8 relative"
+    <a
+      href="/articles/#{article.slug}.html"
+      class="article-card pinned-article group block p-8 bg-amber-50/50 dark:bg-slate-800 border-4 border-orange-500 dark:border-blue-400 shadow-md shadow-orange-200/50 dark:shadow-blue-900/30 rounded-xl hover:border-orange-600 dark:hover:border-blue-300 transition-all cursor-pointer mb-8 relative no-underline"
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
       data-language="#{article.language || "en"}"
       data-pinned="true"
-      onclick="window.location.href='/articles/#{article.slug}.html'"
     >
       <!-- Pinned Badge -->
       <div class="absolute top-4 right-4 flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-full text-xs font-semibold">
@@ -1291,7 +1291,7 @@ defmodule Mix.Tasks.BuildStatic do
         <span>•</span>
         <span class="text-xl">#{Curupira.Blog.Article.language_flag(article)}</span>
       </div>
-    </article>
+    </a>
     """
   end
 
@@ -1314,14 +1314,14 @@ defmodule Mix.Tasks.BuildStatic do
     end
 
     """
-    <article
-      class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer"
+    <a
+      href="/articles/#{article.slug}.html"
+      class="article-card group block p-6 bg-base-100 border border-base-300 rounded-xl hover:shadow-lg hover:border-primary/30 transition-all cursor-pointer no-underline"
       data-slug="#{article.slug}"
       data-title="#{String.downcase(article.title)}"
       data-tags="#{String.downcase(Enum.join(article.tags || [], " "))}"
       data-language="#{article.language || "en"}"
       #{if article.pinned, do: ~s(data-pinned="true"), else: ""}
-      onclick="window.location.href='/articles/#{article.slug}.html'"
     >
       <!-- Tags First -->
       <div class="flex gap-2 flex-wrap mb-3">
@@ -1346,7 +1346,7 @@ defmodule Mix.Tasks.BuildStatic do
         <span>•</span>
         <span class="text-lg">#{Curupira.Blog.Article.language_flag(article)}</span>
       </div>
-    </article>
+    </a>
     """
   end
 end
