@@ -569,16 +569,6 @@ defmodule Mix.Tasks.BuildStatic do
                   btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
                 }
               });
-
-              // Hide pinned if tag filter is active
-              const hasTagFilter = currentTag !== null;
-              if (hasTagFilter) {
-                const pinnedCards = document.querySelectorAll('[data-pinned="true"]');
-                pinnedCards.forEach(function(card) {
-                  card.style.display = 'none';
-                  card.classList.add('hidden');
-                });
-              }
             })();
           </script>
         </div>
@@ -608,6 +598,26 @@ defmodule Mix.Tasks.BuildStatic do
           </div>
         </div>
       </main>
+
+      <!-- Apply pinned visibility after DOM is ready -->
+      <script>
+        (function() {
+          const urlParams = new URLSearchParams(window.location.search);
+          const urlTag = urlParams.get('tag');
+          const savedTag = localStorage.getItem('blog-filter-tag');
+          const currentTag = urlTag || savedTag || null;
+
+          // Hide pinned HIGHLIGHT only when tag filter is active (regular pinned card will be filtered by search.js)
+          const hasTagFilter = currentTag !== null;
+          if (hasTagFilter) {
+            const pinnedHighlight = document.querySelector('.pinned-article');
+            if (pinnedHighlight) {
+              pinnedHighlight.style.display = 'none';
+              pinnedHighlight.classList.add('hidden');
+            }
+          }
+        })();
+      </script>
 
         <!-- Footer -->
         <footer class="mt-16 pt-8 pb-6 border-t border-base-300">
@@ -965,16 +975,6 @@ defmodule Mix.Tasks.BuildStatic do
                   btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
                 }
               });
-
-              // Hide pinned if tag filter is active
-              const hasTagFilter = currentTag !== null;
-              if (hasTagFilter) {
-                const pinnedCards = document.querySelectorAll('[data-pinned="true"]');
-                pinnedCards.forEach(function(card) {
-                  card.style.display = 'none';
-                  card.classList.add('hidden');
-                });
-              }
             })();
           </script>
         </div>

@@ -20,7 +20,8 @@
   }
 
   async function init() {
-    allArticles = Array.from(articlesContainer.querySelectorAll('.article-card'));
+    // Get ALL article cards on the page, including pinned articles outside the container
+    allArticles = Array.from(document.querySelectorAll('.article-card'));
     await loadSearchIndex();
 
     // Always apply filters on init to handle pinned visibility correctly
@@ -112,8 +113,8 @@
       const isPinnedHighlight = card.classList.contains('pinned-article');
       const isPinned = card.getAttribute('data-pinned') === 'true';
 
-      // Hide ALL pinned cards (both highlight and regular) when TAG filter is active
-      if (isPinned && hasTagFilter) {
+      // ALWAYS hide pinned highlight when TAG filter is active (show regular card instead)
+      if (isPinnedHighlight && hasTagFilter) {
         card.style.display = 'none';
         card.classList.add('hidden');
         return;
@@ -133,7 +134,7 @@
         return;
       }
 
-      // For non-pinned cards, apply normal filtering
+      // For non-pinned cards AND regular pinned when tag filter is active, apply normal filtering
       const matchesQ = matchesSearch(card, query);
       const matchesLang = matchesLanguage(card, filters.lang);
       const matchesT = matchesTag(card, filters.tag);
