@@ -455,32 +455,6 @@ defmodule Mix.Tasks.BuildStatic do
           color: #d4d4d8; /* Lighter pastel gray for dark theme */
         }
       </style>
-      <script>
-        // Preload filter state to prevent FOUC
-        (function() {
-          // Get saved language from localStorage or URL params
-          const urlParams = new URLSearchParams(window.location.search);
-          const urlLang = urlParams.get('lang');
-          const savedLang = localStorage.getItem('blog-filter-lang') || 'all';
-          const currentLang = urlLang || savedLang;
-
-          // Store for later use by scripts
-          window.__PRELOADED_LANG__ = currentLang;
-
-          // Set correct button state on DOMContentLoaded (as early as possible)
-          document.addEventListener('DOMContentLoaded', function() {
-            const buttons = document.querySelectorAll('.lang-filter-btn');
-            buttons.forEach(function(btn) {
-              const lang = btn.getAttribute('data-lang');
-              if (lang === currentLang) {
-                btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
-              } else {
-                btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
-              }
-            });
-          });
-        })();
-      </script>
     </head>
     <body class="min-h-screen bg-base-100">
       <!-- Fixed Header -->
@@ -536,6 +510,25 @@ defmodule Mix.Tasks.BuildStatic do
               <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
               <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
             </div>
+            <script>
+              // Apply language state immediately (sync, no event listener)
+              (function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlLang = urlParams.get('lang');
+                const savedLang = localStorage.getItem('blog-filter-lang') || 'all';
+                const currentLang = urlLang || savedLang;
+
+                const buttons = document.querySelectorAll('.lang-filter-btn');
+                buttons.forEach(function(btn) {
+                  const lang = btn.getAttribute('data-lang');
+                  if (lang === currentLang) {
+                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+                  } else {
+                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
+                  }
+                });
+              })();
+            </script>
           </div>
         </div>
 
@@ -567,7 +560,7 @@ defmodule Mix.Tasks.BuildStatic do
         <div id="no-results" class="hidden text-center py-16">
           <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 text-base-content/30 mb-4 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
           <h3 class="text-lg font-semibold text-base-content/70 mb-2">No articles found</h3>
-          <p class="text-base-content/50">Try adjusting your filters or search query</p>
+          <p class="text-base-content/50">Try adjusting your filters or search query or changing language</p>
         </div>
 
         <!-- Pagination -->
@@ -875,6 +868,25 @@ defmodule Mix.Tasks.BuildStatic do
               <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
               <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
             </div>
+            <script>
+              // Apply language state immediately (sync, no event listener)
+              (function() {
+                const urlParams = new URLSearchParams(window.location.search);
+                const urlLang = urlParams.get('lang');
+                const savedLang = localStorage.getItem('blog-filter-lang') || 'all';
+                const currentLang = urlLang || savedLang;
+
+                const buttons = document.querySelectorAll('.lang-filter-btn');
+                buttons.forEach(function(btn) {
+                  const lang = btn.getAttribute('data-lang');
+                  if (lang === currentLang) {
+                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
+                  } else {
+                    btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content';
+                  }
+                });
+              })();
+            </script>
           </div>
         </div>
 

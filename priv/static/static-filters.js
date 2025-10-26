@@ -212,9 +212,6 @@
     },
 
     init() {
-      // Use preloaded language from inline script (prevents FOUC)
-      const preloadedLang = window.__PRELOADED_LANG__;
-
       // If on article page, try to restore filters from referrer or localStorage
       if (isArticlePage()) {
         let langRestored = false;
@@ -244,9 +241,9 @@
           }
         }
 
-        // Fallback to preloaded language or localStorage
+        // Fallback to localStorage
         if (!langRestored) {
-          currentFilters.lang = preloadedLang || localStorage.getItem('blog-filter-lang') || 'all';
+          currentFilters.lang = localStorage.getItem('blog-filter-lang') || 'all';
         }
         if (!tagRestored) {
           const savedTag = localStorage.getItem('blog-filter-tag');
@@ -266,11 +263,6 @@
         } else {
           localStorage.removeItem('blog-filter-tag');
         }
-      }
-
-      // Only update UI if preload didn't already set it (prevents flash)
-      if (!preloadedLang) {
-        updateLanguageUI();
       }
 
       // Restore search input (homepage only)
