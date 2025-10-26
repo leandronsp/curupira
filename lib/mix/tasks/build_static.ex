@@ -551,13 +551,14 @@ defmodule Mix.Tasks.BuildStatic do
             </div>
           </div>
           <script>
-            // Apply tag state immediately (sync, no event listener)
+            // Apply tag state and pinned visibility immediately (sync, no event listener)
             (function() {
               const urlParams = new URLSearchParams(window.location.search);
               const urlTag = urlParams.get('tag');
               const savedTag = localStorage.getItem('blog-filter-tag');
               const currentTag = urlTag || savedTag || null;
 
+              // Update tag buttons
               const buttons = document.querySelectorAll('.tag-pill');
               buttons.forEach(function(btn) {
                 const tag = btn.getAttribute('data-tag');
@@ -568,6 +569,16 @@ defmodule Mix.Tasks.BuildStatic do
                   btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
                 }
               });
+
+              // Hide pinned if tag filter is active
+              const hasTagFilter = currentTag !== null;
+              if (hasTagFilter) {
+                const pinnedCards = document.querySelectorAll('[data-pinned="true"]');
+                pinnedCards.forEach(function(card) {
+                  card.style.display = 'none';
+                  card.classList.add('hidden');
+                });
+              }
             })();
           </script>
         </div>
@@ -936,13 +947,14 @@ defmodule Mix.Tasks.BuildStatic do
             </div>
           </div>
           <script>
-            // Apply tag state immediately (sync, no event listener)
+            // Apply tag state and pinned visibility immediately (sync, no event listener)
             (function() {
               const urlParams = new URLSearchParams(window.location.search);
               const urlTag = urlParams.get('tag');
               const savedTag = localStorage.getItem('blog-filter-tag');
               const currentTag = urlTag || savedTag || null;
 
+              // Update tag buttons
               const buttons = document.querySelectorAll('.tag-pill');
               buttons.forEach(function(btn) {
                 const tag = btn.getAttribute('data-tag');
@@ -953,6 +965,16 @@ defmodule Mix.Tasks.BuildStatic do
                   btn.className = 'tag-pill px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-200 text-base-content';
                 }
               });
+
+              // Hide pinned if tag filter is active
+              const hasTagFilter = currentTag !== null;
+              if (hasTagFilter) {
+                const pinnedCards = document.querySelectorAll('[data-pinned="true"]');
+                pinnedCards.forEach(function(card) {
+                  card.style.display = 'none';
+                  card.classList.add('hidden');
+                });
+              }
             })();
           </script>
         </div>

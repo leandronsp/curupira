@@ -23,13 +23,9 @@
     allArticles = Array.from(articlesContainer.querySelectorAll('.article-card'));
     await loadSearchIndex();
 
-    // Check if we need to apply initial filters from URL
-    // This ensures filters are applied even if blogFilters hasn't called us yet
-    const params = new URLSearchParams(window.location.search);
-    if (params.has('lang') || params.has('tag') || params.has('q')) {
-      // Delay slightly to ensure blogFilters has restored state
-      setTimeout(() => filter(), 50);
-    }
+    // Always apply filters on init to handle pinned visibility correctly
+    // Delay slightly to ensure blogFilters has restored state
+    setTimeout(() => filter(), 50);
   }
 
   function normalizeText(text) {
