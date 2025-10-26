@@ -490,7 +490,7 @@ defmodule Mix.Tasks.BuildStatic do
           </div>
 
           <!-- Search Bar + Language Switcher -->
-          <div class="flex gap-4 items-center">
+          <div class="hidden md:flex gap-4 items-center">
             <!-- Search -->
             <div class="relative flex-1 max-w-2xl">
               <input
@@ -539,7 +539,7 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
 
         <!-- Tags Navigation -->
-        <div class="border-t border-base-300 bg-base-200/50">
+        <div class="hidden md:block border-t border-base-300 bg-base-200/50">
           <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
             <div class="overflow-x-auto py-3">
               <div class="flex gap-2 items-center min-w-max">
@@ -893,7 +893,7 @@ defmodule Mix.Tasks.BuildStatic do
           </div>
 
           <!-- Search Bar + Language Switcher -->
-          <div class="flex gap-4 items-center">
+          <div class="hidden md:flex gap-4 items-center">
             <!-- Search -->
             <div class="relative flex-1 max-w-2xl">
               <input
@@ -942,7 +942,7 @@ defmodule Mix.Tasks.BuildStatic do
         </div>
 
         <!-- Tags Navigation -->
-        <div class="border-t border-base-300 bg-base-200/50">
+        <div class="hidden md:block border-t border-base-300 bg-base-200/50">
           <div class="container mx-auto px-4 sm:px-6 max-w-6xl">
             <div class="overflow-x-auto py-3">
               <div class="flex gap-2 items-center min-w-max">
@@ -1092,6 +1092,7 @@ defmodule Mix.Tasks.BuildStatic do
 
       <script src="/static-theme.js" defer></script>
       <script src="/static-filters.js" defer></script>
+      <script src="/static-search.js" defer></script>
       <script src="/static-giscus.js" defer></script>
 
       <!-- Lazy load Google Analytics after page is interactive -->

@@ -91,6 +91,7 @@
     });
 
     renderPagination();
+    renderEmptyState(regularArticles.length === 0);
     updateUrlParams(page);
   }
 
@@ -149,6 +150,36 @@
 
     if (nextBtn) {
       nextBtn.disabled = currentPage === totalPages;
+    }
+  }
+
+  function renderEmptyState(isEmpty) {
+    let emptyStateEl = document.getElementById('empty-state');
+
+    if (isEmpty) {
+      if (!emptyStateEl) {
+        // Create empty state element if it doesn't exist
+        const container = document.querySelector('main');
+        if (container) {
+          emptyStateEl = document.createElement('div');
+          emptyStateEl.id = 'empty-state';
+          emptyStateEl.className = 'text-center py-16';
+          container.appendChild(emptyStateEl);
+        }
+      }
+
+      if (emptyStateEl) {
+        emptyStateEl.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 mx-auto mb-4 text-base-content/20" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <p class="text-lg font-semibold text-base-content/60 mb-2">No articles found</p>
+          <p class="text-sm text-base-content/40">Try adjusting your filters</p>
+        `;
+      }
+    } else {
+      // Remove empty state if it exists
+      if (emptyStateEl) {
+        emptyStateEl.remove();
+      }
     }
   }
 
