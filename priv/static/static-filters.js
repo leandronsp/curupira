@@ -198,28 +198,44 @@
     },
 
     init() {
-      // Restore from URL
-      const params = getUrlParams();
-      currentFilters.lang = params.lang;
-      currentFilters.tag = params.tag;
-      currentFilters.search = params.search;
+      // If on article page, try to restore filters from referrer
+      if (isArticlePage() && document.referrer) {
+        try {
+          const referrerUrl = new URL(document.referrer);
+          // Only read from referrer if it's from the same site
+          if (referrerUrl.origin === window.location.origin) {
+            const referrerParams = new URLSearchParams(referrerUrl.search);
+            currentFilters.lang = referrerParams.get('lang') || 'all';
+            currentFilters.tag = referrerParams.get('tag') || null;
+          }
+        } catch (e) {
+          // Ignore invalid referrer URLs
+        }
+      } else {
+        // Restore from current URL (homepage)
+        const params = getUrlParams();
+        currentFilters.lang = params.lang;
+        currentFilters.tag = params.tag;
+        currentFilters.search = params.search;
+      }
 
       // Update UI
       updateLanguageUI();
 
-      // Restore search input
+      // Restore search input (homepage only)
       const searchInput = document.getElementById('search-input');
-      if (searchInput && params.search) {
-        searchInput.value = params.search;
+      if (searchInput && currentFilters.search && !isArticlePage()) {
+        searchInput.value = currentFilters.search;
       }
 
-      // Trigger initial filter after state restoration
-      // Use a small delay to ensure search.js has initialized
-      setTimeout(() => {
-        if (window.blogSearch && window.blogSearch.filter) {
-          window.blogSearch.filter();
-        }
-      }, 0);
+      // Trigger initial filter after state restoration (homepage only)
+      if (!isArticlePage()) {
+        setTimeout(() => {
+          if (window.blogSearch && window.blogSearch.filter) {
+            window.blogSearch.filter();
+          }
+        }, 0);
+      }
     }
   };
 

@@ -434,6 +434,11 @@ defmodule Mix.Tasks.BuildStatic do
         [data-theme="dark"] input::placeholder {
           color: #9ca3af;
         }
+        /* Language switcher dark theme styling */
+        [data-theme="dark"] .lang-switcher-bg {
+          background-color: rgba(59, 130, 246, 0.15) !important;
+          border-color: rgba(59, 130, 246, 0.3) !important;
+        }
         /* Blog name styling */
         .blog-name {
           font-family: 'Nunito', sans-serif;
@@ -500,10 +505,10 @@ defmodule Mix.Tasks.BuildStatic do
             </div>
 
             <!-- Language Switcher -->
-            <div class="flex gap-0 bg-base-200 border-2 border-base-300 rounded-full p-1">
+            <div class="lang-switcher-bg flex gap-0 bg-blue-50/80 border border-blue-100 rounded-full p-1 ml-auto shadow-sm">
               <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white" data-lang="all" onclick="window.blogFilters.setLanguage('all')">All</button>
-              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-100 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">PT</button>
-              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-100 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">EN</button>
+              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="pt" onclick="window.blogFilters.setLanguage('pt')">🇧🇷 PT</button>
+              <button class="lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-white/60 text-base-content" data-lang="en" onclick="window.blogFilters.setLanguage('en')">🇺🇸 EN</button>
             </div>
           </div>
         </div>
@@ -746,6 +751,11 @@ defmodule Mix.Tasks.BuildStatic do
         }
         [data-theme="dark"] input::placeholder {
           color: #9ca3af;
+        }
+        /* Language switcher dark theme styling */
+        [data-theme="dark"] .lang-switcher-bg {
+          background-color: rgba(59, 130, 246, 0.15) !important;
+          border-color: rgba(59, 130, 246, 0.3) !important;
         }
         /* Blog name styling */
         .blog-name {
