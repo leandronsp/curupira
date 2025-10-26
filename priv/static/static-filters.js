@@ -52,6 +52,20 @@
     const container = document.getElementById('tags-pills');
     if (!container) return;
 
+    // Add "All" button first
+    const allActive = currentFilters.tag === null;
+    const allButtonClasses = allActive
+      ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white cursor-pointer'
+      : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content cursor-pointer';
+
+    const allButton = `<button
+      class="${allButtonClasses}"
+      onclick="window.blogFilters.clearTag()"
+      data-tag="all"
+    >
+      All
+    </button>`;
+
     // Filter to only show specific main tags
     const mainTags = ['ruby', 'rust', 'haskell', 'assembly', 'bash', 'postgres', 'kubernetes'];
 
@@ -63,7 +77,7 @@
       const isActive = currentFilters.tag === tag;
       const classes = isActive
         ? 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white cursor-pointer'
-        : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content cursor-pointer';
+        : 'px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-transparent hover:bg-base-200 text-base-content cursor-pointer';
 
       return `<button
         class="${classes}"
@@ -74,18 +88,7 @@
       </button>`;
     }).join('');
 
-    // Add Clear All link if filters are active
-    const hasActiveFilters = currentFilters.lang !== 'all' || currentFilters.tag !== null;
-    const clearLink = hasActiveFilters
-      ? `<a
-          class="ml-auto text-sm font-medium text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 cursor-pointer underline"
-          onclick="window.blogFilters.clearAll()"
-        >
-          Clear All ×
-        </a>`
-      : '';
-
-    container.innerHTML = tagButtons + clearLink;
+    container.innerHTML = allButton + tagButtons;
   }
 
   // Update language filter UI
@@ -93,9 +96,9 @@
     document.querySelectorAll('.lang-filter-btn').forEach(btn => {
       const lang = btn.getAttribute('data-lang');
       if (lang === currentFilters.lang) {
-        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-primary text-white cursor-pointer';
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-primary text-white';
       } else {
-        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap bg-base-100 hover:bg-base-300 text-base-content cursor-pointer';
+        btn.className = 'lang-filter-btn px-4 py-1.5 text-sm font-medium rounded-full transition-all whitespace-nowrap cursor-pointer bg-transparent hover:bg-base-100 text-base-content';
       }
     });
   }
@@ -144,6 +147,23 @@
       }
 
       updateUrlParams({ tag: currentFilters.tag, page: 1 });
+      renderTagsPills();
+
+      // Trigger search/filter update
+      if (window.blogSearch && window.blogSearch.filter) {
+        window.blogSearch.filter();
+      }
+    },
+
+    clearTag() {
+      // If on article page, navigate to home
+      if (isArticlePage()) {
+        window.location.href = '/';
+        return;
+      }
+
+      currentFilters.tag = null;
+      updateUrlParams({ tag: null, page: 1 });
       renderTagsPills();
 
       // Trigger search/filter update
